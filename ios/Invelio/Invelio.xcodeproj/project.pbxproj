@@ -1,0 +1,463 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1BC12EFB7A675618F165C9E0 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A396EE7CA1108341935EDA4 /* APIClient.swift */; };
+		2EF97AE706E0E9FE27007F96 /* PortfolioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36CFED0BAC1FE8FE171ABEA8 /* PortfolioView.swift */; };
+		664F1086C8C365A239A4019F /* InvelioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E27E39B194A5B05D70D6F96 /* InvelioTests.swift */; };
+		76BC79C9C796F4A3EED1E951 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E80E1F46D10E577C3BB855B /* ContentView.swift */; };
+		790AFB0FC9DBC71AF69E0BF5 /* Stock.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1161490963A206CA3A1F812 /* Stock.swift */; };
+		80733EC71CF633E11F48E069 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5226C47D501454DEBC61AAD6 /* HomeView.swift */; };
+		8E916646E6DD046618D989E9 /* ChatbotView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D4DAFBEBB482239402E8E37 /* ChatbotView.swift */; };
+		921A35C0CA5ED9024F0B771E /* NotificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8110454BA26FE036A072B5A8 /* NotificationView.swift */; };
+		C52AC931BF45F914967A9F99 /* InvelioApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C65A82A9BB7B48C0C464624 /* InvelioApp.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		2156DFFBDE340A71E047915C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E86D382ECAE9CD9C9D7641A2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 33843BB80B22907200B41C3B;
+			remoteInfo = Invelio;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0A396EE7CA1108341935EDA4 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		0D4DAFBEBB482239402E8E37 /* ChatbotView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatbotView.swift; sourceTree = "<group>"; };
+		36CFED0BAC1FE8FE171ABEA8 /* PortfolioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioView.swift; sourceTree = "<group>"; };
+		3E27E39B194A5B05D70D6F96 /* InvelioTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvelioTests.swift; sourceTree = "<group>"; };
+		3E80E1F46D10E577C3BB855B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		3F6B32F27CF44F6AEB08A066 /* InvelioTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = InvelioTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		473107F0D1D5A1D04D4C305E /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		5226C47D501454DEBC61AAD6 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		5C65A82A9BB7B48C0C464624 /* InvelioApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvelioApp.swift; sourceTree = "<group>"; };
+		8110454BA26FE036A072B5A8 /* NotificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationView.swift; sourceTree = "<group>"; };
+		B1161490963A206CA3A1F812 /* Stock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stock.swift; sourceTree = "<group>"; };
+		F30EF2A838D1272702A46C6E /* Invelio.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Invelio.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		2A7A022ED49606C90988FE04 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F30EF2A838D1272702A46C6E /* Invelio.app */,
+				3F6B32F27CF44F6AEB08A066 /* InvelioTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2CFA5756EE532529A580802B /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				0D4DAFBEBB482239402E8E37 /* ChatbotView.swift */,
+				5226C47D501454DEBC61AAD6 /* HomeView.swift */,
+				8110454BA26FE036A072B5A8 /* NotificationView.swift */,
+				36CFED0BAC1FE8FE171ABEA8 /* PortfolioView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		3E410CAA2D1EF6E0CD5F725F = {
+			isa = PBXGroup;
+			children = (
+				E79179232BA0D679D9BD58D2 /* Sources */,
+				99E8A4742E54F346E758E1BB /* Tests */,
+				2A7A022ED49606C90988FE04 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		64B1B667AFE43D81A432003A /* App */ = {
+			isa = PBXGroup;
+			children = (
+				3E80E1F46D10E577C3BB855B /* ContentView.swift */,
+				5C65A82A9BB7B48C0C464624 /* InvelioApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		99E8A4742E54F346E758E1BB /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				3E27E39B194A5B05D70D6F96 /* InvelioTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		C6D08E4563B4BF8BFE4984EE /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				B1161490963A206CA3A1F812 /* Stock.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		E406FC1248F2EF18B354698D /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				0A396EE7CA1108341935EDA4 /* APIClient.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		E79179232BA0D679D9BD58D2 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				64B1B667AFE43D81A432003A /* App */,
+				F30CA96F92DC904E588DAEF3 /* Components */,
+				C6D08E4563B4BF8BFE4984EE /* Models */,
+				E406FC1248F2EF18B354698D /* Services */,
+				2CFA5756EE532529A580802B /* Views */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		F30CA96F92DC904E588DAEF3 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				473107F0D1D5A1D04D4C305E /* .gitkeep */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1CA83FC65DF79045953B91D1 /* InvelioTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4552F0506240FCA29D2EA262 /* Build configuration list for PBXNativeTarget "InvelioTests" */;
+			buildPhases = (
+				F8D94A440D44EA927A98555B /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EC2E4FB244D12E7315BEA0D2 /* PBXTargetDependency */,
+			);
+			name = InvelioTests;
+			packageProductDependencies = (
+			);
+			productName = InvelioTests;
+			productReference = 3F6B32F27CF44F6AEB08A066 /* InvelioTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		33843BB80B22907200B41C3B /* Invelio */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2804A418221A2F3A296D0A46 /* Build configuration list for PBXNativeTarget "Invelio" */;
+			buildPhases = (
+				6B15DC5BC5D79E9E7F4AB0FC /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Invelio;
+			packageProductDependencies = (
+			);
+			productName = Invelio;
+			productReference = F30EF2A838D1272702A46C6E /* Invelio.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E86D382ECAE9CD9C9D7641A2 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = 1D859689E01F6192B6550A05 /* Build configuration list for PBXProject "Invelio" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 3E410CAA2D1EF6E0CD5F725F;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 2A7A022ED49606C90988FE04 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				33843BB80B22907200B41C3B /* Invelio */,
+				1CA83FC65DF79045953B91D1 /* InvelioTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		6B15DC5BC5D79E9E7F4AB0FC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1BC12EFB7A675618F165C9E0 /* APIClient.swift in Sources */,
+				8E916646E6DD046618D989E9 /* ChatbotView.swift in Sources */,
+				76BC79C9C796F4A3EED1E951 /* ContentView.swift in Sources */,
+				80733EC71CF633E11F48E069 /* HomeView.swift in Sources */,
+				C52AC931BF45F914967A9F99 /* InvelioApp.swift in Sources */,
+				921A35C0CA5ED9024F0B771E /* NotificationView.swift in Sources */,
+				2EF97AE706E0E9FE27007F96 /* PortfolioView.swift in Sources */,
+				790AFB0FC9DBC71AF69E0BF5 /* Stock.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F8D94A440D44EA927A98555B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				664F1086C8C365A239A4019F /* InvelioTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		EC2E4FB244D12E7315BEA0D2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 33843BB80B22907200B41C3B /* Invelio */;
+			targetProxy = 2156DFFBDE340A71E047915C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		38ED2E32D676AD112CB33721 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.invelio.InvelioTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Invelio.app/Invelio";
+			};
+			name = Debug;
+		};
+		5346780D2DE1289E1BEB6B49 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.invelio.InvelioTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Invelio.app/Invelio";
+			};
+			name = Release;
+		};
+		A4C8D61ABEA028239E05C31D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		CB5D9F886D7A356336098B0A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.invelio.Invelio;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D52C1114178D69BA1A767CC3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.invelio.Invelio;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		E00B63E1426F352BCEAEF0EB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1D859689E01F6192B6550A05 /* Build configuration list for PBXProject "Invelio" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A4C8D61ABEA028239E05C31D /* Debug */,
+				E00B63E1426F352BCEAEF0EB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		2804A418221A2F3A296D0A46 /* Build configuration list for PBXNativeTarget "Invelio" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CB5D9F886D7A356336098B0A /* Debug */,
+				D52C1114178D69BA1A767CC3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		4552F0506240FCA29D2EA262 /* Build configuration list for PBXNativeTarget "InvelioTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				38ED2E32D676AD112CB33721 /* Debug */,
+				5346780D2DE1289E1BEB6B49 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E86D382ECAE9CD9C9D7641A2 /* Project object */;
+}
