@@ -105,6 +105,8 @@ struct InsightChip: Identifiable {
 struct PortfolioSummaryData {
     let totalValue: Double
     let totalCost:  Double
+    var dailyProfitIDR: Double = 0
+    var dailyGrowthPct: Double = 0
     var profitIDR:  Double { totalValue - totalCost }
     var growthPct:  Double { totalCost > 0 ? (profitIDR / totalCost) * 100 : 0 }
 }
@@ -309,16 +311,12 @@ struct PriceBadgeView: View {
             Text(formatted)
                 .font(.system(size: 16, weight: .semibold)).foregroundColor(.white).lineLimit(1)
                 .fixedSize(horizontal: true, vertical: false)
-            HStack(spacing: 2) {
-                Image(systemName: isPositive ? "arrow.up.right" : "arrow.down.forward")
-                    .font(.system(size: 8, weight: .bold))
-                Text(String(format: "%.2f%%", abs(percentChange)))
-                    .font(.system(size: 10, weight: .medium)).lineLimit(1)
-                    .fixedSize(horizontal: true, vertical: false)
-            }
-            .foregroundColor(color)
-            .padding(.horizontal, 6).padding(.vertical, 3)
-            .background(color.opacity(0.1)).clipShape(Capsule())
+            Text(String(format: "%@%.2f%%", isPositive ? "+" : "-", abs(percentChange)))
+                .font(.system(size: 10, weight: .medium)).lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
+                .foregroundColor(color)
+                .padding(.horizontal, 6).padding(.vertical, 3)
+                .background(color.opacity(0.1)).clipShape(Capsule())
         }
     }
 }
@@ -381,6 +379,9 @@ struct StockListView: View {
 struct PortfolioSummaryCardView: View {
     let summary: PortfolioSummaryData
 
+    @State private var selectedRange: String = "1D"
+    private let ranges: [String] = ["1D", "1W", "1M", "3M", "YTD", "1Y", "5Y"]
+
     private let green = Color.ProfitGreen
     private let red   = Color.PortfolioLossRed
     private let cardGradient = LinearGradient(
@@ -390,26 +391,42 @@ struct PortfolioSummaryCardView: View {
     )
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text("Total Assets")
+        VStack(alignment: .leading, spacing: 3) {
+            Text("Your Portfolio")
                 .font(.caption).foregroundColor(.white.opacity(0.75))
             Text("Rp\(formatIDR(summary.totalValue))")
                 .font(.system(size: 30, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
+                .padding(.bottom, 2)
 
-            let isPos = summary.growthPct >= 0
-            HStack(spacing: 8) {
-                Text(isPos ? "+Rp\(formatIDR(summary.profitIDR))" : "Rp\(formatIDR(summary.profitIDR))")
+            // 1D Return (Top)
+            let isDailyPos = summary.dailyProfitIDR >= 0
+            let dailyProfitText = isDailyPos ? "+Rp\(formatIDR(summary.dailyProfitIDR))" : "-Rp\(formatIDR(abs(summary.dailyProfitIDR)))"
+            HStack(spacing: 6) {
+                Text(dailyProfitText)
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(isPos ? green : red)
-                HStack(spacing: 4) {
-                    Text(String(format: "%+.2f%%", summary.growthPct))
-                        .font(.system(size: 12, weight: .bold))
-                }
-                .foregroundColor(isPos ? green : red)
-                .padding(.horizontal, 5).padding(.vertical, 2)
-                .background((isPos ? green : red).opacity(0.18))
-                .clipShape(Capsule())
+                    .foregroundColor(isDailyPos ? green : red)
+                Text(String(format: "(%+.2f%%)", summary.dailyGrowthPct))
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(isDailyPos ? green : red)
+                Text("1D")
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundColor(.white.opacity(0.55))
+            }
+
+            // All Time Return (Bottom)
+            let isAllPos = summary.profitIDR >= 0
+            let allProfitText = isAllPos ? "+Rp\(formatIDR(summary.profitIDR))" : "-Rp\(formatIDR(abs(summary.profitIDR)))"
+            HStack(spacing: 6) {
+                Text(allProfitText)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(isAllPos ? green : red)
+                Text(String(format: "(%+.2f%%)", summary.growthPct))
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(isAllPos ? green : red)
+                Text("All Time")
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundColor(.white.opacity(0.55))
             }
 
             // Area & line chart (flat horizontal line)
@@ -436,6 +453,24 @@ struct PortfolioSummaryCardView: View {
                 .stroke(Color.orange, style: StrokeStyle(lineWidth: 1.5, lineCap: .round))
             }
             .frame(height: 100)
+            .padding(.top, 8)
+
+            // Custom Segmented Control (without capsule)
+            HStack {
+                ForEach(ranges, id: \.self) { range in
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.15)) {
+                            selectedRange = range
+                        }
+                    } label: {
+                        Text(range)
+                            .font(.system(size: 12, weight: selectedRange == range ? .bold : .medium))
+                            .foregroundColor(selectedRange == range ? .orange : .gray)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
             .padding(.top, 8)
         }
         .padding(.horizontal, 16).padding(.top, 16).padding(.bottom, 12)
@@ -685,6 +720,7 @@ struct HomeView: View {
         let allStockItems = SectorsStocksLoader.loadStockItems()
         var totalVal: Double = 0
         var totalCost: Double = 0
+        var dailyProfit: Double = 0
 
         for lot in holdingLots {
             totalCost += lot.totalInvested
@@ -694,9 +730,20 @@ struct HomeView: View {
             }
             let price = matched?.price ?? lot.pricePerShare
             totalVal += (price * lot.shares)
+            if let matched = matched {
+                dailyProfit += (matched.change * lot.shares)
+            }
         }
 
-        return PortfolioSummaryData(totalValue: totalVal, totalCost: totalCost)
+        let prevDayVal = totalVal - dailyProfit
+        let dailyPct = prevDayVal > 0 ? (dailyProfit / prevDayVal) * 100 : 0
+
+        return PortfolioSummaryData(
+            totalValue: totalVal,
+            totalCost: totalCost,
+            dailyProfitIDR: dailyProfit,
+            dailyGrowthPct: dailyPct
+        )
     }
 
     /// Filter saham sesuai tab yang aktif
@@ -722,7 +769,7 @@ struct HomeView: View {
                         .padding(.vertical, 4)
 
                     // 3) Watchlist Header
-                    sectionHeader("Watchlist")
+                    sectionHeader("Recommended Stocks")
                         .padding(.top, 16)
 
                     // 4) Watchlist Tab Selector
@@ -753,7 +800,7 @@ struct HomeView: View {
                 Image(systemName: "chart.line.uptrend.xyaxis.circle.fill")
                     .font(.system(size: 28))
                     .foregroundColor(.PrimaryYellow)
-                Text("SahamIndo")
+                Text("Invelio")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundColor(.white)
             }

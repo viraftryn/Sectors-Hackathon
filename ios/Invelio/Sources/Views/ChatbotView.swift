@@ -75,7 +75,55 @@ final class ChatViewModel: ObservableObject {
     private func generateDummyAnswer(for query: String) -> String {
         let q = query.uppercased()
 
-        if q.contains("BBCA") || q.contains("BCA") {
+        if q.contains("OUTLOOK") || (q.contains("STOCK") && q.contains("MY")) {
+            return """
+            **My Stock Outlook**
+
+            • **Overall Trend:** Bullish pada sektor perbankan dan konsumer defensif.
+            • **Top Movers:** BBCA (+0.77%), BMRI (+0.78%), DCII (+2.04%).
+            • **Key Catalyst:** Laporan laba kuartalan yang melampaui konsensus pasar serta stabilitas nilai tukar Rupiah.
+
+            **Strategic Action:**
+            Pertahankan posisi (Hold) pada big-cap leaders dan lakukan akumulasi bertahap saat retrace ke level support terdekat.
+            """
+        } else if q.contains("RISK") || q.contains("PORTFOLIO") {
+            return """
+            **Portfolio Risk Assessment**
+
+            • **Tingkat Risiko:** Moderat
+            • **Konsentrasi Sektor:** 65% Financials, 20% Technology, 15% Energy
+            • **Volatilitas 30-Hari (Beta):** 0.92 (di bawah volatilitas IHSG)
+
+            **Potensi Risiko & Mitigasi:**
+            1. **Sektor Energy (BYAN):** Terpapar penurunan harga komoditas global. Disarankan rebalancing berkala.
+            2. **Diversifikasi:** Pertimbangkan menambah porsi pada sektor Consumer Non-Cyclicals atau Healthcare untuk meredam fluktuasi jangka pendek.
+            """
+        } else if q.contains("RECOMMENDED") || q.contains("REKOMENDASI") {
+            return """
+            **Recommended Stocks (Pilihan Teratas)**
+
+            1. **BBCA (Bank Central Asia)**
+               • Target Harga: Rp 10.500 | Rating: BUY
+               • Katalis: Margin bunga bersih solid & pertumbuhan kredit konsisten.
+
+            2. **DCII (DCI Indonesia)**
+               • Target Harga: Rp 46.000 | Rating: STRONG BUY
+               • Katalis: Ledakan adopsi AI dan ekspansi kapasitas hyperscale data center.
+
+            3. **BMRI (Bank Mandiri)**
+               • Target Harga: Rp 7.100 | Rating: ACCUMULATE
+               • Katalis: Efisiensi digital Livin' dan dividen yield menarik (>5%).
+            """
+        } else if q.contains("MOVE") || q.contains("WHY") {
+            return """
+            **Kenapa Saham Anda Bergerak Hari Ini?**
+
+            • **Sentimen Pasar Positif:** IHSG menguat didorong inflow asing sebesar Rp 450 miliar pada sektor finansial.
+            • **BBCA & BMRI:** Bergerak naik seiring penguatan likuiditas perbankan dan proyeksi NIM yang tetap ekspansif.
+            • **DCII (+2.04%):** Katalis permintaan komputasi awan dan sentimen investasi AI regional.
+            • **BYAN (-0.86%):** Tertekan aksi profit taking akibat koreksi harga batubara Newcastle.
+            """
+        } else if q.contains("BBCA") || q.contains("BCA") {
             return """
             **Analisis PT Bank Central Asia Tbk (BBCA)**
 
@@ -236,10 +284,10 @@ struct ChatbotView: View {
     @FocusState private var isInputFocused: Bool
 
     private let sampleSuggestions = [
-        "Analisis saham BBCA",
-        "Dividen yield ASII",
-        "Prospek TLKM Q3",
-        "Saham dividen tinggi IHSG"
+        "My Stock Outlook",
+        "My portfolio Risks",
+        "Recommended Stocks",
+        "Why Did My Stock Move?"
     ]
 
     var body: some View {
@@ -323,38 +371,37 @@ struct ChatbotView: View {
 
     // MARK: - Suggestion Pills
     private var suggestionPills: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(sampleSuggestions, id: \.self) { suggestion in
-                    Button {
-                        withAnimation(.spring(response: 0.85, dampingFraction: 0.88)) {
-                            viewModel.send(suggestion)
-                        }
-                    } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: "sparkle")
-                                .font(.system(size: 11))
-                                .foregroundStyle(Color.PrimaryYellow)
-                            Text(suggestion)
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundStyle(Color.white.opacity(0.85))
-                        }
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 9)
-                        .background(
-                            Capsule()
-                                .fill(Color.AICardBg)
-                        )
-                        .overlay(
-                            Capsule()
-                                .stroke(Color.white.opacity(0.12), lineWidth: 1)
-                        )
+        VStack(alignment: .trailing, spacing: 10) {
+            ForEach(sampleSuggestions, id: \.self) { suggestion in
+                Button {
+                    withAnimation(.spring(response: 0.85, dampingFraction: 0.88)) {
+                        viewModel.send(suggestion)
                     }
-                    .buttonStyle(.plain)
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 12))
+                            .foregroundStyle(Color.PrimaryYellow)
+                        Text(suggestion)
+                            .font(.system(size: 13.5, weight: .medium))
+                            .foregroundStyle(Color.white.opacity(0.9))
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(
+                        Capsule()
+                            .fill(Color.AICardBg)
+                    )
+                    .overlay(
+                        Capsule()
+                            .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                    )
                 }
+                .buttonStyle(.plain)
             }
-            .padding(.horizontal, 20)
         }
+        .frame(maxWidth: .infinity, alignment: .trailing)
+        .padding(.horizontal, 20)
     }
 
     // MARK: - Message List
