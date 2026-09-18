@@ -1,0 +1,46 @@
+name: iOS CI
+
+on:
+  push:
+    branches: [main]
+    paths: [ios/**]
+  pull_request:
+    branches: [main]
+    paths: [ios/**]
+
+jobs:
+  build-and-test:
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: ios/Invelio
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.app
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build
+        run: |
+          xcodebuild build \
+            -project Invelio.xcodeproj \
+            -scheme Invelio \
+            -destination "platform=iOS Simulator,name=iPhone 16,OS=latest" \
+            -skipPackagePluginValidation \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Test
+        run: |
+          xcodebuild test \
+            -project Invelio.xcodeproj \
+            -scheme InvelioTests \
+            -destination "platform=iOS Simulator,name=iPhone 16,OS=latest" \
+            -skipPackagePluginValidation \
+            CODE_SIGNING_ALLOWED=NO
