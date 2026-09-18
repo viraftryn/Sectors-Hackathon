@@ -450,6 +450,8 @@ struct PortfolioSummaryCardView: View {
 
 struct AIInsightCardView: View {
     let chips: [InsightChip]
+    var title: String = "AI Insight"
+    var horizontalPadding: CGFloat = 16
 
     private let accent = Color.PrimaryYellow
     @State private var selectedIndex: Int      = 0
@@ -472,7 +474,7 @@ struct AIInsightCardView: View {
                     Circle().fill(accent).frame(width: 7, height: 7)
                         .scaleEffect(isPulsing ? 0.7 : 1.0)
                         .animation(.easeInOut(duration: 1).repeatForever(), value: isPulsing)
-                    Text("AI Insight")
+                    Text(title)
                         .font(.caption2).foregroundColor(accent).kerning(0.8)
                 }
                 .padding(.horizontal, 10).padding(.vertical, 5)
@@ -542,11 +544,18 @@ struct AIInsightCardView: View {
         .background(Color.AICardBg)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.white.opacity(0.12), lineWidth: 1))
-        .padding(.horizontal, 16)
+        .padding(.horizontal, horizontalPadding)
         .onAppear {
             isPulsing = true
             if !hasStarted, let chip = selectedChip {
                 hasStarted = true
+                startTyping(text: chip.text)
+            }
+        }
+        .onChange(of: chips.first?.id) { _ in
+            selectedIndex = 0
+            isExpanded = false
+            if let chip = chips.first {
                 startTyping(text: chip.text)
             }
         }

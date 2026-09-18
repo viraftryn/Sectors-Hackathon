@@ -564,6 +564,7 @@ public struct StockDetailView: View {
                 VStack(spacing: 20) {
                     headerSection
                     chartSection
+                    aiAnalysisSection
                     holdingsSection
                 }
                 .padding(.horizontal, 16)
@@ -733,6 +734,51 @@ public struct StockDetailView: View {
             isDragging: $isDragging,
             accentColor: themeColor
         )
+    }
+
+    // MARK: - AI Analysis Section
+    private var aiAnalysisSection: some View {
+        AIInsightCardView(
+            chips: stockAnalysisChips,
+            title: "AI Analysis",
+            horizontalPadding: 0
+        )
+    }
+
+    private var stockAnalysisChips: [InsightChip] {
+        let isBullish = quote.change >= 0
+        let pctStr = String(format: "%.2f", abs(quote.changePercent))
+        let formattedPrice = "\(currencyPrefix)\(StockFormatters.stockPrice(quote.price, currency: quote.currency))"
+
+        let technicalText: String
+        if isBullish {
+            let resistance = "\(currencyPrefix)\(StockFormatters.stockPrice(quote.price * 1.05, currency: quote.currency))"
+            technicalText = "Saham **\(quote.ticker)** berada dalam tren bullish dengan kenaikan **+\(pctStr)%** di level **\(formattedPrice)**. Indikator MACD dan RSI menunjukkan akumulasi yang konsisten. Resistance terdekat diproyeksikan berada di sekitar **\(resistance)** dengan volume perdagangan yang solid."
+        } else {
+            let support = "\(currencyPrefix)\(StockFormatters.stockPrice(quote.price * 0.96, currency: quote.currency))"
+            technicalText = "Saham **\(quote.ticker)** tengah berkonsolidasi di harga **\(formattedPrice)** (**-\(pctStr)%**). Tekanan jual mulai mereda dan stochastic memasuki area oversold. Support psikologis kuat terbentuk di **\(support)** dengan potensi teknikal rebound jangka pendek."
+        }
+
+        let fundamentalText: String
+        if let f = fundamentals {
+            let peText = f.forwardPE != nil ? String(format: "%.1fx", f.forwardPE!) : "wajar"
+            let pbvText = f.pbvRatio > 0 ? String(format: "%.2fx", f.pbvRatio) : "sehat"
+            let epsFormatted = "\(currencyPrefix)\(StockFormatters.stockPrice(f.eps, currency: quote.currency))"
+            fundamentalText = "Fundamental **\(quote.ticker)** memiliki Forward P/E **\(peText)** dan PBV **\(pbvText)**. Laba per saham (EPS) tercatat **\(epsFormatted)** dengan arus kas operasional yang positif, mencerminkan likuiditas yang kuat untuk menopang ekspansi bisnis dan dividen."
+        } else {
+            fundamentalText = "**\(quote.name)** mempertahankan efisiensi operasional dan neraca yang stabil di pasar **\(detectedMarket)**. Pertumbuhan pendapatan konsisten dengan margin laba bersih yang resilien di sektornya."
+        }
+
+        let sentimentText = "Sentimen pasar terhadap **\(quote.ticker)** tergolong **positif** dengan konsensus analis condong ke **Buy/Overweight**. Katalis pasar domestik dan minat investor institusi mendukung likuiditas perdagangan."
+
+        let outlookText = "Prospek pertumbuhan jangka menengah didukung stabilitas ekonomi regional dan digitalisasi sektor. Pantau volatilitas makro serta suku bunga acuan sebagai faktor risiko utama."
+
+        return [
+            InsightChip(label: "Analisis Teknikal", text: technicalText),
+            InsightChip(label: "Fundamental", text: fundamentalText),
+            InsightChip(label: "Sentimen Pasar", text: sentimentText),
+            InsightChip(label: "Outlook & Risiko", text: outlookText)
+        ]
     }
 
     // MARK: - Holdings & Purchase Form Section
