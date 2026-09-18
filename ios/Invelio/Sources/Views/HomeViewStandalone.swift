@@ -115,7 +115,7 @@
 //// ║  3.  DUMMY DATA                                                ║
 //// ╚══════════════════════════════════════════════════════════════════╝
 //
-//let dummySummary = PortfolioSummaryData(totalValue: 58_742_500, totalCost: 52_100_000)
+//let dummySummary = PortfolioSummaryData(totalValue: 0, totalCost: 0)
 //
 //let dummyStocks: [StockItem] = [
 //    StockItem(symbol: "BBCA", name: "Bank Central Asia Tbk",      price: 9850,   change:  75,   percentChange:  0.77, sentiment: Sentiment(buy: 0.70, hold: 0.20, sell: 0.10, score: 85), market: "IDX", sparkData: [0.3, 0.35, 0.32, 0.45, 0.50, 0.48, 0.55, 0.60, 0.58, 0.62, 0.65, 0.70]),
@@ -379,7 +379,7 @@
 //                let midY = geo.size.height * 0.5
 //                Path { p in
 //                    p.move(to: CGPoint(x: 0, y: midY))
-//                    p.addLine(to: CGPoint(x: geo.size.width, y: midY - 20))
+//                    p.addLine(to: CGPoint(x: geo.size.width, y: midY))
 //                    p.addLine(to: CGPoint(x: geo.size.width, y: geo.size.height))
 //                    p.addLine(to: CGPoint(x: 0, y: geo.size.height))
 //                    p.closeSubpath()
@@ -393,7 +393,7 @@
 //                )
 //                Path { p in
 //                    p.move(to: CGPoint(x: 0, y: midY))
-//                    p.addLine(to: CGPoint(x: geo.size.width, y: midY - 20))
+//                    p.addLine(to: CGPoint(x: geo.size.width, y: midY))
 //                }
 //                .stroke(Color.orange, style: StrokeStyle(lineWidth: 1.2, lineCap: .round))
 //            }

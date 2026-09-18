@@ -10,6 +10,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 // ╔══════════════════════════════════════════════════════════════════╗
 // ║  1.  DESIGN TOKENS — Colors & Sizes                            ║
@@ -116,7 +117,7 @@ struct WatchlistTab: Identifiable {
 // ║  3.  DUMMY DATA                                                ║
 // ╚══════════════════════════════════════════════════════════════════╝
 
-let dummySummary = PortfolioSummaryData(totalValue: 58_742_500, totalCost: 52_100_000)
+let dummySummary = PortfolioSummaryData(totalValue: 0, totalCost: 0)
 
 let dummyStocks: [StockItem] = {
     let loaded = SectorsStocksLoader.loadStockItems()
@@ -361,12 +362,15 @@ struct StockListView: View {
     var body: some View {
         LazyVStack(spacing: 0) {
             ForEach(items) { item in
-                VStack(spacing: 0) {
-                    StockRowView(stock: item)
-                        .padding(.horizontal, 16).padding(.vertical, 6)
-                    Divider().overlay(Color.white.opacity(0.1)).padding(.horizontal, 16)
+                NavigationLink(destination: StockDetailView(stock: item)) {
+                    VStack(spacing: 0) {
+                        StockRowView(stock: item)
+                            .padding(.horizontal, 16).padding(.vertical, 6)
+                        Divider().overlay(Color.white.opacity(0.1)).padding(.horizontal, 16)
+                    }
+                    .contentShape(Rectangle())
                 }
-                .contentShape(Rectangle())
+                .buttonStyle(.plain)
             }
         }
     }
@@ -408,28 +412,28 @@ struct PortfolioSummaryCardView: View {
                 .clipShape(Capsule())
             }
 
-            // Placeholder area for chart (simplified flat line)
+            // Area & line chart (flat horizontal line)
             GeometryReader { geo in
                 let midY = geo.size.height * 0.5
                 Path { p in
                     p.move(to: CGPoint(x: 0, y: midY))
-                    p.addLine(to: CGPoint(x: geo.size.width, y: midY - 20))
+                    p.addLine(to: CGPoint(x: geo.size.width, y: midY))
                     p.addLine(to: CGPoint(x: geo.size.width, y: geo.size.height))
                     p.addLine(to: CGPoint(x: 0, y: geo.size.height))
                     p.closeSubpath()
                 }
                 .fill(
                     LinearGradient(
-                        stops: [.init(color: Color.orange.opacity(0.25), location: 0),
+                        stops: [.init(color: Color.orange.opacity(0.20), location: 0),
                                 .init(color: Color.orange.opacity(0.0), location: 0.9)],
                         startPoint: .top, endPoint: .bottom
                     )
                 )
                 Path { p in
                     p.move(to: CGPoint(x: 0, y: midY))
-                    p.addLine(to: CGPoint(x: geo.size.width, y: midY - 20))
+                    p.addLine(to: CGPoint(x: geo.size.width, y: midY))
                 }
-                .stroke(Color.orange, style: StrokeStyle(lineWidth: 1.2, lineCap: .round))
+                .stroke(Color.orange, style: StrokeStyle(lineWidth: 1.5, lineCap: .round))
             }
             .frame(height: 100)
             .padding(.top, 8)
@@ -661,8 +665,30 @@ struct NotificationButton: View {
 // ╚══════════════════════════════════════════════════════════════════╝
 
 struct HomeView: View {
-
+    @Query private var holdingLots: [HoldingLot]
     @State private var activeTabID = "all"
+
+    private var dynamicSummary: PortfolioSummaryData {
+        guard !holdingLots.isEmpty else {
+            return dummySummary
+        }
+
+        let allStockItems = SectorsStocksLoader.loadStockItems()
+        var totalVal: Double = 0
+        var totalCost: Double = 0
+
+        for lot in holdingLots {
+            totalCost += lot.totalInvested
+            let matched = allStockItems.first {
+                $0.symbol.uppercased() == lot.symbol.uppercased() ||
+                lot.ticker.uppercased().hasPrefix($0.symbol.uppercased())
+            }
+            let price = matched?.price ?? lot.pricePerShare
+            totalVal += (price * lot.shares)
+        }
+
+        return PortfolioSummaryData(totalValue: totalVal, totalCost: totalCost)
+    }
 
     /// Filter saham sesuai tab yang aktif
     private var filteredStocks: [StockItem] {
@@ -675,36 +701,38 @@ struct HomeView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                // 1) Portfolio Summary Card
-                PortfolioSummaryCardView(summary: dummySummary)
-                    .padding(.top, 0).padding(.bottom, 4)
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 0) {
+                    // 1) Portfolio Summary Card
+                    PortfolioSummaryCardView(summary: dynamicSummary)
+                        .padding(.top, 0).padding(.bottom, 4)
 
-                // 2) AI Insight Card
-                AIInsightCardView(chips: dummyInsightChips)
-                    .padding(.vertical, 4)
+                    // 2) AI Insight Card
+                    AIInsightCardView(chips: dummyInsightChips)
+                        .padding(.vertical, 4)
 
-                // 3) Watchlist Header
-                sectionHeader("Watchlist")
-                    .padding(.top, 16)
+                    // 3) Watchlist Header
+                    sectionHeader("Watchlist")
+                        .padding(.top, 16)
 
-                // 4) Watchlist Tab Selector
-                WatchlistTabSelectorView(tabs: dummyWatchlistTabs, activeID: $activeTabID)
-                    .padding(.top, -6).padding(.bottom, 4)
+                    // 4) Watchlist Tab Selector
+                    WatchlistTabSelectorView(tabs: dummyWatchlistTabs, activeID: $activeTabID)
+                        .padding(.top, -6).padding(.bottom, 4)
 
-                // 5) Stock List
-                StockListView(items: filteredStocks)
+                    // 5) Stock List
+                    StockListView(items: filteredStocks)
 
-                // 6) Search Hint
-                searchHint
-                    .padding(.top, 8).padding(.bottom, 20)
+                    // 6) Search Hint
+                    searchHint
+                        .padding(.top, 8).padding(.bottom, 20)
+                }
             }
+            .background(Color.DarkPurpleAppBackground.ignoresSafeArea())
+            .preferredColorScheme(.dark)
+            .toolbar(.hidden, for: .navigationBar)
+            .safeAreaInset(edge: .top) { topBar }
         }
-        .background(Color.DarkPurpleAppBackground.ignoresSafeArea())
-        .preferredColorScheme(.dark)
-        .toolbar(.hidden, for: .navigationBar)
-        .safeAreaInset(edge: .top) { topBar }
     }
 
     // MARK: - Top Bar

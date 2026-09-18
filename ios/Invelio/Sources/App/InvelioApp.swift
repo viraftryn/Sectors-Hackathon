@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 @main
 struct InvelioApp: App {
@@ -6,5 +7,6 @@ struct InvelioApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: HoldingLot.self)
     }
 }

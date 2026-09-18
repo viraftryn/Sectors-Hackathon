@@ -11,4 +11,19 @@ final class InvelioTests: XCTestCase {
         XCTAssertEqual(stock.ticker, "BBCA")
         XCTAssertEqual(stock.price, 9875.0)
     }
+
+    func testHoldingLotCalculations() throws {
+        let lot = HoldingLot(
+            ticker: "BBCA.JK",
+            stockName: "Bank Central Asia",
+            market: "IDX",
+            currency: "IDR",
+            pricePerShare: 10000,
+            totalInvested: 5000000
+        )
+
+        XCTAssertEqual(lot.ticker, "BBCA.JK")
+        XCTAssertEqual(lot.shares, 500.0)
+        XCTAssertEqual(lot.symbol, "BBCA")
+    }
 }
