@@ -118,58 +118,30 @@ struct WatchlistTab: Identifiable {
 
 let dummySummary = PortfolioSummaryData(totalValue: 58_742_500, totalCost: 52_100_000)
 
-let dummyStocks: [StockItem] = [
-    // ── IDX (Indonesia) ──
-    StockItem(symbol: "BBCA", name: "Bank Central Asia", sector: "Bank", price: 9850, change: 75, percentChange: 0.77,
-              sentiment: Sentiment(buy: 0.70, hold: 0.20, sell: 0.10, score: 85), market: "IDX",
-              sparkData: [0.30, 0.35, 0.32, 0.45, 0.50, 0.48, 0.55, 0.60, 0.58, 0.62, 0.65, 0.70]),
-    StockItem(symbol: "BBRI", name: "Bank Rakyat Indonesia", sector: "Bank", price: 4680, change: -30, percentChange: -0.64,
-              sentiment: Sentiment(buy: 0.45, hold: 0.35, sell: 0.20, score: 55), market: "IDX",
-              sparkData: [0.60, 0.58, 0.55, 0.50, 0.52, 0.48, 0.45, 0.42, 0.44, 0.40, 0.38, 0.35]),
-    StockItem(symbol: "DCII", name: "DCI Indonesia", sector: "Data center", price: 42500, change: 850, percentChange: 2.04,
-              sentiment: Sentiment(buy: 0.82, hold: 0.12, sell: 0.06, score: 90), market: "IDX",
-              sparkData: [0.20, 0.25, 0.32, 0.40, 0.48, 0.52, 0.60, 0.68, 0.72, 0.78, 0.85, 0.92]),
-    StockItem(symbol: "BMRI", name: "Bank Mandiri", sector: "Bank", price: 6450, change: 50, percentChange: 0.78,
-              sentiment: Sentiment(buy: 0.68, hold: 0.22, sell: 0.10, score: 82), market: "IDX",
-              sparkData: [0.40, 0.42, 0.45, 0.43, 0.48, 0.52, 0.55, 0.58, 0.60, 0.62, 0.65, 0.68]),
-    StockItem(symbol: "BYAN", name: "Bayan Resources", sector: "Batu bara", price: 17200, change: -150, percentChange: -0.86,
-              sentiment: Sentiment(buy: 0.25, hold: 0.35, sell: 0.40, score: 38), market: "IDX",
-              sparkData: [0.70, 0.68, 0.62, 0.65, 0.58, 0.55, 0.50, 0.48, 0.45, 0.42, 0.38, 0.35]),
-
-    // ── SGX (Singapore) ──
-    StockItem(symbol: "D05", name: "DBS Group", sector: "Bank", price: 36.40, change: 0.45, percentChange: 1.25,
-              sentiment: Sentiment(buy: 0.75, hold: 0.15, sell: 0.10, score: 86), market: "SGX",
-              sparkData: [0.40, 0.45, 0.48, 0.52, 0.50, 0.55, 0.60, 0.62, 0.65, 0.70, 0.72, 0.75]),
-    StockItem(symbol: "O39", name: "OCBC", sector: "Bank", price: 14.85, change: 0.12, percentChange: 0.81,
-              sentiment: Sentiment(buy: 0.65, hold: 0.25, sell: 0.10, score: 80), market: "SGX",
-              sparkData: [0.35, 0.38, 0.40, 0.42, 0.45, 0.48, 0.50, 0.52, 0.55, 0.58, 0.60, 0.62]),
-    StockItem(symbol: "SE", name: "Sea Limited", sector: "Internet/Tech", price: 82.30, change: 2.15, percentChange: 2.68,
-              sentiment: Sentiment(buy: 0.70, hold: 0.20, sell: 0.10, score: 76), market: "SGX",
-              sparkData: [0.25, 0.30, 0.35, 0.38, 0.45, 0.52, 0.58, 0.65, 0.70, 0.75, 0.82, 0.88]),
-    StockItem(symbol: "Z74", name: "Singtel", sector: "Telekomunikasi", price: 3.12, change: -0.02, percentChange: -0.64,
-              sentiment: Sentiment(buy: 0.50, hold: 0.35, sell: 0.15, score: 62), market: "SGX",
-              sparkData: [0.55, 0.52, 0.50, 0.48, 0.46, 0.47, 0.45, 0.44, 0.43, 0.42, 0.40, 0.38]),
-    StockItem(symbol: "U11", name: "UOB", sector: "Bank", price: 31.60, change: 0.28, percentChange: 0.89,
-              sentiment: Sentiment(buy: 0.72, hold: 0.18, sell: 0.10, score: 84), market: "SGX",
-              sparkData: [0.38, 0.42, 0.45, 0.48, 0.50, 0.54, 0.56, 0.60, 0.62, 0.65, 0.68, 0.72]),
-
-    // ── KLSE (Malaysia) ──
-    StockItem(symbol: "1155", name: "Maybank", sector: "Bank", price: 10.20, change: 0.08, percentChange: 0.79,
-              sentiment: Sentiment(buy: 0.68, hold: 0.22, sell: 0.10, score: 80), market: "KLSE",
-              sparkData: [0.35, 0.38, 0.42, 0.45, 0.48, 0.52, 0.55, 0.58, 0.60, 0.63, 0.65, 0.68]),
-    StockItem(symbol: "1295", name: "Public Bank", sector: "Bank", price: 4.35, change: 0.03, percentChange: 0.69,
-              sentiment: Sentiment(buy: 0.62, hold: 0.26, sell: 0.12, score: 76), market: "KLSE",
-              sparkData: [0.40, 0.42, 0.45, 0.48, 0.47, 0.50, 0.52, 0.55, 0.58, 0.60, 0.62, 0.64]),
-    StockItem(symbol: "1023", name: "CIMB Group", sector: "Bank", price: 8.15, change: 0.12, percentChange: 1.49,
-              sentiment: Sentiment(buy: 0.70, hold: 0.20, sell: 0.10, score: 82), market: "KLSE",
-              sparkData: [0.30, 0.35, 0.38, 0.42, 0.45, 0.50, 0.55, 0.58, 0.62, 0.68, 0.70, 0.74]),
-    StockItem(symbol: "5347", name: "Tenaga Nasional", sector: "Utilities/Listrik", price: 14.40, change: -0.10, percentChange: -0.69,
-              sentiment: Sentiment(buy: 0.45, hold: 0.40, sell: 0.15, score: 58), market: "KLSE",
-              sparkData: [0.60, 0.58, 0.55, 0.56, 0.52, 0.50, 0.48, 0.45, 0.46, 0.44, 0.42, 0.40]),
-    StockItem(symbol: "5225", name: "IHH Healthcare", sector: "Healthcare", price: 6.80, change: 0.05, percentChange: 0.74,
-              sentiment: Sentiment(buy: 0.64, hold: 0.24, sell: 0.12, score: 74), market: "KLSE",
-              sparkData: [0.38, 0.40, 0.44, 0.46, 0.48, 0.50, 0.54, 0.56, 0.58, 0.60, 0.62, 0.65]),
-]
+let dummyStocks: [StockItem] = {
+    let loaded = SectorsStocksLoader.loadStockItems()
+    if !loaded.isEmpty {
+        return loaded
+    }
+    // Fallback list jika file JSON tidak dapat diakses
+    return [
+        StockItem(symbol: "BBCA", name: "Bank Central Asia", sector: "Financials", price: 9850, change: 75, percentChange: 0.77,
+                  sentiment: Sentiment(buy: 0.70, hold: 0.20, sell: 0.10, score: 85), market: "IDX",
+                  sparkData: [0.30, 0.35, 0.32, 0.45, 0.50, 0.48, 0.55, 0.60, 0.58, 0.62, 0.65, 0.70]),
+        StockItem(symbol: "BBRI", name: "Bank Rakyat Indonesia", sector: "Financials", price: 4680, change: -30, percentChange: -0.64,
+                  sentiment: Sentiment(buy: 0.45, hold: 0.35, sell: 0.20, score: 55), market: "IDX",
+                  sparkData: [0.60, 0.58, 0.55, 0.50, 0.52, 0.48, 0.45, 0.42, 0.44, 0.40, 0.38, 0.35]),
+        StockItem(symbol: "DCII", name: "DCI Indonesia", sector: "Technology", price: 42500, change: 850, percentChange: 2.04,
+                  sentiment: Sentiment(buy: 0.82, hold: 0.12, sell: 0.06, score: 90), market: "IDX",
+                  sparkData: [0.20, 0.25, 0.32, 0.40, 0.48, 0.52, 0.60, 0.68, 0.72, 0.78, 0.85, 0.92]),
+        StockItem(symbol: "BMRI", name: "Bank Mandiri", sector: "Financials", price: 6450, change: 50, percentChange: 0.78,
+                  sentiment: Sentiment(buy: 0.68, hold: 0.22, sell: 0.10, score: 82), market: "IDX",
+                  sparkData: [0.40, 0.42, 0.45, 0.43, 0.48, 0.52, 0.55, 0.58, 0.60, 0.62, 0.65, 0.68]),
+        StockItem(symbol: "BYAN", name: "Bayan Resources", sector: "Energy", price: 17200, change: -150, percentChange: -0.86,
+                  sentiment: Sentiment(buy: 0.25, hold: 0.35, sell: 0.40, score: 38), market: "IDX",
+                  sparkData: [0.70, 0.68, 0.62, 0.65, 0.58, 0.55, 0.50, 0.48, 0.45, 0.42, 0.38, 0.35])
+    ]
+}()
 
 let dummyInsightChips: [InsightChip] = [
     InsightChip(label: "Analisis Teknikal",
@@ -362,11 +334,10 @@ struct StockRowView: View {
                     Text(stock.symbol).font(.system(size: 15, weight: .bold)).foregroundColor(.white)
                     SentimentPillView(sentiment: stock.sentiment)
                 }
-                HStack(spacing: 4) {
-                    Text(stock.name).font(.caption).foregroundColor(.white.opacity(0.65)).lineLimit(1)
-                    Text("•").font(.caption2).foregroundColor(.white.opacity(0.35))
-                    Text(stock.sector).font(.caption2).foregroundColor(.PrimaryYellow.opacity(0.85)).lineLimit(1)
-                }
+                Text(stock.name)
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.65))
+                    .lineLimit(1)
                 SentimentBarView(sentiment: stock.sentiment)
                     .frame(width: DS.sentBarW, alignment: .leading)
             }
