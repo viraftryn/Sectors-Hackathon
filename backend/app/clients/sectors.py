@@ -4,7 +4,7 @@ from app.config import settings
 
 
 class SectorsClient:
-    """Wrapper for the Sectors REST API with auth and rate limiting."""
+    """Wrapper for the Sectors REST API with auth."""
 
     def __init__(self) -> None:
         self._base_url = settings.sectors_base_url
@@ -21,17 +21,18 @@ class SectorsClient:
             response.raise_for_status()
             return response.json()
 
+    # --- Fundamental / Company data (cache: 24h) ---
+
     async def get_company_report(self, ticker: str) -> dict:
         return await self._get(f"/companies/report/{ticker}/")
-
-    async def get_daily_prices(self, ticker: str) -> dict:
-        return await self._get(f"/daily/{ticker}/")
 
     async def list_companies(self) -> dict:
         return await self._get("/companies/")
 
-    async def get_sector_report(self) -> dict:
-        return await self._get("/sector/report/")
+    # --- Price / Trending data (cache: 5min) ---
+
+    async def get_daily_prices(self, ticker: str) -> dict:
+        return await self._get(f"/daily/{ticker}/")
 
     async def get_most_traded(self) -> dict:
         return await self._get("/most-traded/")
@@ -39,5 +40,22 @@ class SectorsClient:
     async def get_top_companies(self) -> dict:
         return await self._get("/top-companies/")
 
+    # --- Market index (cache: 10min) ---
+
     async def get_idx_total(self) -> dict:
         return await self._get("/idx-total/")
+
+    # --- Sector reports (cache: 1h) ---
+
+    async def get_sector_report(self) -> dict:
+        return await self._get("/sector/report/")
+
+    # --- News / Sentiment (cache: 15min / 1h) ---
+
+    async def get_news(self, ticker: str | None = None) -> dict:
+        params = {"ticker": ticker} if ticker else None
+        return await self._get("/news/", params=params)
+
+    async def get_news_filings(self, ticker: str | None = None) -> dict:
+        params = {"ticker": ticker} if ticker else None
+        return await self._get("/news/filings/", params=params)
