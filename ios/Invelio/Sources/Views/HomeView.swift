@@ -92,7 +92,7 @@ struct StockItem: Identifiable {
     let change: Double
     let percentChange: Double
     let sentiment: Sentiment
-    let market: String            // "IDX" | "SGX" | "KLSE"
+    let market: String            // "IDX"
     let sparkData: [Double]       // normalised 0‒1 for mini chart
 }
 
@@ -111,9 +111,6 @@ struct PortfolioSummaryData {
     var growthPct:  Double { totalCost > 0 ? (profitIDR / totalCost) * 100 : 0 }
 }
 
-struct WatchlistTab: Identifiable {
-    let id: String; let name: String
-}
 
 // ╔══════════════════════════════════════════════════════════════════╗
 // ║  3.  DUMMY DATA                                                ║
@@ -155,12 +152,6 @@ let dummyInsightChips: [InsightChip] = [
                 text: "Rupiah menguat ke **Rp 15.820/USD** didukung surplus neraca dagang. BI diprediksi menahan suku bunga di 6.25% pada RDG mendatang."),
 ]
 
-let dummyWatchlistTabs: [WatchlistTab] = [
-    WatchlistTab(id: "all",    name: "All"),
-    WatchlistTab(id: "idx",    name: "IDX"),
-    WatchlistTab(id: "sgx",    name: "SGX"),
-    WatchlistTab(id: "klse",   name: "KLSE"),
-]
 
 // ╔══════════════════════════════════════════════════════════════════╗
 // ║  4.  FORMATTERS                                                ║
@@ -298,13 +289,7 @@ struct PriceBadgeView: View {
     private var isPositive: Bool { change >= 0 }
     private var color: Color { isPositive ? .ProfitGreen : .LossRed }
     private var formatted: String {
-        let f = formatPrice(price, market: market)
-        switch market.uppercased() {
-        case "IDX": return f
-        case "SGX": return "S$\(f)"
-        case "KLSE": return "RM\(f)"
-        default: return "$\(f)"
-        }
+        formatPrice(price, market: market)
     }
     var body: some View {
         VStack(alignment: .trailing, spacing: 2) {
@@ -635,32 +620,6 @@ struct AIInsightCardView: View {
     }
 }
 
-// MARK: - WatchlistTabSelectorView
-
-struct WatchlistTabSelectorView: View {
-    let tabs: [WatchlistTab]
-    @Binding var activeID: String
-
-    var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(alignment: .bottom, spacing: 0) {
-                ForEach(tabs) { tab in
-                    VStack(spacing: 0) {
-                        Text(tab.name)
-                            .font(.system(size: 14, weight: tab.id == activeID ? .bold : .regular))
-                            .foregroundColor(tab.id == activeID ? .PrimaryYellow : .white.opacity(0.6))
-                            .padding(.horizontal, 14).padding(.vertical, 10)
-                        Rectangle()
-                            .fill(tab.id == activeID ? Color.PrimaryYellow : .clear)
-                            .frame(height: 2).cornerRadius(1)
-                    }
-                    .onTapGesture { withAnimation(.easeInOut(duration: 0.2)) { activeID = tab.id } }
-                }
-            }
-            .padding(.leading, 16)
-        }
-    }
-}
 
 // MARK: - NotificationButton
 
@@ -710,7 +669,6 @@ struct NotificationButton: View {
 
 struct HomeView: View {
     @Query private var holdingLots: [HoldingLot]
-    @State private var activeTabID = "all"
 
     private var dynamicSummary: PortfolioSummaryData {
         guard !holdingLots.isEmpty else {
@@ -746,16 +704,6 @@ struct HomeView: View {
         )
     }
 
-    /// Filter saham sesuai tab yang aktif
-    private var filteredStocks: [StockItem] {
-        switch activeTabID {
-        case "idx":  return dummyStocks.filter { $0.market.uppercased() == "IDX" }
-        case "sgx":  return dummyStocks.filter { $0.market.uppercased() == "SGX" }
-        case "klse": return dummyStocks.filter { $0.market.uppercased() == "KLSE" }
-        default:     return dummyStocks
-        }
-    }
-
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -771,13 +719,10 @@ struct HomeView: View {
                     // 3) Watchlist Header
                     sectionHeader("Recommended Stocks")
                         .padding(.top, 16)
+                        .padding(.bottom, 6)
 
-                    // 4) Watchlist Tab Selector
-                    WatchlistTabSelectorView(tabs: dummyWatchlistTabs, activeID: $activeTabID)
-                        .padding(.top, -6).padding(.bottom, 4)
-
-                    // 5) Stock List
-                    StockListView(items: filteredStocks)
+                    // 4) Stock List
+                    StockListView(items: dummyStocks)
 
                     // 6) Search Hint
                     searchHint
@@ -816,7 +761,7 @@ struct HomeView: View {
     private var searchHint: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass").foregroundColor(.PrimaryYellow)
-            Text("Cari saham IDX, SGX, KLSE, dan lebih banyak lagi")
+            Text("Cari saham IDX dan lebih banyak lagi")
                 .font(.caption).foregroundColor(.white.opacity(0.7))
             Spacer()
             Image(systemName: "chevron.right")

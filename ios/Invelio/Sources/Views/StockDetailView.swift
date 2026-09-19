@@ -2,7 +2,7 @@
 //  StockDetailView.swift
 //  Invelio
 //
-//  Self-contained Stock Detail View for SwiftUI supporting IDX, SGX, and KLSE markets.
+//  Self-contained Stock Detail View for SwiftUI supporting IDX market.
 //
 
 import SwiftUI
@@ -145,12 +145,8 @@ public struct PurchaseFormEntry: Identifiable, Equatable {
 // MARK: - ==========================================
 
 public enum StockFormatters {
-    public static func currencyPrefix(for currency: String) -> String {
-        switch currency.uppercased() {
-        case "SGD", "SGX": return "S$"
-        case "MYR", "KLSE": return "RM"
-        default: return "Rp "
-        }
+    public static func currencyPrefix(for currency: String = "IDR") -> String {
+        return "Rp "
     }
 
     public static func stockPrice(_ value: Double, currency: String = "IDR") -> String {
@@ -168,28 +164,15 @@ public enum StockFormatters {
         let absVal = abs(value)
         let sign = value < 0 ? "-" : ""
         let prefix = currencyPrefix(for: currency)
-        let isIdr = currency.uppercased() == "IDR"
 
-        if isIdr {
-            if absVal >= 1_000_000_000_000 {
-                return "\(sign)\(prefix)\(String(format: "%.1fT", absVal / 1_000_000_000_000))"
-            } else if absVal >= 1_000_000_000 {
-                return "\(sign)\(prefix)\(String(format: "%.1fM", absVal / 1_000_000_000))"
-            } else if absVal >= 1_000_000 {
-                return "\(sign)\(prefix)\(String(format: "%.1fjt", absVal / 1_000_000))"
-            } else {
-                return "\(sign)\(prefix)\(stockPrice(absVal, currency: currency))"
-            }
+        if absVal >= 1_000_000_000_000 {
+            return "\(sign)\(prefix)\(String(format: "%.1fT", absVal / 1_000_000_000_000))"
+        } else if absVal >= 1_000_000_000 {
+            return "\(sign)\(prefix)\(String(format: "%.1fM", absVal / 1_000_000_000))"
+        } else if absVal >= 1_000_000 {
+            return "\(sign)\(prefix)\(String(format: "%.1fjt", absVal / 1_000_000))"
         } else {
-            if absVal >= 1_000_000_000_000 {
-                return "\(sign)\(prefix)\(String(format: "%.2fT", absVal / 1_000_000_000_000))"
-            } else if absVal >= 1_000_000_000 {
-                return "\(sign)\(prefix)\(String(format: "%.2fB", absVal / 1_000_000_000))"
-            } else if absVal >= 1_000_000 {
-                return "\(sign)\(prefix)\(String(format: "%.2fM", absVal / 1_000_000))"
-            } else {
-                return "\(sign)\(prefix)\(stockPrice(absVal, currency: currency))"
-            }
+            return "\(sign)\(prefix)\(stockPrice(absVal, currency: currency))"
         }
     }
 
@@ -509,8 +492,6 @@ public struct StockDetailView: View {
     }
 
     private var detectedMarket: String {
-        if quote.ticker.hasSuffix(".SI") || quote.currency == "SGD" { return "SGX" }
-        if quote.ticker.hasSuffix(".KL") || quote.currency == "MYR" { return "KLSE" }
         return "IDX"
     }
 
@@ -1021,25 +1002,11 @@ public struct StockDetailView: View {
 
 extension StockItem {
     var currency: String {
-        switch market.uppercased() {
-        case "SGX": return "SGD"
-        case "KLSE": return "MYR"
-        default: return "IDR"
-        }
+        return "IDR"
     }
 
     func toStockQuote() -> StockQuote {
-        let fullTicker: String
-        switch market.uppercased() {
-        case "IDX":
-            fullTicker = symbol.hasSuffix(".JK") ? symbol : "\(symbol).JK"
-        case "SGX":
-            fullTicker = symbol.hasSuffix(".SI") ? symbol : "\(symbol).SI"
-        case "KLSE":
-            fullTicker = symbol.hasSuffix(".KL") ? symbol : "\(symbol).KL"
-        default:
-            fullTicker = symbol
-        }
+        let fullTicker = symbol.hasSuffix(".JK") ? symbol : "\(symbol).JK"
 
         let prevClose = price - change
         return StockQuote(
@@ -1147,54 +1114,6 @@ extension StockDetailView {
             onBuy: { amount, pricePerShare in
                 print("Bought: \(amount) at \(pricePerShare)")
             }
-        )
-    }
-}
-
-#Preview("Singapore Stock (DBS - SGX)") {
-    NavigationStack {
-        StockDetailView(
-            quote: StockQuote(
-                ticker: "D05.SI",
-                name: "DBS Group Holdings",
-                price: 38.60,
-                change: 0.45,
-                changePercent: 1.18,
-                previousClose: 38.15,
-                currency: "SGD"
-            ),
-            fundamentals: StockFundamentals(
-                ticker: "D05.SI",
-                forwardPE: 11.2,
-                eps: 3.90,
-                pbvRatio: 1.45,
-                freeCashflow: 6_200_000_000,
-                sector: "Financials"
-            )
-        )
-    }
-}
-
-#Preview("Malaysian Stock (MAYBANK - KLSE)") {
-    NavigationStack {
-        StockDetailView(
-            quote: StockQuote(
-                ticker: "1155.KL",
-                name: "Malayan Banking Berhad",
-                price: 10.18,
-                change: -0.04,
-                changePercent: -0.39,
-                previousClose: 10.22,
-                currency: "MYR"
-            ),
-            fundamentals: StockFundamentals(
-                ticker: "1155.KL",
-                forwardPE: 12.4,
-                eps: 0.82,
-                pbvRatio: 1.30,
-                freeCashflow: 8_500_000_000,
-                sector: "Financials"
-            )
         )
     }
 }

@@ -160,22 +160,11 @@ enum SectorsStocksLoader {
 
 extension SectorsCompanyReportResponse {
     func toStockItem() -> StockItem {
-        // Clean symbol: e.g. "BBCA.JK" -> "BBCA", "D05.SI" -> "D05"
+        // Clean symbol: e.g. "BBCA.JK" -> "BBCA"
         let cleanSymbol = symbol.components(separatedBy: ".").first ?? symbol
 
         // Market detection
-        let detectedMarket: String
-        if let m = self.market {
-            detectedMarket = m
-        } else if symbol.hasSuffix(".JK") {
-            detectedMarket = "IDX"
-        } else if symbol.hasSuffix(".SI") {
-            detectedMarket = "SGX"
-        } else if symbol.hasSuffix(".KL") {
-            detectedMarket = "KLSE"
-        } else {
-            detectedMarket = "IDX"
-        }
+        let detectedMarket = self.market ?? "IDX"
 
         // Clean company name
         let cleanName = companyName
