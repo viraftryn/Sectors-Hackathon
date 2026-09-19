@@ -144,12 +144,12 @@ let dummyStocks: [StockItem] = {
 }()
 
 let dummyInsightChips: [InsightChip] = [
-    InsightChip(label: "Analisis Teknikal",
-                text: "Sektor **perbankan** menunjukkan momentum positif. **BBCA & BBRI** berpotensi retest resistance. RSI sektor berada di 58, mengindikasikan ruang kenaikan sebelum overbought. Volume perdagangan meningkat 15% dibanding rata-rata 20 hari."),
-    InsightChip(label: "Sentimen Berita",
-                text: "Sentimen terhadap **GGRM** meningkat signifikan. Buzz positif naik **34%** dalam 48 jam terakhir. Headline rilis laporan keuangan Q2 mendorong minat investor ritel."),
-    InsightChip(label: "Makro IDR",
-                text: "Rupiah menguat ke **Rp 15.820/USD** didukung surplus neraca dagang. BI diprediksi menahan suku bunga di 6.25% pada RDG mendatang."),
+    InsightChip(label: "Technical Analysis",
+                text: "**Banking sector** demonstrates positive momentum. **BBCA & BBRI** are testing resistance. Sector RSI sits at 58, signaling room before overbought territory. Volume is up 15% vs 20-day average."),
+    InsightChip(label: "News Sentiment",
+                text: "Sentiment on **GGRM** surged noticeably. Positive buzz is up **34%** in the past 48 hours. Q2 earnings release headlines drove retail investor appetite."),
+    InsightChip(label: "Macro & Currency",
+                text: "Rupiah strengthened to **Rp 15,820/USD** backed by trade surplus. Central bank is expected to hold benchmark rates at 6.25%."),
 ]
 
 
@@ -519,7 +519,7 @@ struct AIInsightCardView: View {
                             withAnimation(.easeInOut(duration: 0.25)) { isExpanded.toggle() }
                         } label: {
                             HStack(spacing: 4) {
-                                Text(isExpanded ? "Sembunyikan" : "Baca selengkapnya")
+                                Text(isExpanded ? "Show less" : "Read more")
                                     .font(.system(size: 11, weight: .semibold))
                                 Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                                     .font(.system(size: 9, weight: .bold))
@@ -533,6 +533,23 @@ struct AIInsightCardView: View {
                 .frame(maxWidth: .infinity, minHeight: 80, alignment: .topLeading)
             }
             .padding(12)
+
+            // Disclaimer Banner (above chips)
+            Text("Based on available data and for informational purposes only, not financial advice to buy or sell. Always Do your own research before making investment decisions.")
+                .font(.system(size: 10.5, weight: .regular))
+                .foregroundColor(.white.opacity(0.85))
+                .lineSpacing(2.5)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(10)
+                .background(accent.opacity(0.10))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .strokeBorder(accent.opacity(0.25), lineWidth: 0.8)
+                )
+                .padding(.horizontal, 10)
+                .padding(.bottom, 10)
 
             // Chip selector
             ScrollView(.horizontal, showsIndicators: false) {
@@ -558,7 +575,7 @@ struct AIInsightCardView: View {
                 }
                 .padding(.horizontal, 12)
             }
-            .padding(.bottom, 10)
+            .padding(.bottom, 12)
         }
         .frame(minHeight: 150, alignment: .top)
         .background(Color.AICardBg)
@@ -761,7 +778,7 @@ struct HomeView: View {
     private var searchHint: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass").foregroundColor(.PrimaryYellow)
-            Text("Cari saham IDX dan lebih banyak lagi")
+            Text("Search IDX stocks and more")
                 .font(.caption).foregroundColor(.white.opacity(0.7))
             Spacer()
             Image(systemName: "chevron.right")

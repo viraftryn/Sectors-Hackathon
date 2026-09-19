@@ -144,7 +144,7 @@ struct PortfolioView: View {
 
                 Spacer()
 
-                Text("\(positions.count) Saham")
+                Text(positions.count == 1 ? "1 Stock" : "\(positions.count) Stocks")
                     .font(.caption.bold())
                     .foregroundStyle(Color.white.opacity(0.6))
             }
@@ -168,7 +168,7 @@ struct PortfolioView: View {
     // MARK: - Positions List
     private var positionsList: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Aset Saham")
+            Text("Stock Holdings")
                 .font(.headline.bold())
                 .foregroundStyle(Color.white)
                 .padding(.top, 8)
@@ -226,7 +226,7 @@ struct PortfolioView: View {
                     .foregroundStyle(Color.white.opacity(0.6))
                     .lineLimit(1)
 
-                Text(String(format: "%@ Lembar • Avg %@%@", formatShares(pos.totalShares), prefix, StockFormatters.stockPrice(pos.averageCost, currency: pos.currency)))
+                Text(String(format: "%@ Shares • Avg %@%@", formatShares(pos.totalShares), prefix, StockFormatters.stockPrice(pos.averageCost, currency: pos.currency)))
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(Color.white.opacity(0.5))
             }
@@ -258,11 +258,11 @@ struct PortfolioView: View {
                 .font(.system(size: 54))
                 .foregroundStyle(Color.PrimaryYellow.opacity(0.8))
 
-            Text("Belum Ada Aset Saham")
+            Text("No Stock Holdings Yet")
                 .font(.title3.bold())
                 .foregroundStyle(Color.white)
 
-            Text("Buka detail saham favoritmu dari tab Home dan masukkan jumlah lot pembelian untuk mulai memantau portofolio.")
+            Text("Select any stock from the Home tab and add your purchase lots to start tracking your portfolio.")
                 .font(.subheadline)
                 .foregroundStyle(Color.white.opacity(0.6))
                 .multilineTextAlignment(.center)

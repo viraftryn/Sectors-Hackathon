@@ -79,115 +79,115 @@ final class ChatViewModel: ObservableObject {
             return """
             **My Stock Outlook**
 
-            • **Overall Trend:** Bullish pada sektor perbankan dan konsumer defensif.
+            • **Overall Trend:** Bullish across banking and defensive consumer sectors.
             • **Top Movers:** BBCA (+0.77%), BMRI (+0.78%), DCII (+2.04%).
-            • **Key Catalyst:** Laporan laba kuartalan yang melampaui konsensus pasar serta stabilitas nilai tukar Rupiah.
+            • **Key Catalyst:** Quarterly earnings beating consensus and Rupiah exchange rate stability.
 
             **Strategic Action:**
-            Pertahankan posisi (Hold) pada big-cap leaders dan lakukan akumulasi bertahap saat retrace ke level support terdekat.
+            Maintain positions in big-cap leaders and accumulate on pullbacks near support.
             """
         } else if q.contains("RISK") || q.contains("PORTFOLIO") {
             return """
             **Portfolio Risk Assessment**
 
-            • **Tingkat Risiko:** Moderat
-            • **Konsentrasi Sektor:** 65% Financials, 20% Technology, 15% Energy
-            • **Volatilitas 30-Hari (Beta):** 0.92 (di bawah volatilitas IHSG)
+            • **Risk Level:** Moderate
+            • **Sector Concentration:** 65% Financials, 20% Technology, 15% Energy
+            • **30-Day Volatility (Beta):** 0.92 (below IDX Composite volatility)
 
-            **Potensi Risiko & Mitigasi:**
-            1. **Sektor Energy (BYAN):** Terpapar penurunan harga komoditas global. Disarankan rebalancing berkala.
-            2. **Diversifikasi:** Pertimbangkan menambah porsi pada sektor Consumer Non-Cyclicals atau Healthcare untuk meredam fluktuasi jangka pendek.
+            **Potential Risks & Mitigation:**
+            1. **Energy Sector (BYAN):** Exposed to global commodity pullbacks. Periodic rebalancing recommended.
+            2. **Diversification:** Consider increasing allocation in Consumer Non-Cyclicals or Healthcare to hedge short-term swings.
             """
         } else if q.contains("RECOMMENDED") || q.contains("REKOMENDASI") {
             return """
-            **Recommended Stocks (Pilihan Teratas)**
+            **Recommended Stocks (Top Picks)**
 
             1. **BBCA (Bank Central Asia)**
-               • Target Harga: Rp 10.500 | Rating: BUY
-               • Katalis: Margin bunga bersih solid & pertumbuhan kredit konsisten.
+               • Target Price: Rp 10,500 | Rating: BUY
+               • Catalyst: Solid net interest margins & consistent loan growth.
 
             2. **DCII (DCI Indonesia)**
-               • Target Harga: Rp 46.000 | Rating: STRONG BUY
-               • Katalis: Ledakan adopsi AI dan ekspansi kapasitas hyperscale data center.
+               • Target Price: Rp 46,000 | Rating: STRONG BUY
+               • Catalyst: AI boom demand and hyperscale data center capacity expansion.
 
             3. **BMRI (Bank Mandiri)**
-               • Target Harga: Rp 7.100 | Rating: ACCUMULATE
-               • Katalis: Efisiensi digital Livin' dan dividen yield menarik (>5%).
+               • Target Price: Rp 7,100 | Rating: ACCUMULATE
+               • Catalyst: Digital banking efficiency and attractive dividend yield (>5%).
             """
         } else if q.contains("MOVE") || q.contains("WHY") {
             return """
-            **Kenapa Saham Anda Bergerak Hari Ini?**
+            **Why Did Your Stocks Move Today?**
 
-            • **Sentimen Pasar Positif:** IHSG menguat didorong inflow asing sebesar Rp 450 miliar pada sektor finansial.
-            • **BBCA & BMRI:** Bergerak naik seiring penguatan likuiditas perbankan dan proyeksi NIM yang tetap ekspansif.
-            • **DCII (+2.04%):** Katalis permintaan komputasi awan dan sentimen investasi AI regional.
-            • **BYAN (-0.86%):** Tertekan aksi profit taking akibat koreksi harga batubara Newcastle.
+            • **Positive Market Sentiment:** IDX Composite rallied backed by Rp 450B foreign inflow into financials.
+            • **BBCA & BMRI:** Advanced on solid banking liquidity and expansive NIM outlook.
+            • **DCII (+2.04%):** Driven by cloud computing demand and regional AI investment momentum.
+            • **BYAN (-0.86%):** Pressured by profit taking following Newcastle coal price correction.
             """
         } else if q.contains("BBCA") || q.contains("BCA") {
             return """
-            **Analisis PT Bank Central Asia Tbk (BBCA)**
+            **Analysis: PT Bank Central Asia Tbk (BBCA)**
 
-            • **Rekomendasi:** BUY / ACCUMULATE
-            • **Konsensus Target Harga:** Rp 11.250 (+12,5%)
-            • **Valuasi Saat Ini:** PER 22,4x | PBV 4,8x | ROE 23,1%
-            • **Dividend Yield:** ~3,1% p.a.
+            • **Recommendation:** BUY / ACCUMULATE
+            • **Consensus Target Price:** Rp 11,250 (+12.5%)
+            • **Current Valuation:** P/E 22.4x | PBV 4.8x | ROE 23.1%
+            • **Dividend Yield:** ~3.1% p.a.
 
-            **Poin Kunci:**
-            1. Kualitas aset paling solid di industri perbankan dengan CASA ratio di atas 80%.
-            2. Pertumbuhan kredit konsisten 13-14% YoY didorong segmen komersial dan konsumer.
-            3. Sentimen suku bunga BI yang stabil memberikan ruang bagi pertumbuhan margin bunga bersih (NIM).
+            **Key Takeaways:**
+            1. Highest asset quality in the banking sector with CASA ratio above 80%.
+            2. Consistent 13-14% YoY loan growth driven by commercial and consumer segments.
+            3. Stable BI rate expectations provide headroom for net interest margin (NIM) growth.
 
-            *Kesimpulan: Cocok untuk investasi jangka menengah-panjang dengan profil risiko konservatif.*
+            *Conclusion: Well-suited for medium to long-term investors with a conservative risk profile.*
             """
         } else if q.contains("ASII") || q.contains("ASTRA") {
             return """
-            **Analisis PT Astra International Tbk (ASII)**
+            **Analysis: PT Astra International Tbk (ASII)**
 
-            • **Rekomendasi:** NEUTRAL / HOLD
-            • **Target Harga:** Rp 5.600 (+6,2%)
-            • **Valuasi Saat Ini:** PER 6,8x | PBV 0,9x (Undervalued)
-            • **Dividend Yield:** Sangat Menarik (~7,8% p.a.)
+            • **Recommendation:** NEUTRAL / HOLD
+            • **Target Price:** Rp 5,600 (+6.2%)
+            • **Current Valuation:** P/E 6.8x | PBV 0.9x (Undervalued)
+            • **Dividend Yield:** Highly Attractive (~7.8% p.a.)
 
-            **Katalog Risiko & Peluang:**
-            • Tekanan dari persaingan kendaraan listrik (EV) merek baru di Indonesia.
-            • Namun, diversifikasi di sektor alat berat (UNTR) dan agribisnis memberikan bantalan arus kas kuat.
-            • Dividend payout ratio tetap konsisten tinggi di atas 50%.
+            **Risks & Opportunities:**
+            • Margin pressure from new EV entrants in the Indonesian auto market.
+            • Heavy equipment (UNTR) and agribusiness diversification provide resilient cash flows.
+            • Dividend payout ratio remains high above 50%.
             """
         } else if q.contains("TLKM") || q.contains("TELKOM") {
             return """
-            **Analisis PT Telkom Indonesia Tbk (TLKM)**
+            **Analysis: PT Telkom Indonesia Tbk (TLKM)**
 
-            • **Rekomendasi:** BUY
-            • **Target Harga:** Rp 3.450 (+15,0%)
-            • **Valuasi Saat Ini:** PER 14,2x | PBV 2,3x | Dividend Yield ~4,8%
+            • **Recommendation:** BUY
+            • **Target Price:** Rp 3,450 (+15.0%)
+            • **Current Valuation:** P/E 14.2x | PBV 2.3x | Dividend Yield ~4.8%
 
-            **Sentimen Utama:**
-            1. Integrasi IndiHome ke Telkomsel (FMC) meningkatkan efisiensi operasional dan ARPU.
-            2. Monetisasi bisnis Data Center melalui NeutraDC berpotensi unlock value signifikan di 2026.
+            **Key Drivers:**
+            1. FMC integration (IndiHome to Telkomsel) drives operational efficiency and ARPU.
+            2. Data Center monetization via NeutraDC creates significant unlock value into 2026.
             """
         } else if q.contains("DIVIDEN") || q.contains("DIVIDEND") {
             return """
-            **Top Saham Dividen Tinggi IHSG (High Dividend Yield)**
+            **Top High Dividend Yield Stocks on IDX**
 
-            1. **ASII** - Yield est. 7,8% | Payout ~50%
-            2. **PTBA** - Yield est. 11,2% | Payout ~75%
-            3. **ITMG** - Yield est. 12,5% | Payout ~65%
-            4. **BMRI** - Yield est. 5,1% | Payout ~60%
-            5. **BBRI** - Yield est. 5,4% | Payout ~70%
+            1. **ASII** - Est. Yield 7.8% | Payout ~50%
+            2. **PTBA** - Est. Yield 11.2% | Payout ~75%
+            3. **ITMG** - Est. Yield 12.5% | Payout ~65%
+            4. **BMRI** - Est. Yield 5.1% | Payout ~60%
+            5. **BBRI** - Est. Yield 5.4% | Payout ~70%
 
-            *Tips: Perhatikan jadwal Cum Date dan pastikan fundamental kas operasional emiten tetap sehat.*
+            *Tip: Track the Cum Date schedule and ensure operating cash flow remains strong.*
             """
         } else {
             return """
-            **Analisis Ringkas Pasar Saham**
+            **Market Summary & Analysis**
 
-            Pertanyaan Anda mengenai: *"\(query)"*
+            Regarding your query: *"\(query)"*
 
-            • **Sentimen Pasar:** Net foreign inflow terpantau positif pada sektor perbankan dan telekomunikasi.
-            • **Valuasi IHSG:** P/E rata-rata IHSG berada di kisaran 13,8x, berada di bawah rata-rata historis 5 tahun (tergolong menarik).
-            • **Katalis Utama:** Stabilitas nilai tukar Rupiah, inflasi domestik yang terjaga, serta rilis kinerja keuangan emiten Q2.
+            • **Market Sentiment:** Net foreign inflow remains positive across banking and telco sectors.
+            • **IDX Valuation:** Average IDX P/E is ~13.8x, below the 5-year historical average (attractive valuation).
+            • **Key Catalysts:** Rupiah exchange stability, controlled domestic inflation, and robust quarterly earnings.
 
-            *💡 Anda juga dapat menanyakan ticker saham spesifik seperti BBCA, ASII, TLKM, atau rekomendasi dividen.*
+            *💡 You can also ask about specific tickers like BBCA, ASII, TLKM, or dividend recommendations.*
             """
         }
     }
@@ -242,7 +242,7 @@ struct ChatBubbleRow: View {
                     ProgressView()
                         .tint(.white)
                         .scaleEffect(0.8)
-                    Text("Menganalisis...")
+                    Text("Analyzing...")
                         .font(.system(size: 14))
                         .foregroundStyle(Color.white.opacity(0.7))
                 }

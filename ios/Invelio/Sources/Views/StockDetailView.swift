@@ -178,7 +178,7 @@ public enum StockFormatters {
 
     public static func formatScrubDate(_ date: Date) -> String {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "id_ID")
+        f.locale = Locale(identifier: "en_US")
         let calendar = Calendar.current
         let hour = calendar.component(.hour, from: date)
         let min = calendar.component(.minute, from: date)
@@ -734,31 +734,31 @@ public struct StockDetailView: View {
         let technicalText: String
         if isBullish {
             let resistance = "\(currencyPrefix)\(StockFormatters.stockPrice(quote.price * 1.05, currency: quote.currency))"
-            technicalText = "Saham **\(quote.ticker)** berada dalam tren bullish dengan kenaikan **+\(pctStr)%** di level **\(formattedPrice)**. Indikator MACD dan RSI menunjukkan akumulasi yang konsisten. Resistance terdekat diproyeksikan berada di sekitar **\(resistance)** dengan volume perdagangan yang solid."
+            technicalText = "**\(quote.ticker)** is in a bullish uptrend (+**\(pctStr)%**) at **\(formattedPrice)**. MACD and RSI indicate consistent accumulation. Immediate resistance is projected near **\(resistance)** with solid trading volume."
         } else {
             let support = "\(currencyPrefix)\(StockFormatters.stockPrice(quote.price * 0.96, currency: quote.currency))"
-            technicalText = "Saham **\(quote.ticker)** tengah berkonsolidasi di harga **\(formattedPrice)** (**-\(pctStr)%**). Tekanan jual mulai mereda dan stochastic memasuki area oversold. Support psikologis kuat terbentuk di **\(support)** dengan potensi teknikal rebound jangka pendek."
+            technicalText = "**\(quote.ticker)** is consolidating at **\(formattedPrice)** (**-\(pctStr)%**). Selling pressure is subsiding and stochastics entered oversold territory. Strong psychological support is established at **\(support)** with short-term rebound potential."
         }
 
         let fundamentalText: String
         if let f = fundamentals {
-            let peText = f.forwardPE != nil ? String(format: "%.1fx", f.forwardPE!) : "wajar"
-            let pbvText = f.pbvRatio > 0 ? String(format: "%.2fx", f.pbvRatio) : "sehat"
+            let peText = f.forwardPE != nil ? String(format: "%.1fx", f.forwardPE!) : "fair"
+            let pbvText = f.pbvRatio > 0 ? String(format: "%.2fx", f.pbvRatio) : "healthy"
             let epsFormatted = "\(currencyPrefix)\(StockFormatters.stockPrice(f.eps, currency: quote.currency))"
-            fundamentalText = "Fundamental **\(quote.ticker)** memiliki Forward P/E **\(peText)** dan PBV **\(pbvText)**. Laba per saham (EPS) tercatat **\(epsFormatted)** dengan arus kas operasional yang positif, mencerminkan likuiditas yang kuat untuk menopang ekspansi bisnis dan dividen."
+            fundamentalText = "**\(quote.ticker)** fundamentals show Forward P/E of **\(peText)** and PBV of **\(pbvText)**. EPS is recorded at **\(epsFormatted)** with positive operating cash flow, reflecting solid balance sheet strength to support business growth and dividends."
         } else {
-            fundamentalText = "**\(quote.name)** mempertahankan efisiensi operasional dan neraca yang stabil di pasar **\(detectedMarket)**. Pertumbuhan pendapatan konsisten dengan margin laba bersih yang resilien di sektornya."
+            fundamentalText = "**\(quote.name)** maintains sound operational efficiency and a stable balance sheet in the **\(detectedMarket)** market. Revenue growth remains consistent with resilient profit margins in its sector."
         }
 
-        let sentimentText = "Sentimen pasar terhadap **\(quote.ticker)** tergolong **positif** dengan konsensus analis condong ke **Buy/Overweight**. Katalis pasar domestik dan minat investor institusi mendukung likuiditas perdagangan."
+        let sentimentText = "Market sentiment for **\(quote.ticker)** is **positive** with analyst consensus leaning towards **Buy/Overweight**. Domestic market catalysts and institutional demand support active trading liquidity."
 
-        let outlookText = "Prospek pertumbuhan jangka menengah didukung stabilitas ekonomi regional dan digitalisasi sektor. Pantau volatilitas makro serta suku bunga acuan sebagai faktor risiko utama."
+        let outlookText = "Medium-term growth outlook is supported by macroeconomic stability and sector digitization. Monitor macro volatility and interest rate benchmarks as primary risk factors."
 
         return [
-            InsightChip(label: "Analisis Teknikal", text: technicalText),
-            InsightChip(label: "Fundamental", text: fundamentalText),
-            InsightChip(label: "Sentimen Pasar", text: sentimentText),
-            InsightChip(label: "Outlook & Risiko", text: outlookText)
+            InsightChip(label: "Technical Analysis", text: technicalText),
+            InsightChip(label: "Fundamentals", text: fundamentalText),
+            InsightChip(label: "Market Sentiment", text: sentimentText),
+            InsightChip(label: "Outlook & Risks", text: outlookText)
         ]
     }
 
@@ -810,7 +810,7 @@ public struct StockDetailView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 11))
-                        Text("Tersimpan")
+                        Text("Saved")
                             .font(.system(size: 11, weight: .semibold))
                     }
                     .foregroundStyle(Color.ProfitGreen)
@@ -896,7 +896,7 @@ public struct StockDetailView: View {
                         HStack(spacing: 8) {
                             let prefix = currencyPrefix.trimmingCharacters(in: .whitespaces)
                             inputField(label: "Cost / Share", prefix: prefix, text: $entry.priceInput)
-                            inputField(label: "Total Buy", prefix: prefix, text: $entry.totalInput)
+                            inputField(label: "Total Buy", prefix: prefix, text: $entry.totalInput, fontSize: 13.5, prefixSize: 11)
 
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("Shares")
@@ -936,18 +936,19 @@ public struct StockDetailView: View {
         }
     }
 
-    private func inputField(label: String, prefix: String, text: Binding<String>) -> some View {
+    private func inputField(label: String, prefix: String, text: Binding<String>, fontSize: CGFloat = 15, prefixSize: CGFloat = 12) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(label)
                 .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(Color.white.opacity(0.65))
             HStack(spacing: 3) {
                 Text(prefix)
-                    .font(.system(size: 12, weight: .bold))
+                    .font(.system(size: prefixSize, weight: .bold))
                     .foregroundStyle(Color.white.opacity(0.65))
                 TextField("0", text: text)
                     .keyboardType(.decimalPad)
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .font(.system(size: fontSize, weight: .bold, design: .rounded))
+                    .minimumScaleFactor(0.75)
                     .foregroundStyle(Color.white)
             }
             .padding(8)
