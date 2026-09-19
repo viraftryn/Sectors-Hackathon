@@ -157,7 +157,7 @@ let dummyInsightChips: [InsightChip] = [
 // ║  4.  FORMATTERS                                                ║
 // ╚══════════════════════════════════════════════════════════════════╝
 
-private func formatIDR(_ value: Double, decimals: Int = 0) -> String {
+func formatIDR(_ value: Double, decimals: Int = 0) -> String {
     let f = NumberFormatter()
     f.numberStyle           = .decimal
     f.groupingSeparator     = "."
@@ -363,6 +363,9 @@ struct StockListView: View {
 
 struct PortfolioSummaryCardView: View {
     let summary: PortfolioSummaryData
+    var title: String = "Your Portfolio"
+    var horizontalPadding: CGFloat = 16
+    var showChart: Bool = false
 
     @State private var selectedRange: String = "1D"
     private let ranges: [String] = ["1D", "1W", "1M", "3M", "YTD", "1Y", "5Y"]
@@ -376,8 +379,8 @@ struct PortfolioSummaryCardView: View {
     )
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 3) {
-            Text("Your Portfolio")
+        VStack(alignment: .leading, spacing: 5) {
+            Text(title)
                 .font(.caption).foregroundColor(.white.opacity(0.75))
             Text("Rp\(formatIDR(summary.totalValue))")
                 .font(.system(size: 30, weight: .bold, design: .rounded))
@@ -414,55 +417,58 @@ struct PortfolioSummaryCardView: View {
                     .foregroundColor(.white.opacity(0.55))
             }
 
-            // Area & line chart (flat horizontal line)
-            GeometryReader { geo in
-                let midY = geo.size.height * 0.5
-                Path { p in
-                    p.move(to: CGPoint(x: 0, y: midY))
-                    p.addLine(to: CGPoint(x: geo.size.width, y: midY))
-                    p.addLine(to: CGPoint(x: geo.size.width, y: geo.size.height))
-                    p.addLine(to: CGPoint(x: 0, y: geo.size.height))
-                    p.closeSubpath()
-                }
-                .fill(
-                    LinearGradient(
-                        stops: [.init(color: Color.orange.opacity(0.20), location: 0),
-                                .init(color: Color.orange.opacity(0.0), location: 0.9)],
-                        startPoint: .top, endPoint: .bottom
-                    )
-                )
-                Path { p in
-                    p.move(to: CGPoint(x: 0, y: midY))
-                    p.addLine(to: CGPoint(x: geo.size.width, y: midY))
-                }
-                .stroke(Color.orange, style: StrokeStyle(lineWidth: 1.5, lineCap: .round))
-            }
-            .frame(height: 100)
-            .padding(.top, 8)
-
-            // Custom Segmented Control (without capsule)
-            HStack {
-                ForEach(ranges, id: \.self) { range in
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.15)) {
-                            selectedRange = range
-                        }
-                    } label: {
-                        Text(range)
-                            .font(.system(size: 12, weight: selectedRange == range ? .bold : .medium))
-                            .foregroundColor(selectedRange == range ? .orange : .gray)
-                            .frame(maxWidth: .infinity)
+            if showChart {
+                // Area & line chart (flat horizontal line)
+                GeometryReader { geo in
+                    let midY = geo.size.height * 0.5
+                    Path { p in
+                        p.move(to: CGPoint(x: 0, y: midY))
+                        p.addLine(to: CGPoint(x: geo.size.width, y: midY))
+                        p.addLine(to: CGPoint(x: geo.size.width, y: geo.size.height))
+                        p.addLine(to: CGPoint(x: 0, y: geo.size.height))
+                        p.closeSubpath()
                     }
-                    .buttonStyle(.plain)
+                    .fill(
+                        LinearGradient(
+                            stops: [.init(color: Color.orange.opacity(0.20), location: 0),
+                                    .init(color: Color.orange.opacity(0.0), location: 0.9)],
+                            startPoint: .top, endPoint: .bottom
+                        )
+                    )
+                    Path { p in
+                        p.move(to: CGPoint(x: 0, y: midY))
+                        p.addLine(to: CGPoint(x: geo.size.width, y: midY))
+                    }
+                    .stroke(Color.orange, style: StrokeStyle(lineWidth: 1.5, lineCap: .round))
                 }
+                .frame(height: 100)
+                .padding(.top, 8)
+
+                // Custom Segmented Control (without capsule)
+                HStack {
+                    ForEach(ranges, id: \.self) { range in
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.15)) {
+                                selectedRange = range
+                            }
+                        } label: {
+                            Text(range)
+                                .font(.system(size: 12, weight: selectedRange == range ? .bold : .medium))
+                                .foregroundColor(selectedRange == range ? .orange : .gray)
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.top, 8)
             }
-            .padding(.top, 8)
         }
-        .padding(.horizontal, 16).padding(.top, 16).padding(.bottom, 12)
+        .padding(.horizontal, 16).padding(.top, 16).padding(.bottom, showChart ? 12 : 16)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(cardGradient)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.12), lineWidth: 1))
-        .padding(.horizontal, 16)
+        .padding(.horizontal, horizontalPadding)
     }
 }
 
@@ -470,7 +476,7 @@ struct PortfolioSummaryCardView: View {
 
 struct AIInsightCardView: View {
     let chips: [InsightChip]
-    var title: String = "AI Insight"
+    var title: String = "Market Intelligence"
     var horizontalPadding: CGFloat = 16
 
     private let accent = Color.PrimaryYellow
@@ -680,6 +686,63 @@ struct NotificationButton: View {
     }
 }
 
+// MARK: - Invelio Logo View
+
+struct InvelioLogoView: View {
+    var size: CGFloat = 28
+    var cornerRadius: CGFloat = 6
+
+    var body: some View {
+        Group {
+            if let uiImage = resolvedLogoImage() {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFit()
+            } else {
+                Image("invelio-icon")
+                    .resizable()
+                    .scaledToFit()
+            }
+        }
+        .frame(width: size, height: size)
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+    }
+
+    private func resolvedLogoImage() -> UIImage? {
+        // 1. Asset Catalog by name
+        let names = ["invelio-icon", "Invelio-logo", "invelio-logo", "Invelio-icon"]
+        for name in names {
+            if let img = UIImage(named: name) {
+                return img
+            }
+        }
+
+        // 2. Main bundle resources
+        for name in names {
+            if let path = Bundle.main.path(forResource: name, ofType: "png"),
+               let img = UIImage(contentsOfFile: path) {
+                return img
+            }
+        }
+
+        // 3. Fallback filesystem search for Xcode Canvas preview
+        let candidatePaths = [
+            "/Users/surya/Documents/2026/Hackaton/Sectors/Sectors-Hackathon-main/ios/Invelio/Resources/Assets.xcassets/invelio-icon.imageset/Invelio-logo.png",
+            "/Users/surya/Documents/2026/Hackaton/Sectors/Sectors-Hackathon-main/ios/Invelio/Sources/Assets.xcassets/invelio-icon.imageset/Invelio-logo.png",
+            "/Users/surya/Documents/2026/Hackaton/Sectors/Sectors-Hackathon-main/ios/Invelio/Sources/Views/Assets.xcassets/invelio-icon.imageset/Invelio-logo.png",
+            "/Users/surya/Documents/2026/Hackaton/Sectors/Sectors-Hackathon-main/ios/Invelio/Resources/invelio-icon.png",
+            "/Users/surya/Documents/2026/Hackaton/Sectors/Sectors-Hackathon-main/ios/Invelio/Sources/invelio-icon.png"
+        ]
+        for p in candidatePaths {
+            if let img = UIImage(contentsOfFile: p) {
+                return img
+            }
+        }
+
+        return nil
+    }
+}
+
 // ╔══════════════════════════════════════════════════════════════════╗
 // ║  6.  MAIN HOME VIEW                                            ║
 // ╚══════════════════════════════════════════════════════════════════╝
@@ -729,7 +792,7 @@ struct HomeView: View {
                     PortfolioSummaryCardView(summary: dynamicSummary)
                         .padding(.top, 0).padding(.bottom, 4)
 
-                    // 2) AI Insight Card
+                    // 2) Market Intelligence Card
                     AIInsightCardView(chips: dummyInsightChips)
                         .padding(.vertical, 4)
 
@@ -757,11 +820,8 @@ struct HomeView: View {
 
     private var topBar: some View {
         HStack {
-            HStack(spacing: 4) {
-                // Replace with your own logo — here we use SF Symbol placeholder
-                Image(systemName: "chart.line.uptrend.xyaxis.circle.fill")
-                    .font(.system(size: 28))
-                    .foregroundColor(.PrimaryYellow)
+            HStack(spacing: 8) {
+                InvelioLogoView(size: 28)
                 Text("Invelio")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundColor(.white)
@@ -769,7 +829,7 @@ struct HomeView: View {
             Spacer()
             NotificationButton(unreadCount: 3) { /* handle tap */ }
         }
-        .padding(.horizontal).padding(.vertical, 8)
+        .padding(.horizontal, 16).padding(.vertical, 8)
         .background(Color.DarkPurpleAppBackground)
     }
 
@@ -787,7 +847,7 @@ struct HomeView: View {
         .padding(.horizontal, 16).padding(.vertical, 12)
         .background(Color(.systemGray6).opacity(0.18))
         .clipShape(RoundedRectangle(cornerRadius: 10))
-        .padding(.horizontal)
+        .padding(.horizontal, 16)
     }
 
     // MARK: - Section Header

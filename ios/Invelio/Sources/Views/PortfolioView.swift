@@ -115,53 +115,39 @@ struct PortfolioView: View {
         }
     }
 
-    // MARK: - Summary Card
-    private var summaryCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Total Portfolio Value")
-                .font(.caption)
-                .foregroundStyle(Color.white.opacity(0.65))
+    private var dynamicSummary: PortfolioSummaryData {
+        let totalVal = totalPortfolioValue
+        let totalCost = totalPortfolioCost
 
-            Text("Rp \(StockFormatters.stockPrice(totalPortfolioValue, currency: "IDR"))")
-                .font(.system(size: 28, weight: .bold, design: .rounded))
-                .foregroundStyle(Color.white)
-
-            HStack(spacing: 8) {
-                let isProfit = totalProfitLoss >= 0
-                let sign = isProfit ? "+" : "-"
-                let pColor = isProfit ? Color.ProfitGreen : Color.PortfolioLossRed
-
-                HStack(spacing: 4) {
-                    Image(systemName: isProfit ? "arrow.up.right" : "arrow.down.forward")
-                        .font(.system(size: 10, weight: .bold))
-                    Text(String(format: "%@Rp %@ (%@%.2f%%)", sign, StockFormatters.stockPrice(abs(totalProfitLoss), currency: "IDR"), sign, abs(totalGrowthPct)))
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
-                }
-                .foregroundStyle(pColor)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(pColor.opacity(0.15), in: Capsule())
-
-                Spacer()
-
-                Text(positions.count == 1 ? "1 Stock" : "\(positions.count) Stocks")
-                    .font(.caption.bold())
-                    .foregroundStyle(Color.white.opacity(0.6))
+        var dailyProfit: Double = 0
+        for lot in holdingLots {
+            let matched = allStockItems.first {
+                $0.symbol.uppercased() == lot.symbol.uppercased() ||
+                lot.ticker.uppercased().hasPrefix($0.symbol.uppercased())
+            }
+            if let matched = matched {
+                dailyProfit += (matched.change * lot.shares)
             }
         }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            LinearGradient(
-                colors: [Color(red: 45/255, green: 38/255, blue: 95/255), Color(red: 26/255, green: 22/255, blue: 58/255)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            ),
-            in: RoundedRectangle(cornerRadius: 18)
+
+        let prevDayVal = totalVal - dailyProfit
+        let dailyPct = prevDayVal > 0 ? (dailyProfit / prevDayVal) * 100 : 0
+
+        return PortfolioSummaryData(
+            totalValue: totalVal,
+            totalCost: totalCost,
+            dailyProfitIDR: dailyProfit,
+            dailyGrowthPct: dailyPct
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: 18)
-                .stroke(Color.white.opacity(0.12), lineWidth: 1)
+    }
+
+    // MARK: - Summary Card
+    private var summaryCard: some View {
+        PortfolioSummaryCardView(
+            summary: dynamicSummary,
+            title: "Total Portfolio",
+            horizontalPadding: 0,
+            showChart: true
         )
     }
 
@@ -242,10 +228,6 @@ struct PortfolioView: View {
                     .font(.system(size: 11, weight: .semibold, design: .rounded))
                     .foregroundStyle(pColor)
             }
-
-            Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(Color.white.opacity(0.3))
         }
         .padding(14)
         .background(Color.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 14))
