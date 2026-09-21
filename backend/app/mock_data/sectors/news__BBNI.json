@@ -1,0 +1,67 @@
+{
+ "results": [
+  {
+   "title": "Analysts raise target price for PT Bank Negara Indonesia (Persero) Tbk",
+   "body": "Mock article body for development. Analysts raise target price for PT Bank Negara Indonesia (Persero) Tbk.",
+   "source": "https://example.com/mock-news/1",
+   "thumbnail": null,
+   "timestamp": "2026-09-16T11:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Bullish",
+    "Analyst Rating"
+   ],
+   "symbols": [
+    "BBNI.JK"
+   ]
+  },
+  {
+   "title": "Analysts raise target price for PT Bank Negara Indonesia (Persero) Tbk",
+   "body": "Mock article body for development. Analysts raise target price for PT Bank Negara Indonesia (Persero) Tbk.",
+   "source": "https://example.com/mock-news/23",
+   "thumbnail": null,
+   "timestamp": "2026-09-07T11:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Bullish",
+    "Analyst Rating"
+   ],
+   "symbols": [
+    "BBNI.JK"
+   ]
+  },
+  {
+   "title": "PT Bank Negara Indonesia (Persero) Tbk schedules annual shareholder meeting",
+   "body": "Mock article body for development. PT Bank Negara Indonesia (Persero) Tbk schedules annual shareholder meeting.",
+   "source": "https://example.com/mock-news/28",
+   "thumbnail": null,
+   "timestamp": "2026-09-05T22:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Corporate Action"
+   ],
+   "symbols": [
+    "BBNI.JK"
+   ]
+  }
+ ],
+ "pagination": {
+  "total_count": 3,
+  "showing": 3,
+  "limit": 30,
+  "offset": 0,
+  "has_next": false,
+  "has_previous": false,
+  "next_offset": null,
+  "previous_offset": null
+ }
+}

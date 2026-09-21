@@ -1,0 +1,632 @@
+[
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-06-24",
+  "close": 3025,
+  "open": 3025,
+  "high": 3100,
+  "low": 2975,
+  "volume": 103821156,
+  "market_cap": 453881320050675
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-06-25",
+  "close": 2950,
+  "open": 2975,
+  "high": 3025,
+  "low": 2950,
+  "volume": 113934014,
+  "market_cap": 442628064181650
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-06-26",
+  "close": 2900,
+  "open": 2900,
+  "high": 2950,
+  "low": 2875,
+  "volume": 69778468,
+  "market_cap": 435125893602300
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-06-29",
+  "close": 2950,
+  "open": 2950,
+  "high": 2975,
+  "low": 2900,
+  "volume": 40260269,
+  "market_cap": 442628064181650
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-06-30",
+  "close": 2950,
+  "open": 2975,
+  "high": 2975,
+  "low": 2900,
+  "volume": 101278267,
+  "market_cap": 442628064181650
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-07-01",
+  "close": 2975,
+  "open": 3000,
+  "high": 3075,
+  "low": 2975,
+  "volume": 117686567,
+  "market_cap": 446379149471325
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-07-02",
+  "close": 2950,
+  "open": 2975,
+  "high": 3025,
+  "low": 2875,
+  "volume": 80807649,
+  "market_cap": 442628064181650
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-07-03",
+  "close": 3000,
+  "open": 2975,
+  "high": 3050,
+  "low": 2900,
+  "volume": 46678556,
+  "market_cap": 450130234761000
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-07-06",
+  "close": 2975,
+  "open": 3025,
+  "high": 3025,
+  "low": 2900,
+  "volume": 82027478,
+  "market_cap": 446379149471325
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-07-07",
+  "close": 3000,
+  "open": 2975,
+  "high": 3025,
+  "low": 2950,
+  "volume": 111922898,
+  "market_cap": 450130234761000
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-07-08",
+  "close": 2925,
+  "open": 2925,
+  "high": 2975,
+  "low": 2925,
+  "volume": 129030736,
+  "market_cap": 438876978891975
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-07-09",
+  "close": 2975,
+  "open": 3000,
+  "high": 3025,
+  "low": 2900,
+  "volume": 78168153,
+  "market_cap": 446379149471325
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-07-10",
+  "close": 2975,
+  "open": 3000,
+  "high": 3075,
+  "low": 2925,
+  "volume": 116511599,
+  "market_cap": 446379149471325
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-07-13",
+  "close": 2975,
+  "open": 3000,
+  "high": 3000,
+  "low": 2975,
+  "volume": 124694442,
+  "market_cap": 446379149471325
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-07-14",
+  "close": 2950,
+  "open": 2950,
+  "high": 2975,
+  "low": 2925,
+  "volume": 60770877,
+  "market_cap": 442628064181650
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-07-15",
+  "close": 2925,
+  "open": 2925,
+  "high": 2925,
+  "low": 2900,
+  "volume": 36250447,
+  "market_cap": 438876978891975
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-07-16",
+  "close": 2950,
+  "open": 2950,
+  "high": 3025,
+  "low": 2875,
+  "volume": 63261869,
+  "market_cap": 442628064181650
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-07-17",
+  "close": 3025,
+  "open": 3025,
+  "high": 3100,
+  "low": 3025,
+  "volume": 100339228,
+  "market_cap": 453881320050675
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-07-20",
+  "close": 2975,
+  "open": 3000,
+  "high": 3050,
+  "low": 2950,
+  "volume": 75793007,
+  "market_cap": 446379149471325
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-07-21",
+  "close": 3075,
+  "open": 3050,
+  "high": 3125,
+  "low": 3025,
+  "volume": 42683960,
+  "market_cap": 461383490630025
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-07-22",
+  "close": 3175,
+  "open": 3175,
+  "high": 3200,
+  "low": 3125,
+  "volume": 91696121,
+  "market_cap": 476387831788725
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-07-23",
+  "close": 3100,
+  "open": 3125,
+  "high": 3200,
+  "low": 3100,
+  "volume": 79870130,
+  "market_cap": 465134575919700
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-07-24",
+  "close": 3025,
+  "open": 3000,
+  "high": 3075,
+  "low": 2925,
+  "volume": 124234496,
+  "market_cap": 453881320050675
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-07-27",
+  "close": 3075,
+  "open": 3050,
+  "high": 3075,
+  "low": 3050,
+  "volume": 119249982,
+  "market_cap": 461383490630025
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-07-28",
+  "close": 3075,
+  "open": 3075,
+  "high": 3125,
+  "low": 3025,
+  "volume": 38420953,
+  "market_cap": 461383490630025
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-07-29",
+  "close": 3075,
+  "open": 3075,
+  "high": 3075,
+  "low": 3025,
+  "volume": 89936717,
+  "market_cap": 461383490630025
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-07-30",
+  "close": 3150,
+  "open": 3175,
+  "high": 3200,
+  "low": 3075,
+  "volume": 84575015,
+  "market_cap": 472636746499050
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-07-31",
+  "close": 3100,
+  "open": 3075,
+  "high": 3175,
+  "low": 3000,
+  "volume": 126703570,
+  "market_cap": 465134575919700
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-08-03",
+  "close": 3125,
+  "open": 3125,
+  "high": 3200,
+  "low": 3075,
+  "volume": 74221381,
+  "market_cap": 468885661209375
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-08-04",
+  "close": 3225,
+  "open": 3225,
+  "high": 3250,
+  "low": 3175,
+  "volume": 74529980,
+  "market_cap": 483890002368075
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-08-05",
+  "close": 3150,
+  "open": 3150,
+  "high": 3225,
+  "low": 3100,
+  "volume": 98017819,
+  "market_cap": 472636746499050
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-08-06",
+  "close": 3275,
+  "open": 3250,
+  "high": 3275,
+  "low": 3175,
+  "volume": 44242396,
+  "market_cap": 491392172947425
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-08-07",
+  "close": 3250,
+  "open": 3275,
+  "high": 3325,
+  "low": 3200,
+  "volume": 46850261,
+  "market_cap": 487641087657750
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-08-10",
+  "close": 3275,
+  "open": 3275,
+  "high": 3275,
+  "low": 3200,
+  "volume": 74679972,
+  "market_cap": 491392172947425
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-08-11",
+  "close": 3250,
+  "open": 3200,
+  "high": 3275,
+  "low": 3150,
+  "volume": 94278530,
+  "market_cap": 487641087657750
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-08-12",
+  "close": 3300,
+  "open": 3275,
+  "high": 3300,
+  "low": 3250,
+  "volume": 60996463,
+  "market_cap": 495143258237100
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-08-13",
+  "close": 3325,
+  "open": 3325,
+  "high": 3350,
+  "low": 3275,
+  "volume": 77007666,
+  "market_cap": 498894343526775
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-08-14",
+  "close": 3325,
+  "open": 3325,
+  "high": 3350,
+  "low": 3300,
+  "volume": 65086212,
+  "market_cap": 498894343526775
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-08-17",
+  "close": 3250,
+  "open": 3250,
+  "high": 3250,
+  "low": 3175,
+  "volume": 44724381,
+  "market_cap": 487641087657750
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-08-18",
+  "close": 3225,
+  "open": 3275,
+  "high": 3350,
+  "low": 3225,
+  "volume": 96625626,
+  "market_cap": 483890002368075
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-08-19",
+  "close": 3225,
+  "open": 3225,
+  "high": 3250,
+  "low": 3150,
+  "volume": 123296326,
+  "market_cap": 483890002368075
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-08-20",
+  "close": 3275,
+  "open": 3275,
+  "high": 3350,
+  "low": 3200,
+  "volume": 127750897,
+  "market_cap": 491392172947425
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-08-21",
+  "close": 3225,
+  "open": 3250,
+  "high": 3275,
+  "low": 3150,
+  "volume": 87598411,
+  "market_cap": 483890002368075
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-08-24",
+  "close": 3225,
+  "open": 3200,
+  "high": 3250,
+  "low": 3200,
+  "volume": 61856756,
+  "market_cap": 483890002368075
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-08-25",
+  "close": 3200,
+  "open": 3225,
+  "high": 3300,
+  "low": 3150,
+  "volume": 123445649,
+  "market_cap": 480138917078400
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-08-26",
+  "close": 3150,
+  "open": 3125,
+  "high": 3200,
+  "low": 3075,
+  "volume": 114387746,
+  "market_cap": 472636746499050
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-08-27",
+  "close": 3200,
+  "open": 3200,
+  "high": 3275,
+  "low": 3175,
+  "volume": 77796835,
+  "market_cap": 480138917078400
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-08-28",
+  "close": 3225,
+  "open": 3200,
+  "high": 3300,
+  "low": 3125,
+  "volume": 123314971,
+  "market_cap": 483890002368075
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-08-31",
+  "close": 3300,
+  "open": 3300,
+  "high": 3325,
+  "low": 3275,
+  "volume": 89520259,
+  "market_cap": 495143258237100
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-09-01",
+  "close": 3300,
+  "open": 3300,
+  "high": 3300,
+  "low": 3250,
+  "volume": 105704402,
+  "market_cap": 495143258237100
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-09-02",
+  "close": 3200,
+  "open": 3225,
+  "high": 3300,
+  "low": 3125,
+  "volume": 128515550,
+  "market_cap": 480138917078400
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-09-03",
+  "close": 3200,
+  "open": 3200,
+  "high": 3225,
+  "low": 3125,
+  "volume": 126307567,
+  "market_cap": 480138917078400
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-09-04",
+  "close": 3200,
+  "open": 3175,
+  "high": 3225,
+  "low": 3125,
+  "volume": 117403949,
+  "market_cap": 480138917078400
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-09-07",
+  "close": 3250,
+  "open": 3275,
+  "high": 3350,
+  "low": 3250,
+  "volume": 103620742,
+  "market_cap": 487641087657750
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-09-08",
+  "close": 3300,
+  "open": 3275,
+  "high": 3375,
+  "low": 3250,
+  "volume": 43003924,
+  "market_cap": 495143258237100
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-09-09",
+  "close": 3225,
+  "open": 3225,
+  "high": 3300,
+  "low": 3225,
+  "volume": 115725231,
+  "market_cap": 483890002368075
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-09-10",
+  "close": 3300,
+  "open": 3275,
+  "high": 3375,
+  "low": 3225,
+  "volume": 94668403,
+  "market_cap": 495143258237100
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-09-11",
+  "close": 3250,
+  "open": 3275,
+  "high": 3275,
+  "low": 3250,
+  "volume": 57974494,
+  "market_cap": 487641087657750
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-09-14",
+  "close": 3325,
+  "open": 3300,
+  "high": 3375,
+  "low": 3275,
+  "volume": 105897331,
+  "market_cap": 498894343526775
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-09-15",
+  "close": 3350,
+  "open": 3350,
+  "high": 3350,
+  "low": 3275,
+  "volume": 51571744,
+  "market_cap": 502645428816450
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-09-16",
+  "close": 3400,
+  "open": 3400,
+  "high": 3450,
+  "low": 3400,
+  "volume": 40304754,
+  "market_cap": 510147599395800
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-09-17",
+  "close": 3325,
+  "open": 3325,
+  "high": 3375,
+  "low": 3250,
+  "volume": 49625332,
+  "market_cap": 498894343526775
+ },
+ {
+  "symbol": "BBRI.JK",
+  "date": "2026-09-18",
+  "close": 3310,
+  "open": 3275,
+  "high": 3375,
+  "low": 3250,
+  "volume": 51910469,
+  "market_cap": 495143258237100
+ }
+]

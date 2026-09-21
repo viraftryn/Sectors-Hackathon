@@ -1,0 +1,36 @@
+{
+ "symbol": "BBCA.JK",
+ "company_name": "PT Bank Central Asia Tbk.",
+ "overview": {
+  "sector": "Financials",
+  "sub_sector": "Banks",
+  "market_cap": 768866486850000,
+  "last_close_price": 6300,
+  "latest_close_date": "2026-09-18",
+  "daily_close_change": -0.0078740157480315,
+  "all_time_price": {
+   "52_w_high": {
+    "2026-01-05": 8750.0
+   },
+   "52_w_low": {
+    "2026-06-09": 4820.0
+   }
+  },
+  "tags": [],
+  "indices": [
+   "LQ45"
+  ]
+ },
+ "valuation": {
+  "last_close_price": 6300,
+  "latest_close_date": "2026-09-18",
+  "forward_pe": 11.91,
+  "historical_valuation": [
+   {
+    "year": 2025,
+    "pe": 13.229820093447,
+    "pb": 2.84304641404762
+   }
+  ]
+ }
+}

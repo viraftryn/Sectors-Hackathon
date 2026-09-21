@@ -1,0 +1,36 @@
+{
+ "symbol": "TLKM.JK",
+ "company_name": "PT Telkom Indonesia (Persero) Tbk",
+ "overview": {
+  "sector": "Infrastructures",
+  "sub_sector": "Telecommunication",
+  "market_cap": 253599274496000,
+  "last_close_price": 2560,
+  "latest_close_date": "2026-09-18",
+  "daily_close_change": -0.0115830115830116,
+  "all_time_price": {
+   "52_w_high": {
+    "2026-01-05": 3990.0
+   },
+   "52_w_low": {
+    "2026-06-09": 2350.0
+   }
+  },
+  "tags": [],
+  "indices": [
+   "LQ45"
+  ]
+ },
+ "valuation": {
+  "last_close_price": 2560,
+  "latest_close_date": "2026-09-18",
+  "forward_pe": 13.07,
+  "historical_valuation": [
+   {
+    "year": 2025,
+    "pe": 14.5229226031382,
+    "pb": 2.14309849742675
+   }
+  ]
+ }
+}

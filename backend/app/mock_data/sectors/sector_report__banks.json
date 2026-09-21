@@ -1,0 +1,32 @@
+{
+ "sector": "Financials",
+ "sub_sector": "Banks",
+ "statistics": {
+  "total_companies": 36,
+  "filtered_median_pe": 14.11,
+  "filtered_weighted_avg_pe": 7.63
+ },
+ "market_cap": {
+  "total_market_cap": 1537732973700000,
+  "mcap_summary": {
+   "mcap_change": {
+    "1w": 0.0417,
+    "1y": -0.0802,
+    "ytd": 0.1115
+   },
+   "performance_quantile": 0.693
+  }
+ },
+ "stability": {
+  "weighted_max_drawdown": -0.1869,
+  "weighted_rsd_close": 0.0624
+ },
+ "growth": {
+  "weighted_avg_growth_data": {
+   "2025": {
+    "avg_annual_earning_growth": 0.1611,
+    "avg_annual_revenue_growth": -0.0363
+   }
+  }
+ }
+}

@@ -54,7 +54,7 @@ async def test_mock_mode_returns_fixture_without_calling_api(db: AsyncSession, m
 
     data = await client.get_company_report("BBCA")
 
-    assert data["symbol"] == "BBCA"
+    assert data["symbol"] == "BBCA.JK"
     assert data["company_name"].startswith("PT Bank Central Asia")
 
 
@@ -79,6 +79,8 @@ async def test_mock_mode_missing_fixture_raises(db: AsyncSession, monkeypatch) -
 
 def test_get_mock_response_returns_independent_copy() -> None:
     first = get_mock_response("idx_total")
-    first["close"] = -999
+    first[0]["idx_total_market_cap"] = -999
     second = get_mock_response("idx_total")
-    assert second["close"] != -999  # mutating one copy must not corrupt the fixture
+    assert (
+        second[0]["idx_total_market_cap"] != -999
+    )  # mutating one copy must not corrupt the fixture

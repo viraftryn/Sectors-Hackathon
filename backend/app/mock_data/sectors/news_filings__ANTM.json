@@ -1,0 +1,56 @@
+{
+ "results": [
+  {
+   "title": "Insider buys shares of Aneka Tambang Tbk.",
+   "body": "Mock filing for development.",
+   "source": "https://example.com/mock-filing/14",
+   "timestamp": "2026-09-13T03:00:00",
+   "sector": "basic-materials",
+   "sub_sector": "basic-materials",
+   "tags": [
+    "insider-trading"
+   ],
+   "symbol": "ANTM.JK",
+   "transaction_type": "buy",
+   "holder_type": "institution",
+   "holder_name": "Mock Holder 14",
+   "amount_transaction": 200000,
+   "price": 3525,
+   "transaction_value": 705000000.0,
+   "share_percentage_before": 1.94,
+   "share_percentage_after": 2.12,
+   "share_percentage_transaction": 0.18
+  },
+  {
+   "title": "Insider sells shares of Aneka Tambang Tbk.",
+   "body": "Mock filing for development.",
+   "source": "https://example.com/mock-filing/11",
+   "timestamp": "2026-09-08T21:00:00",
+   "sector": "basic-materials",
+   "sub_sector": "basic-materials",
+   "tags": [
+    "insider-trading"
+   ],
+   "symbol": "ANTM.JK",
+   "transaction_type": "sell",
+   "holder_type": "insider",
+   "holder_name": "Mock Holder 11",
+   "amount_transaction": 4900000,
+   "price": 3550,
+   "transaction_value": 17395000000.0,
+   "share_percentage_before": 4.76,
+   "share_percentage_after": 4.5,
+   "share_percentage_transaction": 0.26
+  }
+ ],
+ "pagination": {
+  "total_count": 2,
+  "showing": 2,
+  "limit": 30,
+  "offset": 0,
+  "has_next": false,
+  "has_previous": false,
+  "next_offset": null,
+  "previous_offset": null
+ }
+}

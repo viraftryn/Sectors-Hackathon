@@ -1,0 +1,103 @@
+{
+ "results": [
+  {
+   "title": "PT Sumber Alfaria Trijaya Tbk. schedules annual shareholder meeting",
+   "body": "Mock article body for development. PT Sumber Alfaria Trijaya Tbk. schedules annual shareholder meeting.",
+   "source": "https://example.com/mock-news/12",
+   "thumbnail": null,
+   "timestamp": "2026-09-17T18:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": [
+    "food-staples-retailing"
+   ],
+   "tags": [
+    "Corporate Action"
+   ],
+   "symbols": [
+    "AMRT.JK"
+   ]
+  },
+  {
+   "title": "PT Sumber Alfaria Trijaya Tbk. expands distribution network to eastern Indonesia",
+   "body": "Mock article body for development. PT Sumber Alfaria Trijaya Tbk. expands distribution network to eastern Indonesia.",
+   "source": "https://example.com/mock-news/36",
+   "thumbnail": null,
+   "timestamp": "2026-09-15T03:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": [
+    "food-staples-retailing"
+   ],
+   "tags": [
+    "Bullish",
+    "Expansion"
+   ],
+   "symbols": [
+    "AMRT.JK"
+   ]
+  },
+  {
+   "title": "PT Sumber Alfaria Trijaya Tbk. faces margin pressure from rising input costs",
+   "body": "Mock article body for development. PT Sumber Alfaria Trijaya Tbk. faces margin pressure from rising input costs.",
+   "source": "https://example.com/mock-news/5",
+   "thumbnail": null,
+   "timestamp": "2026-09-13T14:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": [
+    "food-staples-retailing"
+   ],
+   "tags": [
+    "Bearish",
+    "Earnings"
+   ],
+   "symbols": [
+    "AMRT.JK"
+   ]
+  },
+  {
+   "title": "Foreign investors trim holdings in PT Sumber Alfaria Trijaya Tbk.",
+   "body": "Mock article body for development. Foreign investors trim holdings in PT Sumber Alfaria Trijaya Tbk..",
+   "source": "https://example.com/mock-news/0",
+   "thumbnail": null,
+   "timestamp": "2026-09-09T18:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": [
+    "food-staples-retailing"
+   ],
+   "tags": [
+    "Bearish",
+    "Foreign Flow"
+   ],
+   "symbols": [
+    "AMRT.JK"
+   ]
+  },
+  {
+   "title": "PT Sumber Alfaria Trijaya Tbk. announces interim dividend",
+   "body": "Mock article body for development. PT Sumber Alfaria Trijaya Tbk. announces interim dividend.",
+   "source": "https://example.com/mock-news/24",
+   "thumbnail": null,
+   "timestamp": "2026-08-30T23:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": [
+    "food-staples-retailing"
+   ],
+   "tags": [
+    "Bullish",
+    "Dividend"
+   ],
+   "symbols": [
+    "AMRT.JK"
+   ]
+  }
+ ],
+ "pagination": {
+  "total_count": 5,
+  "showing": 5,
+  "limit": 30,
+  "offset": 0,
+  "has_next": false,
+  "has_previous": false,
+  "next_offset": null,
+  "previous_offset": null
+ }
+}

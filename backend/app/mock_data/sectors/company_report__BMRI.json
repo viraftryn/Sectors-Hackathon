@@ -1,0 +1,36 @@
+{
+ "symbol": "BMRI.JK",
+ "company_name": "PT Bank Mandiri (Persero) Tbk",
+ "overview": {
+  "sector": "Financials",
+  "sub_sector": "Banks",
+  "market_cap": 393623999982960,
+  "last_close_price": 4260,
+  "latest_close_date": "2026-09-18",
+  "daily_close_change": -0.0206896551724138,
+  "all_time_price": {
+   "52_w_high": {
+    "2026-01-05": 5375.0
+   },
+   "52_w_low": {
+    "2026-06-09": 3650.0
+   }
+  },
+  "tags": [],
+  "indices": [
+   "LQ45"
+  ]
+ },
+ "valuation": {
+  "last_close_price": 4260,
+  "latest_close_date": "2026-09-18",
+  "forward_pe": 5.06,
+  "historical_valuation": [
+   {
+    "year": 2025,
+    "pe": 5.62364386593313,
+    "pb": 1.38311007423169
+   }
+  ]
+ }
+}

@@ -8,7 +8,7 @@ from typing import cast
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.cache import cache_get, cache_set
-from app.clients.sectors import SectorsClient
+from app.clients.sectors import SectorsClient, bare_symbol
 from app.config import settings
 from app.mock_data.fixtures import JsonData, get_mock_response
 
@@ -42,6 +42,7 @@ class CachedSectorsClient:
     # --- Fundamental / Company data (24h) ---
 
     async def get_company_report(self, ticker: str) -> JsonData:
+        ticker = bare_symbol(ticker)
         return await self._cached(
             f"company_report:{ticker}",
             settings.cache_ttl_fundamentals,
@@ -49,15 +50,17 @@ class CachedSectorsClient:
         )
 
     async def list_companies(self) -> JsonData:
+        # Screener rows carry the latest close too, so refresh at price speed.
         return await self._cached(
             "companies_list",
-            settings.cache_ttl_fundamentals,
+            settings.cache_ttl_prices,
             self._raw.list_companies,
         )
 
     # --- Price / Trending data (5min) ---
 
     async def get_daily_prices(self, ticker: str) -> JsonData:
+        ticker = bare_symbol(ticker)
         return await self._cached(
             f"daily_prices:{ticker}",
             settings.cache_ttl_prices,
@@ -87,19 +90,34 @@ class CachedSectorsClient:
             self._raw.get_idx_total,
         )
 
-    # --- Sector reports (1h) ---
-
-    async def get_sector_report(self) -> JsonData:
+    async def get_ihsg(self) -> JsonData:
         return await self._cached(
-            "sector_report",
+            "ihsg",
+            settings.cache_ttl_market_index,
+            self._raw.get_ihsg,
+        )
+
+    # --- Sector reports / foreign flow (1h) ---
+
+    async def get_sector_report(self, sub_sector: str) -> JsonData:
+        return await self._cached(
+            f"sector_report:{sub_sector}",
             settings.cache_ttl_sector_reports,
-            self._raw.get_sector_report,
+            lambda: self._raw.get_sector_report(sub_sector),
+        )
+
+    async def get_foreign_flow(self, ticker: str = "IHSG") -> JsonData:
+        ticker = bare_symbol(ticker)
+        return await self._cached(
+            f"foreign_flow:{ticker}",
+            settings.cache_ttl_sector_reports,
+            lambda: self._raw.get_foreign_flow(ticker),
         )
 
     # --- News (15min) / Filings (1h) ---
 
     async def get_news(self, ticker: str | None = None) -> JsonData:
-        key = f"news:{ticker}" if ticker else "news:all"
+        key = f"news:{bare_symbol(ticker)}" if ticker else "news:all"
         return await self._cached(
             key,
             settings.cache_ttl_news,
@@ -107,7 +125,7 @@ class CachedSectorsClient:
         )
 
     async def get_news_filings(self, ticker: str | None = None) -> JsonData:
-        key = f"news_filings:{ticker}" if ticker else "news_filings:all"
+        key = f"news_filings:{bare_symbol(ticker)}" if ticker else "news_filings:all"
         return await self._cached(
             key,
             settings.cache_ttl_sector_reports,

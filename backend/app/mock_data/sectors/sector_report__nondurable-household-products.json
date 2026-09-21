@@ -1,0 +1,32 @@
+{
+ "sector": "Consumer Non-Cyclicals",
+ "sub_sector": "Nondurable Household Products",
+ "statistics": {
+  "total_companies": 27,
+  "filtered_median_pe": 14.45,
+  "filtered_weighted_avg_pe": 11.53
+ },
+ "market_cap": {
+  "total_market_cap": 125895000000000,
+  "mcap_summary": {
+   "mcap_change": {
+    "1w": 0.0018,
+    "1y": 0.046,
+    "ytd": -0.1494
+   },
+   "performance_quantile": 0.237
+  }
+ },
+ "stability": {
+  "weighted_max_drawdown": -0.1723,
+  "weighted_rsd_close": 0.1619
+ },
+ "growth": {
+  "weighted_avg_growth_data": {
+   "2025": {
+    "avg_annual_earning_growth": -0.1754,
+    "avg_annual_revenue_growth": 0.036
+   }
+  }
+ }
+}

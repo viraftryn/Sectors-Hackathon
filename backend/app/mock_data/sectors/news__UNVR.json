@@ -1,0 +1,121 @@
+{
+ "results": [
+  {
+   "title": "Unilever Indonesia Tbk faces margin pressure from rising input costs",
+   "body": "Mock article body for development. Unilever Indonesia Tbk faces margin pressure from rising input costs.",
+   "source": "https://example.com/mock-news/16",
+   "thumbnail": null,
+   "timestamp": "2026-09-14T21:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": [
+    "nondurable-household-products"
+   ],
+   "tags": [
+    "Bearish",
+    "Earnings"
+   ],
+   "symbols": [
+    "UNVR.JK"
+   ]
+  },
+  {
+   "title": "Regulator reviews compliance at Unilever Indonesia Tbk",
+   "body": "Mock article body for development. Regulator reviews compliance at Unilever Indonesia Tbk.",
+   "source": "https://example.com/mock-news/39",
+   "thumbnail": null,
+   "timestamp": "2026-09-14T21:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": [
+    "nondurable-household-products"
+   ],
+   "tags": [
+    "Bearish",
+    "Risk & Compliance"
+   ],
+   "symbols": [
+    "UNVR.JK"
+   ]
+  },
+  {
+   "title": "Unilever Indonesia Tbk schedules annual shareholder meeting",
+   "body": "Mock article body for development. Unilever Indonesia Tbk schedules annual shareholder meeting.",
+   "source": "https://example.com/mock-news/38",
+   "thumbnail": null,
+   "timestamp": "2026-09-08T01:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": [
+    "nondurable-household-products"
+   ],
+   "tags": [
+    "Corporate Action"
+   ],
+   "symbols": [
+    "UNVR.JK"
+   ]
+  },
+  {
+   "title": "Unilever Indonesia Tbk announces interim dividend",
+   "body": "Mock article body for development. Unilever Indonesia Tbk announces interim dividend.",
+   "source": "https://example.com/mock-news/27",
+   "thumbnail": null,
+   "timestamp": "2026-09-03T21:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": [
+    "nondurable-household-products"
+   ],
+   "tags": [
+    "Bullish",
+    "Dividend"
+   ],
+   "symbols": [
+    "UNVR.JK"
+   ]
+  },
+  {
+   "title": "Unilever Indonesia Tbk announces interim dividend",
+   "body": "Mock article body for development. Unilever Indonesia Tbk announces interim dividend.",
+   "source": "https://example.com/mock-news/37",
+   "thumbnail": null,
+   "timestamp": "2026-09-02T16:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": [
+    "nondurable-household-products"
+   ],
+   "tags": [
+    "Bullish",
+    "Dividend"
+   ],
+   "symbols": [
+    "UNVR.JK"
+   ]
+  },
+  {
+   "title": "Foreign investors trim holdings in Unilever Indonesia Tbk",
+   "body": "Mock article body for development. Foreign investors trim holdings in Unilever Indonesia Tbk.",
+   "source": "https://example.com/mock-news/31",
+   "thumbnail": null,
+   "timestamp": "2026-09-01T20:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": [
+    "nondurable-household-products"
+   ],
+   "tags": [
+    "Bearish",
+    "Foreign Flow"
+   ],
+   "symbols": [
+    "UNVR.JK"
+   ]
+  }
+ ],
+ "pagination": {
+  "total_count": 6,
+  "showing": 6,
+  "limit": 30,
+  "offset": 0,
+  "has_next": false,
+  "has_previous": false,
+  "next_offset": null,
+  "previous_offset": null
+ }
+}

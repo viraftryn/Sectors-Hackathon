@@ -1,0 +1,56 @@
+{
+ "results": [
+  {
+   "title": "Insider buys shares of PT Bank Central Asia Tbk.",
+   "body": "Mock filing for development.",
+   "source": "https://example.com/mock-filing/15",
+   "timestamp": "2026-09-01T09:00:00",
+   "sector": "financials",
+   "sub_sector": "banks",
+   "tags": [
+    "insider-trading"
+   ],
+   "symbol": "BBCA.JK",
+   "transaction_type": "buy",
+   "holder_type": "institution",
+   "holder_name": "Mock Holder 15",
+   "amount_transaction": 2200000,
+   "price": 6200,
+   "transaction_value": 13640000000.0,
+   "share_percentage_before": 1.2,
+   "share_percentage_after": 1.33,
+   "share_percentage_transaction": 0.13
+  },
+  {
+   "title": "Insider buys shares of PT Bank Central Asia Tbk.",
+   "body": "Mock filing for development.",
+   "source": "https://example.com/mock-filing/10",
+   "timestamp": "2026-09-01T07:00:00",
+   "sector": "financials",
+   "sub_sector": "banks",
+   "tags": [
+    "insider-trading"
+   ],
+   "symbol": "BBCA.JK",
+   "transaction_type": "buy",
+   "holder_type": "insider",
+   "holder_name": "Mock Holder 10",
+   "amount_transaction": 2300000,
+   "price": 6200,
+   "transaction_value": 14260000000.0,
+   "share_percentage_before": 3.94,
+   "share_percentage_after": 4.07,
+   "share_percentage_transaction": 0.13
+  }
+ ],
+ "pagination": {
+  "total_count": 2,
+  "showing": 2,
+  "limit": 30,
+  "offset": 0,
+  "has_next": false,
+  "has_previous": false,
+  "next_offset": null,
+  "previous_offset": null
+ }
+}

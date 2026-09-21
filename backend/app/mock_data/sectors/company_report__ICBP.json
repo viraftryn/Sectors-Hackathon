@@ -1,0 +1,36 @@
+{
+ "symbol": "ICBP.JK",
+ "company_name": "Indofood CBP Sukses Makmur Tbk",
+ "overview": {
+  "sector": "Consumer Non-Cyclicals",
+  "sub_sector": "Food & Beverage",
+  "market_cap": 80467165200000,
+  "last_close_price": 6900,
+  "latest_close_date": "2026-09-18",
+  "daily_close_change": -0.00719424460431655,
+  "all_time_price": {
+   "52_w_high": {
+    "2026-01-05": 10050.0
+   },
+   "52_w_low": {
+    "2026-06-09": 5925.0
+   }
+  },
+  "tags": [],
+  "indices": [
+   "LQ45"
+  ]
+ },
+ "valuation": {
+  "last_close_price": 6900,
+  "latest_close_date": "2026-09-18",
+  "forward_pe": 9.8,
+  "historical_valuation": [
+   {
+    "year": 2025,
+    "pe": 10.8866624554395,
+    "pb": 1.52498098965675
+   }
+  ]
+ }
+}
