@@ -1,6 +1,37 @@
+from collections.abc import Iterator
+
+import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.config import settings
+from app.db.database import get_db
+from app.main import app
+from tests.conftest import SQLITE_CACHE_DDL, make_sqlite_engine
+
+
+@pytest.fixture
+def client(monkeypatch: pytest.MonkeyPatch) -> Iterator[TestClient]:
+    monkeypatch.setattr(settings, "use_mock_data", True)
+    engine = make_sqlite_engine()
+    factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    ready = False
+
+    async def _sqlite_db():  # type: ignore[no-untyped-def]
+        nonlocal ready
+        async with factory() as session:
+            if not ready:
+                await session.execute(text(SQLITE_CACHE_DDL))
+                ready = True
+            yield session
+
+    app.dependency_overrides[get_db] = _sqlite_db
+    try:
+        with TestClient(app) as test_client:
+            yield test_client
+    finally:
+        app.dependency_overrides.pop(get_db, None)
 
 
 def test_list_stocks(client: TestClient) -> None:
@@ -37,3 +68,9 @@ def test_market_overview(client: TestClient) -> None:
     assert len(data["top_gainers"]) == 5
     assert data["most_traded"]
     assert data["foreign_flow"] is not None
+
+
+def test_second_request_is_served_from_cache(client: TestClient) -> None:
+    client.get("/api/stocks")
+    client.get("/api/stocks")
+    assert client.get("/api/cache/stats").json()["l1_hits"] >= 1

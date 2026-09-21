@@ -1,0 +1,80 @@
+{
+ "top_gainers": {
+  "1d": [
+   {
+    "name": "Aneka Tambang Tbk.",
+    "symbol": "ANTM.JK",
+    "price_change": 0.0198,
+    "last_close_price": 3340,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "Unilever Indonesia Tbk",
+    "symbol": "UNVR.JK",
+    "price_change": 0.0061,
+    "last_close_price": 1650,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Bank Rakyat Indonesia (Persero) Tbk",
+    "symbol": "BBRI.JK",
+    "price_change": -0.0045,
+    "last_close_price": 3310,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "Indofood CBP Sukses Makmur Tbk",
+    "symbol": "ICBP.JK",
+    "price_change": -0.0072,
+    "last_close_price": 6900,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Bank Central Asia Tbk.",
+    "symbol": "BBCA.JK",
+    "price_change": -0.0079,
+    "last_close_price": 6300,
+    "latest_close_date": "2026-09-18"
+   }
+  ]
+ },
+ "top_losers": {
+  "1d": [
+   {
+    "name": "PT Bank Negara Indonesia (Persero) Tbk",
+    "symbol": "BBNI.JK",
+    "price_change": -0.0267,
+    "last_close_price": 3650,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Bank Mandiri (Persero) Tbk",
+    "symbol": "BMRI.JK",
+    "price_change": -0.0207,
+    "last_close_price": 4260,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Sumber Alfaria Trijaya Tbk.",
+    "symbol": "AMRT.JK",
+    "price_change": -0.0189,
+    "last_close_price": 1300,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "Astra International Tbk",
+    "symbol": "ASII.JK",
+    "price_change": -0.0163,
+    "last_close_price": 4820,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Telkom Indonesia (Persero) Tbk",
+    "symbol": "TLKM.JK",
+    "price_change": -0.0154,
+    "last_close_price": 2560,
+    "latest_close_date": "2026-09-18"
+   }
+  ]
+ }
+}

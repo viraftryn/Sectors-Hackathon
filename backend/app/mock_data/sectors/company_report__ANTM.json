@@ -1,0 +1,36 @@
+{
+ "symbol": "ANTM.JK",
+ "company_name": "Aneka Tambang Tbk.",
+ "overview": {
+  "sector": "Basic Materials",
+  "sub_sector": "Basic Materials",
+  "market_cap": 80262754181500,
+  "last_close_price": 3340,
+  "latest_close_date": "2026-09-18",
+  "daily_close_change": 0.0182926829268293,
+  "all_time_price": {
+   "52_w_high": {
+    "2026-01-05": 4970.0
+   },
+   "52_w_low": {
+    "2026-06-09": 2450.0
+   }
+  },
+  "tags": [],
+  "indices": [
+   "LQ45"
+  ]
+ },
+ "valuation": {
+  "last_close_price": 3340,
+  "latest_close_date": "2026-09-18",
+  "forward_pe": 8.12,
+  "historical_valuation": [
+   {
+    "year": 2025,
+    "pe": 9.0172231569871,
+    "pb": 2.15354790696198
+   }
+  ]
+ }
+}

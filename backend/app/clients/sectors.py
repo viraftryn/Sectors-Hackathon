@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any, Protocol
+from datetime import date, timedelta
+from typing import Any
 
 import httpx
 
@@ -24,6 +25,10 @@ SCREENER_FIELDS = (
     "52_w_low_price",
 )
 SUBSECTOR_SECTIONS = ("statistics", "market_cap", "stability", "growth")
+REPORT_SECTIONS = ("overview", "valuation")
+HISTORY_DAYS = 90
+LIST_LIMIT = 30
+TOP_N = 5
 
 _MAX_CONCURRENT = 4
 
@@ -45,38 +50,12 @@ def screener_where(symbols: list[str]) -> str:
     return f"symbol in [{listed}] and sector != '' and sub_sector != '' and ({any_value})"
 
 
-class SectorsSource(Protocol):
-    async def screen_companies(self, symbols: list[str]) -> dict[str, Any]: ...
-
-    async def get_daily(
-        self, symbol: str, start: str | None = None, end: str | None = None
-    ) -> list[dict[str, Any]]: ...
-
-    async def get_index_daily(
-        self, index_code: str, start: str | None = None, end: str | None = None
-    ) -> list[dict[str, Any]]: ...
-
-    async def get_subsector_report(self, sub_sector: str) -> dict[str, Any]: ...
-
-    async def get_top_changes(self, period: str = "1d", n_stock: int = 5) -> dict[str, Any]: ...
-
-    async def get_most_traded(self, n_stock: int = 5) -> dict[str, Any]: ...
-
-    async def get_news(
-        self, symbols: list[str] | None = None, limit: int = 20, start: str | None = None
-    ) -> dict[str, Any]: ...
-
-    async def get_filings(
-        self, symbol: str | None = None, limit: int = 20, start: str | None = None
-    ) -> dict[str, Any]: ...
-
-    async def get_foreign_flow(
-        self, symbol: str = "IHSG", start: str | None = None, end: str | None = None
-    ) -> dict[str, Any]: ...
+def _history_start() -> str:
+    return (date.today() - timedelta(days=HISTORY_DAYS)).isoformat()
 
 
 class SectorsClient:
-    """Real API client. Only used when USE_MOCK_SECTORS=false."""
+    """Real API client. CachedSectorsClient decides whether it is called at all."""
 
     request_count = 0
     _semaphore = asyncio.Semaphore(_MAX_CONCURRENT)
@@ -103,73 +82,63 @@ class SectorsClient:
             raise SectorsError(response.status_code, response.text[:200])
         return response.json()
 
-    async def screen_companies(self, symbols: list[str]) -> dict[str, Any]:
-        result: dict[str, Any] = await self._get(
+    # --- Fundamental / Company data ---
+
+    async def get_company_report(self, ticker: str) -> Any:
+        return await self._get(
+            f"/company/report/{bare_symbol(ticker)}/", {"sections": ",".join(REPORT_SECTIONS)}
+        )
+
+    async def list_companies(self) -> Any:
+        tickers = settings.tracked_tickers
+        return await self._get(
             "/companies/",
             {
-                "where": screener_where(symbols),
+                "where": screener_where(tickers),
                 "order_by": "-market_cap",
-                "limit": len(symbols),
+                "limit": len(tickers),
                 "include_query_values": "true",
             },
         )
-        return result
 
-    async def get_daily(
-        self, symbol: str, start: str | None = None, end: str | None = None
-    ) -> list[dict[str, Any]]:
-        result: list[dict[str, Any]] = await self._get(
-            f"/daily/{bare_symbol(symbol)}/", {"start": start, "end": end}
+    # --- Price / Trending data ---
+
+    async def get_daily_prices(self, ticker: str) -> Any:
+        return await self._get(f"/daily/{bare_symbol(ticker)}/", {"start": _history_start()})
+
+    async def get_most_traded(self) -> Any:
+        return await self._get("/most-traded/", {"n_stock": TOP_N})
+
+    async def get_top_companies(self) -> Any:
+        return await self._get(
+            "/companies/top-changes/",
+            {"classifications": "top_gainers,top_losers", "periods": "1d", "n_stock": TOP_N},
         )
-        return result
 
-    async def get_index_daily(
-        self, index_code: str, start: str | None = None, end: str | None = None
-    ) -> list[dict[str, Any]]:
-        result: list[dict[str, Any]] = await self._get(
-            f"/index-daily/{index_code.lower()}/", {"start": start, "end": end}
-        )
-        return result
+    # --- Market index ---
 
-    async def get_subsector_report(self, sub_sector: str) -> dict[str, Any]:
-        result: dict[str, Any] = await self._get(
+    async def get_idx_total(self) -> Any:
+        return await self._get("/idx-total/", {"start": _history_start()})
+
+    async def get_ihsg(self) -> Any:
+        return await self._get("/index-daily/ihsg/", {"start": _history_start()})
+
+    async def get_foreign_flow(self, ticker: str = "IHSG") -> Any:
+        return await self._get(f"/foreign-flow/{bare_symbol(ticker)}/")
+
+    # --- Sector reports ---
+
+    async def get_sector_report(self, sub_sector: str) -> Any:
+        return await self._get(
             f"/subsector/report/{sub_sector}/", {"sections": ",".join(SUBSECTOR_SECTIONS)}
         )
-        return result
 
-    async def get_top_changes(self, period: str = "1d", n_stock: int = 5) -> dict[str, Any]:
-        result: dict[str, Any] = await self._get(
-            "/companies/top-changes/",
-            {"classifications": "top_gainers,top_losers", "periods": period, "n_stock": n_stock},
-        )
-        return result
+    # --- News / Filings ---
 
-    async def get_most_traded(self, n_stock: int = 5) -> dict[str, Any]:
-        result: dict[str, Any] = await self._get("/most-traded/", {"n_stock": n_stock})
-        return result
+    async def get_news(self, ticker: str | None = None) -> Any:
+        symbols = bare_symbol(ticker) if ticker else None
+        return await self._get("/news/", {"symbols": symbols, "limit": LIST_LIMIT})
 
-    async def get_news(
-        self, symbols: list[str] | None = None, limit: int = 20, start: str | None = None
-    ) -> dict[str, Any]:
-        joined = ",".join(bare_symbol(s) for s in symbols) if symbols else None
-        result: dict[str, Any] = await self._get(
-            "/news/", {"symbols": joined, "limit": limit, "start": start}
-        )
-        return result
-
-    async def get_filings(
-        self, symbol: str | None = None, limit: int = 20, start: str | None = None
-    ) -> dict[str, Any]:
-        result: dict[str, Any] = await self._get(
-            "/filings/",
-            {"symbol": bare_symbol(symbol) if symbol else None, "limit": limit, "start": start},
-        )
-        return result
-
-    async def get_foreign_flow(
-        self, symbol: str = "IHSG", start: str | None = None, end: str | None = None
-    ) -> dict[str, Any]:
-        result: dict[str, Any] = await self._get(
-            f"/foreign-flow/{bare_symbol(symbol)}/", {"start": start, "end": end}
-        )
-        return result
+    async def get_news_filings(self, ticker: str | None = None) -> Any:
+        symbol = bare_symbol(ticker) if ticker else None
+        return await self._get("/filings/", {"symbol": symbol, "limit": LIST_LIMIT})

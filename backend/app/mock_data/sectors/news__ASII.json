@@ -1,0 +1,86 @@
+{
+ "results": [
+  {
+   "title": "Astra International Tbk expands distribution network to eastern Indonesia",
+   "body": "Mock article body for development. Astra International Tbk expands distribution network to eastern Indonesia.",
+   "source": "https://example.com/mock-news/18",
+   "thumbnail": null,
+   "timestamp": "2026-09-18T06:00:00",
+   "sector": "industrials",
+   "sub_sector": [
+    "multi-sector-holdings"
+   ],
+   "tags": [
+    "Bullish",
+    "Expansion"
+   ],
+   "symbols": [
+    "ASII.JK"
+   ]
+  },
+  {
+   "title": "Regulator reviews compliance at Astra International Tbk",
+   "body": "Mock article body for development. Regulator reviews compliance at Astra International Tbk.",
+   "source": "https://example.com/mock-news/11",
+   "thumbnail": null,
+   "timestamp": "2026-09-14T13:00:00",
+   "sector": "industrials",
+   "sub_sector": [
+    "multi-sector-holdings"
+   ],
+   "tags": [
+    "Bearish",
+    "Risk & Compliance"
+   ],
+   "symbols": [
+    "ASII.JK"
+   ]
+  },
+  {
+   "title": "Analysts raise target price for Astra International Tbk",
+   "body": "Mock article body for development. Analysts raise target price for Astra International Tbk.",
+   "source": "https://example.com/mock-news/14",
+   "thumbnail": null,
+   "timestamp": "2026-09-14T00:00:00",
+   "sector": "industrials",
+   "sub_sector": [
+    "multi-sector-holdings"
+   ],
+   "tags": [
+    "Bullish",
+    "Analyst Rating"
+   ],
+   "symbols": [
+    "ASII.JK"
+   ]
+  },
+  {
+   "title": "Analysts raise target price for Astra International Tbk",
+   "body": "Mock article body for development. Analysts raise target price for Astra International Tbk.",
+   "source": "https://example.com/mock-news/15",
+   "thumbnail": null,
+   "timestamp": "2026-09-11T11:00:00",
+   "sector": "industrials",
+   "sub_sector": [
+    "multi-sector-holdings"
+   ],
+   "tags": [
+    "Bullish",
+    "Analyst Rating"
+   ],
+   "symbols": [
+    "ASII.JK"
+   ]
+  }
+ ],
+ "pagination": {
+  "total_count": 4,
+  "showing": 4,
+  "limit": 30,
+  "offset": 0,
+  "has_next": false,
+  "has_previous": false,
+  "next_offset": null,
+  "previous_offset": null
+ }
+}

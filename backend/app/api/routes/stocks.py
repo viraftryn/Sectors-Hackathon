@@ -1,11 +1,10 @@
-from datetime import date, timedelta
-from typing import Any
+from typing import Any, cast
 
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.api.deps import get_sectors
-from app.clients.sectors import SectorsSource, bare_symbol
-from app.config import settings
+from app.clients.cached_sectors import CachedSectorsClient
+from app.clients.sectors import bare_symbol
 from app.models.schemas import (
     Fundamentals,
     PricePoint,
@@ -15,8 +14,6 @@ from app.models.schemas import (
 )
 
 router = APIRouter()
-
-PRICE_HISTORY_DAYS = 90
 
 
 def pct(value: float | None) -> float | None:
@@ -40,25 +37,27 @@ def to_summary(row: dict[str, Any]) -> StockSummary:
     )
 
 
+async def tracked_rows(sectors: CachedSectorsClient) -> list[dict[str, Any]]:
+    screener = cast(dict[str, Any], await sectors.list_companies())
+    return cast(list[dict[str, Any]], screener["results"])
+
+
 @router.get("/stocks", response_model=StockListResponse)
-async def list_stocks(sectors: SectorsSource = Depends(get_sectors)) -> StockListResponse:
-    screener = await sectors.screen_companies(settings.tracked_tickers)
-    return StockListResponse(stocks=[to_summary(r) for r in screener["results"]])
+async def list_stocks(sectors: CachedSectorsClient = Depends(get_sectors)) -> StockListResponse:
+    return StockListResponse(stocks=[to_summary(r) for r in await tracked_rows(sectors)])
 
 
 @router.get("/stock/{ticker}", response_model=StockDetail)
-async def get_stock(ticker: str, sectors: SectorsSource = Depends(get_sectors)) -> StockDetail:
+async def get_stock(
+    ticker: str, sectors: CachedSectorsClient = Depends(get_sectors)
+) -> StockDetail:
     ticker = bare_symbol(ticker)
-    if ticker not in settings.tracked_tickers:
+    rows = await tracked_rows(sectors)
+    row = next((r for r in rows if bare_symbol(r["symbol"]) == ticker), None)
+    if row is None:
         raise HTTPException(status_code=404, detail=f"{ticker} is not tracked")
 
-    screener = await sectors.screen_companies(settings.tracked_tickers)
-    row = next((r for r in screener["results"] if bare_symbol(r["symbol"]) == ticker), None)
-    if row is None:
-        raise HTTPException(status_code=404, detail=f"No data for {ticker}")
-
-    start = (date.today() - timedelta(days=PRICE_HISTORY_DAYS)).isoformat()
-    daily = await sectors.get_daily(ticker, start=start)
+    daily = cast(list[dict[str, Any]], await sectors.get_daily_prices(ticker))
 
     q = row["query_values"]
     return StockDetail(

@@ -13,7 +13,6 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["*"]
 
     sectors_base_url: str = "https://api.sectors.app/v2"
-    use_mock_sectors: bool = True
     tracked_tickers: list[str] = [
         "BBCA",
         "BBRI",
@@ -26,6 +25,11 @@ class Settings(BaseSettings):
         "AMRT",
         "ANTM",
     ]
+
+    # Zero-credit development mode: serve saved fixtures instead of calling the Sectors API.
+    # Defaults ON so we never burn credits by accident (plan Section 5.4). Set to false for
+    # integration testing and demo day.
+    use_mock_data: bool = True
 
     # Cache TTLs (seconds) — matches implementation plan Section 5.2
     cache_ttl_prices: int = 300  # 5 min — /daily, /most-traded, /top-companies

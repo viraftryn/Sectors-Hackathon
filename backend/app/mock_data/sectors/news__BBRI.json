@@ -1,0 +1,67 @@
+{
+ "results": [
+  {
+   "title": "PT Bank Rakyat Indonesia (Persero) Tbk expands distribution network to eastern Indonesia",
+   "body": "Mock article body for development. PT Bank Rakyat Indonesia (Persero) Tbk expands distribution network to eastern Indonesia.",
+   "source": "https://example.com/mock-news/25",
+   "thumbnail": null,
+   "timestamp": "2026-09-15T15:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Bullish",
+    "Expansion"
+   ],
+   "symbols": [
+    "BBRI.JK"
+   ]
+  },
+  {
+   "title": "Regulator reviews compliance at PT Bank Rakyat Indonesia (Persero) Tbk",
+   "body": "Mock article body for development. Regulator reviews compliance at PT Bank Rakyat Indonesia (Persero) Tbk.",
+   "source": "https://example.com/mock-news/35",
+   "thumbnail": null,
+   "timestamp": "2026-09-01T20:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Bearish",
+    "Risk & Compliance"
+   ],
+   "symbols": [
+    "BBRI.JK"
+   ]
+  },
+  {
+   "title": "PT Bank Rakyat Indonesia (Persero) Tbk schedules annual shareholder meeting",
+   "body": "Mock article body for development. PT Bank Rakyat Indonesia (Persero) Tbk schedules annual shareholder meeting.",
+   "source": "https://example.com/mock-news/20",
+   "thumbnail": null,
+   "timestamp": "2026-08-29T17:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Corporate Action"
+   ],
+   "symbols": [
+    "BBRI.JK"
+   ]
+  }
+ ],
+ "pagination": {
+  "total_count": 3,
+  "showing": 3,
+  "limit": 30,
+  "offset": 0,
+  "has_next": false,
+  "has_previous": false,
+  "next_offset": null,
+  "previous_offset": null
+ }
+}

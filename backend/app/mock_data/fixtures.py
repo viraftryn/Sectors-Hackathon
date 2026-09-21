@@ -1,155 +1,46 @@
 """Mock Sectors API responses for development — zero credits spent.
 
 Switch to real API only for integration testing and demo day.
+
+Each file in ``sectors/`` is one Sectors v2 response, named after the cache key the
+CachedSectorsClient uses (":" is written as "__", e.g. ``daily_prices__BBCA.json``).
+To add a fixture, drop a new file there. ``companies_list.json`` is a real screener
+response; prices, news, filings and flows are synthetic data in the real v2 shapes.
 """
 
-COMPANY_REPORT_BBCA: dict = {
-    "symbol": "BBCA",
-    "company_name": "PT Bank Central Asia Tbk",
-    "sector": "Financials",
-    "sub_sector": "Banks",
-    "market_cap": 1200000000000000,
-    "last_close_price": 9800,
-    "pb_ratio": 4.5,
-    "pe_ratio": 22.3,
-    "roe": 21.5,
-    "der": 5.2,
-    "revenue": 90000000000000,
-    "net_income": 48000000000000,
-    "dividend_yield": 1.8,
+import json
+from copy import deepcopy
+from pathlib import Path
+from typing import Any
+
+# A Sectors JSON response is either a single object or a list of objects.
+JsonData = dict[str, Any] | list[dict[str, Any]]
+
+FIXTURES_DIR = Path(__file__).resolve().parent / "sectors"
+
+MOCK_RESPONSES: dict[str, JsonData] = {
+    path.stem.replace("__", ":"): json.loads(path.read_text())
+    for path in sorted(FIXTURES_DIR.glob("*.json"))
 }
 
-COMPANY_REPORT_BMRI: dict = {
-    "symbol": "BMRI",
-    "company_name": "PT Bank Mandiri (Persero) Tbk",
-    "sector": "Financials",
-    "sub_sector": "Banks",
-    "market_cap": 600000000000000,
-    "last_close_price": 6350,
-    "pb_ratio": 2.1,
-    "pe_ratio": 10.5,
-    "roe": 19.8,
-    "der": 5.8,
-    "revenue": 75000000000000,
-    "net_income": 42000000000000,
-    "dividend_yield": 3.2,
-}
 
-DAILY_PRICES_BBCA: list[dict] = [
-    {
-        "date": "2026-09-18",
-        "close": 9800,
-        "open": 9750,
-        "high": 9850,
-        "low": 9700,
-        "volume": 15000000,
-    },
-    {
-        "date": "2026-09-17",
-        "close": 9750,
-        "open": 9700,
-        "high": 9800,
-        "low": 9650,
-        "volume": 12000000,
-    },
-    {
-        "date": "2026-09-16",
-        "close": 9700,
-        "open": 9650,
-        "high": 9750,
-        "low": 9600,
-        "volume": 13000000,
-    },
-]
+class MockDataMissingError(LookupError):
+    """Raised when mock mode is on but no fixture exists for the requested cache key."""
 
-COMPANIES_LIST: list[dict] = [
-    {"symbol": "BBCA", "company_name": "PT Bank Central Asia Tbk", "sector": "Financials"},
-    {"symbol": "BMRI", "company_name": "PT Bank Mandiri (Persero) Tbk", "sector": "Financials"},
-    {
-        "symbol": "TLKM",
-        "company_name": "PT Telkom Indonesia Tbk",
-        "sector": "Communication Services",
-    },
-    {
-        "symbol": "ASII",
-        "company_name": "PT Astra International Tbk",
-        "sector": "Consumer Discretionary",
-    },
-    {"symbol": "UNVR", "company_name": "PT Unilever Indonesia Tbk", "sector": "Consumer Staples"},
-]
 
-MOST_TRADED: list[dict] = [
-    {"symbol": "BBCA", "volume": 15000000, "value": 147000000000},
-    {"symbol": "BMRI", "volume": 25000000, "value": 158750000000},
-    {"symbol": "TLKM", "volume": 30000000, "value": 99000000000},
-]
+def get_mock_response(cache_key: str) -> JsonData:
+    """Return a deep copy of the mock fixture for a cache key.
 
-TOP_COMPANIES: list[dict] = [
-    {"symbol": "BBCA", "change_pct": 2.1, "close": 9800},
-    {"symbol": "ASII", "change_pct": 1.8, "close": 5250},
-    {"symbol": "TLKM", "change_pct": -0.5, "close": 3300},
-]
-
-IDX_TOTAL: dict = {
-    "index": "IHSG",
-    "close": 7250.5,
-    "change": 45.2,
-    "change_pct": 0.63,
-    "volume": 12500000000,
-    "date": "2026-09-18",
-}
-
-SECTOR_REPORT: list[dict] = [
-    {"sector": "Financials", "performance_1d": 0.8, "performance_1w": 2.1, "performance_1m": 5.3},
-    {
-        "sector": "Communication Services",
-        "performance_1d": -0.2,
-        "performance_1w": 1.0,
-        "performance_1m": 3.1,
-    },
-    {
-        "sector": "Consumer Staples",
-        "performance_1d": 0.5,
-        "performance_1w": 0.8,
-        "performance_1m": 1.2,
-    },
-]
-
-NEWS_BBCA: list[dict] = [
-    {
-        "title": "BBCA Reports Record Q3 2026 Net Income",
-        "source": "Bisnis Indonesia",
-        "published_at": "2026-09-18T08:00:00Z",
-        "sentiment": "positive",
-        "ticker": "BBCA",
-    },
-    {
-        "title": "Bank Indonesia Holds Rates Steady, Banking Sector Stable",
-        "source": "CNBC Indonesia",
-        "published_at": "2026-09-17T14:30:00Z",
-        "sentiment": "neutral",
-        "ticker": "BBCA",
-    },
-]
-
-NEWS_FILINGS_BBCA: list[dict] = [
-    {
-        "title": "BBCA - Laporan Keuangan Q3 2026",
-        "filing_type": "financial_report",
-        "published_at": "2026-09-15T10:00:00Z",
-        "ticker": "BBCA",
-    },
-]
-
-MOCK_RESPONSES: dict[str, dict | list] = {
-    "company_report:BBCA": COMPANY_REPORT_BBCA,
-    "company_report:BMRI": COMPANY_REPORT_BMRI,
-    "daily_prices:BBCA": DAILY_PRICES_BBCA,
-    "companies_list": COMPANIES_LIST,
-    "most_traded": MOST_TRADED,
-    "top_companies": TOP_COMPANIES,
-    "idx_total": IDX_TOTAL,
-    "sector_report": SECTOR_REPORT,
-    "news:BBCA": NEWS_BBCA,
-    "news_filings:BBCA": NEWS_FILINGS_BBCA,
-}
+    Keyed by the same cache keys the CachedSectorsClient uses (e.g. "company_report:BBCA").
+    A deep copy is returned so callers can mutate the result without corrupting the shared
+    fixture (or an L1-cached reference). Raises MockDataMissingError with a helpful message
+    when no fixture is registered, so devs know to add one instead of getting silent bad data.
+    """
+    if cache_key not in MOCK_RESPONSES:
+        available = ", ".join(sorted(MOCK_RESPONSES)) or "(none)"
+        filename = cache_key.replace(":", "__") + ".json"
+        raise MockDataMissingError(
+            f"No mock fixture for cache key {cache_key!r}. "
+            f"Add app/mock_data/sectors/{filename}. Available keys: {available}"
+        )
+    return deepcopy(MOCK_RESPONSES[cache_key])

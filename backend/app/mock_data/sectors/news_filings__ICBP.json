@@ -1,0 +1,56 @@
+{
+ "results": [
+  {
+   "title": "Insider buys shares of Indofood CBP Sukses Makmur Tbk",
+   "body": "Mock filing for development.",
+   "source": "https://example.com/mock-filing/5",
+   "timestamp": "2026-09-10T23:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": "food-beverage",
+   "tags": [
+    "insider-trading"
+   ],
+   "symbol": "ICBP.JK",
+   "transaction_type": "buy",
+   "holder_type": "institution",
+   "holder_name": "Mock Holder 5",
+   "amount_transaction": 3200000,
+   "price": 6825,
+   "transaction_value": 21840000000.0,
+   "share_percentage_before": 1.65,
+   "share_percentage_after": 1.77,
+   "share_percentage_transaction": 0.12
+  },
+  {
+   "title": "Insider buys shares of Indofood CBP Sukses Makmur Tbk",
+   "body": "Mock filing for development.",
+   "source": "https://example.com/mock-filing/18",
+   "timestamp": "2026-08-25T07:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": "food-beverage",
+   "tags": [
+    "insider-trading"
+   ],
+   "symbol": "ICBP.JK",
+   "transaction_type": "buy",
+   "holder_type": "institution",
+   "holder_name": "Mock Holder 18",
+   "amount_transaction": 2500000,
+   "price": 6675,
+   "transaction_value": 16687500000.0,
+   "share_percentage_before": 1.02,
+   "share_percentage_after": 1.06,
+   "share_percentage_transaction": 0.04
+  }
+ ],
+ "pagination": {
+  "total_count": 2,
+  "showing": 2,
+  "limit": 30,
+  "offset": 0,
+  "has_next": false,
+  "has_previous": false,
+  "next_offset": null,
+  "previous_offset": null
+ }
+}

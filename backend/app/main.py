@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api.routes import health, market, stocks
+from app.api.routes import cache, health, market, stocks
 from app.clients.sectors import SectorsError
 from app.config import settings
 
@@ -21,6 +21,7 @@ app.add_middleware(
 )
 
 app.include_router(health.router, prefix="/api", tags=["health"])
+app.include_router(cache.router, prefix="/api", tags=["cache"])
 app.include_router(stocks.router, prefix="/api", tags=["stocks"])
 app.include_router(market.router, prefix="/api", tags=["market"])
 

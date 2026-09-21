@@ -1,0 +1,140 @@
+{
+ "results": [
+  {
+   "title": "Insider buys shares of PT Telkom Indonesia (Persero) Tbk",
+   "body": "Mock filing for development.",
+   "source": "https://example.com/mock-filing/2",
+   "timestamp": "2026-09-02T12:00:00",
+   "sector": "infrastructures",
+   "sub_sector": "telecommunication",
+   "tags": [
+    "insider-trading"
+   ],
+   "symbol": "TLKM.JK",
+   "transaction_type": "buy",
+   "holder_type": "insider",
+   "holder_name": "Mock Holder 2",
+   "amount_transaction": 1600000,
+   "price": 2725,
+   "transaction_value": 4360000000.0,
+   "share_percentage_before": 2.04,
+   "share_percentage_after": 2.14,
+   "share_percentage_transaction": 0.1
+  },
+  {
+   "title": "Insider sells shares of PT Telkom Indonesia (Persero) Tbk",
+   "body": "Mock filing for development.",
+   "source": "https://example.com/mock-filing/4",
+   "timestamp": "2026-08-30T09:00:00",
+   "sector": "infrastructures",
+   "sub_sector": "telecommunication",
+   "tags": [
+    "insider-trading"
+   ],
+   "symbol": "TLKM.JK",
+   "transaction_type": "sell",
+   "holder_type": "institution",
+   "holder_name": "Mock Holder 4",
+   "amount_transaction": 3000000,
+   "price": 2600,
+   "transaction_value": 7800000000.0,
+   "share_percentage_before": 2.61,
+   "share_percentage_after": 2.5,
+   "share_percentage_transaction": 0.11
+  },
+  {
+   "title": "Insider buys shares of PT Telkom Indonesia (Persero) Tbk",
+   "body": "Mock filing for development.",
+   "source": "https://example.com/mock-filing/12",
+   "timestamp": "2026-08-29T15:00:00",
+   "sector": "infrastructures",
+   "sub_sector": "telecommunication",
+   "tags": [
+    "insider-trading"
+   ],
+   "symbol": "TLKM.JK",
+   "transaction_type": "buy",
+   "holder_type": "institution",
+   "holder_name": "Mock Holder 12",
+   "amount_transaction": 3400000,
+   "price": 2500,
+   "transaction_value": 8500000000.0,
+   "share_percentage_before": 2.98,
+   "share_percentage_after": 3.15,
+   "share_percentage_transaction": 0.17
+  },
+  {
+   "title": "Insider buys shares of PT Telkom Indonesia (Persero) Tbk",
+   "body": "Mock filing for development.",
+   "source": "https://example.com/mock-filing/6",
+   "timestamp": "2026-08-28T05:00:00",
+   "sector": "infrastructures",
+   "sub_sector": "telecommunication",
+   "tags": [
+    "insider-trading"
+   ],
+   "symbol": "TLKM.JK",
+   "transaction_type": "buy",
+   "holder_type": "insider",
+   "holder_name": "Mock Holder 6",
+   "amount_transaction": 2300000,
+   "price": 2600,
+   "transaction_value": 5980000000.0,
+   "share_percentage_before": 4.52,
+   "share_percentage_after": 4.62,
+   "share_percentage_transaction": 0.1
+  },
+  {
+   "title": "Insider sells shares of PT Telkom Indonesia (Persero) Tbk",
+   "body": "Mock filing for development.",
+   "source": "https://example.com/mock-filing/9",
+   "timestamp": "2026-08-26T10:00:00",
+   "sector": "infrastructures",
+   "sub_sector": "telecommunication",
+   "tags": [
+    "insider-trading"
+   ],
+   "symbol": "TLKM.JK",
+   "transaction_type": "sell",
+   "holder_type": "institution",
+   "holder_name": "Mock Holder 9",
+   "amount_transaction": 900000,
+   "price": 2700,
+   "transaction_value": 2430000000.0,
+   "share_percentage_before": 4.99,
+   "share_percentage_after": 4.76,
+   "share_percentage_transaction": 0.23
+  },
+  {
+   "title": "Insider sells shares of PT Telkom Indonesia (Persero) Tbk",
+   "body": "Mock filing for development.",
+   "source": "https://example.com/mock-filing/8",
+   "timestamp": "2026-08-20T11:00:00",
+   "sector": "infrastructures",
+   "sub_sector": "telecommunication",
+   "tags": [
+    "insider-trading"
+   ],
+   "symbol": "TLKM.JK",
+   "transaction_type": "sell",
+   "holder_type": "institution",
+   "holder_name": "Mock Holder 8",
+   "amount_transaction": 1700000,
+   "price": 2575,
+   "transaction_value": 4377500000.0,
+   "share_percentage_before": 1.58,
+   "share_percentage_after": 1.33,
+   "share_percentage_transaction": 0.25
+  }
+ ],
+ "pagination": {
+  "total_count": 6,
+  "showing": 6,
+  "limit": 30,
+  "offset": 0,
+  "has_next": false,
+  "has_previous": false,
+  "next_offset": null,
+  "previous_offset": null
+ }
+}

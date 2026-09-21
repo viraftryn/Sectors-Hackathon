@@ -1,0 +1,50 @@
+{
+ "results": [
+  {
+   "title": "Indofood CBP Sukses Makmur Tbk faces margin pressure from rising input costs",
+   "body": "Mock article body for development. Indofood CBP Sukses Makmur Tbk faces margin pressure from rising input costs.",
+   "source": "https://example.com/mock-news/7",
+   "thumbnail": null,
+   "timestamp": "2026-09-10T04:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": [
+    "food-beverage"
+   ],
+   "tags": [
+    "Bearish",
+    "Earnings"
+   ],
+   "symbols": [
+    "ICBP.JK"
+   ]
+  },
+  {
+   "title": "Indofood CBP Sukses Makmur Tbk faces margin pressure from rising input costs",
+   "body": "Mock article body for development. Indofood CBP Sukses Makmur Tbk faces margin pressure from rising input costs.",
+   "source": "https://example.com/mock-news/29",
+   "thumbnail": null,
+   "timestamp": "2026-08-30T01:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": [
+    "food-beverage"
+   ],
+   "tags": [
+    "Bearish",
+    "Earnings"
+   ],
+   "symbols": [
+    "ICBP.JK"
+   ]
+  }
+ ],
+ "pagination": {
+  "total_count": 2,
+  "showing": 2,
+  "limit": 30,
+  "offset": 0,
+  "has_next": false,
+  "has_previous": false,
+  "next_offset": null,
+  "previous_offset": null
+ }
+}

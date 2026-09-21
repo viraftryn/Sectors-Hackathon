@@ -1,11 +1,11 @@
-from datetime import date, timedelta
-from typing import Any
+from typing import Any, cast
 
 from fastapi import APIRouter, Depends
 
 from app.api.deps import get_sectors
 from app.api.routes.stocks import pct
-from app.clients.sectors import SectorsSource, bare_symbol
+from app.clients.cached_sectors import CachedSectorsClient
+from app.clients.sectors import bare_symbol
 from app.models.schemas import (
     ForeignFlow,
     IndexPoint,
@@ -19,12 +19,11 @@ router = APIRouter()
 
 
 @router.get("/market-overview", response_model=MarketOverview)
-async def market_overview(sectors: SectorsSource = Depends(get_sectors)) -> MarketOverview:
-    ihsg = await sectors.get_index_daily("ihsg")
-    movers = await sectors.get_top_changes("1d")
-    traded = await sectors.get_most_traded()
-    week_ago = (date.today() - timedelta(days=7)).isoformat()
-    flow = await sectors.get_foreign_flow("IHSG", start=week_ago)
+async def market_overview(sectors: CachedSectorsClient = Depends(get_sectors)) -> MarketOverview:
+    ihsg = cast(list[dict[str, Any]], await sectors.get_ihsg())
+    movers = cast(dict[str, Any], await sectors.get_top_companies())
+    traded = cast(dict[str, Any], await sectors.get_most_traded())
+    flow = cast(dict[str, Any], await sectors.get_foreign_flow("IHSG"))
 
     last = ihsg[-1]
     change = last["price"] / ihsg[-2]["price"] - 1 if len(ihsg) > 1 else None

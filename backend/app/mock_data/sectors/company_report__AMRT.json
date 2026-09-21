@@ -1,0 +1,36 @@
+{
+ "symbol": "AMRT.JK",
+ "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+ "overview": {
+  "sector": "Consumer Non-Cyclicals",
+  "sub_sector": "Food & Staples Retailing",
+  "market_cap": 53981852210000,
+  "last_close_price": 1300,
+  "latest_close_date": "2026-09-18",
+  "daily_close_change": -0.0188679245283019,
+  "all_time_price": {
+   "52_w_high": {
+    "2026-01-05": 2330.0
+   },
+   "52_w_low": {
+    "2026-06-09": 1105.0
+   }
+  },
+  "tags": [],
+  "indices": [
+   "LQ45"
+  ]
+ },
+ "valuation": {
+  "last_close_price": 1300,
+  "latest_close_date": "2026-09-18",
+  "forward_pe": 13.68,
+  "historical_valuation": [
+   {
+    "year": 2025,
+    "pe": 15.1967421335347,
+    "pb": 3.0325591870863
+   }
+  ]
+ }
+}

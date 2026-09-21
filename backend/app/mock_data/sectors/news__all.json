@@ -1,0 +1,550 @@
+{
+ "results": [
+  {
+   "title": "Astra International Tbk expands distribution network to eastern Indonesia",
+   "body": "Mock article body for development. Astra International Tbk expands distribution network to eastern Indonesia.",
+   "source": "https://example.com/mock-news/18",
+   "thumbnail": null,
+   "timestamp": "2026-09-18T06:00:00",
+   "sector": "industrials",
+   "sub_sector": [
+    "multi-sector-holdings"
+   ],
+   "tags": [
+    "Bullish",
+    "Expansion"
+   ],
+   "symbols": [
+    "ASII.JK"
+   ]
+  },
+  {
+   "title": "PT Sumber Alfaria Trijaya Tbk. schedules annual shareholder meeting",
+   "body": "Mock article body for development. PT Sumber Alfaria Trijaya Tbk. schedules annual shareholder meeting.",
+   "source": "https://example.com/mock-news/12",
+   "thumbnail": null,
+   "timestamp": "2026-09-17T18:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": [
+    "food-staples-retailing"
+   ],
+   "tags": [
+    "Corporate Action"
+   ],
+   "symbols": [
+    "AMRT.JK"
+   ]
+  },
+  {
+   "title": "Analysts raise target price for PT Bank Negara Indonesia (Persero) Tbk",
+   "body": "Mock article body for development. Analysts raise target price for PT Bank Negara Indonesia (Persero) Tbk.",
+   "source": "https://example.com/mock-news/1",
+   "thumbnail": null,
+   "timestamp": "2026-09-16T11:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Bullish",
+    "Analyst Rating"
+   ],
+   "symbols": [
+    "BBNI.JK"
+   ]
+  },
+  {
+   "title": "PT Bank Central Asia Tbk. expands distribution network to eastern Indonesia",
+   "body": "Mock article body for development. PT Bank Central Asia Tbk. expands distribution network to eastern Indonesia.",
+   "source": "https://example.com/mock-news/10",
+   "thumbnail": null,
+   "timestamp": "2026-09-15T16:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Bullish",
+    "Expansion"
+   ],
+   "symbols": [
+    "BBCA.JK"
+   ]
+  },
+  {
+   "title": "PT Bank Rakyat Indonesia (Persero) Tbk expands distribution network to eastern Indonesia",
+   "body": "Mock article body for development. PT Bank Rakyat Indonesia (Persero) Tbk expands distribution network to eastern Indonesia.",
+   "source": "https://example.com/mock-news/25",
+   "thumbnail": null,
+   "timestamp": "2026-09-15T15:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Bullish",
+    "Expansion"
+   ],
+   "symbols": [
+    "BBRI.JK"
+   ]
+  },
+  {
+   "title": "PT Sumber Alfaria Trijaya Tbk. expands distribution network to eastern Indonesia",
+   "body": "Mock article body for development. PT Sumber Alfaria Trijaya Tbk. expands distribution network to eastern Indonesia.",
+   "source": "https://example.com/mock-news/36",
+   "thumbnail": null,
+   "timestamp": "2026-09-15T03:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": [
+    "food-staples-retailing"
+   ],
+   "tags": [
+    "Bullish",
+    "Expansion"
+   ],
+   "symbols": [
+    "AMRT.JK"
+   ]
+  },
+  {
+   "title": "PT Telkom Indonesia (Persero) Tbk posts higher quarterly net profit",
+   "body": "Mock article body for development. PT Telkom Indonesia (Persero) Tbk posts higher quarterly net profit.",
+   "source": "https://example.com/mock-news/17",
+   "thumbnail": null,
+   "timestamp": "2026-09-14T22:00:00",
+   "sector": "infrastructures",
+   "sub_sector": [
+    "telecommunication"
+   ],
+   "tags": [
+    "Bullish",
+    "Earnings"
+   ],
+   "symbols": [
+    "TLKM.JK"
+   ]
+  },
+  {
+   "title": "Unilever Indonesia Tbk faces margin pressure from rising input costs",
+   "body": "Mock article body for development. Unilever Indonesia Tbk faces margin pressure from rising input costs.",
+   "source": "https://example.com/mock-news/16",
+   "thumbnail": null,
+   "timestamp": "2026-09-14T21:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": [
+    "nondurable-household-products"
+   ],
+   "tags": [
+    "Bearish",
+    "Earnings"
+   ],
+   "symbols": [
+    "UNVR.JK"
+   ]
+  },
+  {
+   "title": "Regulator reviews compliance at Unilever Indonesia Tbk",
+   "body": "Mock article body for development. Regulator reviews compliance at Unilever Indonesia Tbk.",
+   "source": "https://example.com/mock-news/39",
+   "thumbnail": null,
+   "timestamp": "2026-09-14T21:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": [
+    "nondurable-household-products"
+   ],
+   "tags": [
+    "Bearish",
+    "Risk & Compliance"
+   ],
+   "symbols": [
+    "UNVR.JK"
+   ]
+  },
+  {
+   "title": "PT Bank Mandiri (Persero) Tbk faces margin pressure from rising input costs",
+   "body": "Mock article body for development. PT Bank Mandiri (Persero) Tbk faces margin pressure from rising input costs.",
+   "source": "https://example.com/mock-news/26",
+   "thumbnail": null,
+   "timestamp": "2026-09-14T14:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Bearish",
+    "Earnings"
+   ],
+   "symbols": [
+    "BMRI.JK"
+   ]
+  },
+  {
+   "title": "Regulator reviews compliance at Astra International Tbk",
+   "body": "Mock article body for development. Regulator reviews compliance at Astra International Tbk.",
+   "source": "https://example.com/mock-news/11",
+   "thumbnail": null,
+   "timestamp": "2026-09-14T13:00:00",
+   "sector": "industrials",
+   "sub_sector": [
+    "multi-sector-holdings"
+   ],
+   "tags": [
+    "Bearish",
+    "Risk & Compliance"
+   ],
+   "symbols": [
+    "ASII.JK"
+   ]
+  },
+  {
+   "title": "PT Bank Central Asia Tbk. faces margin pressure from rising input costs",
+   "body": "Mock article body for development. PT Bank Central Asia Tbk. faces margin pressure from rising input costs.",
+   "source": "https://example.com/mock-news/13",
+   "thumbnail": null,
+   "timestamp": "2026-09-14T11:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Bearish",
+    "Earnings"
+   ],
+   "symbols": [
+    "BBCA.JK"
+   ]
+  },
+  {
+   "title": "Regulator reviews compliance at PT Bank Mandiri (Persero) Tbk",
+   "body": "Mock article body for development. Regulator reviews compliance at PT Bank Mandiri (Persero) Tbk.",
+   "source": "https://example.com/mock-news/34",
+   "thumbnail": null,
+   "timestamp": "2026-09-14T05:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Bearish",
+    "Risk & Compliance"
+   ],
+   "symbols": [
+    "BMRI.JK"
+   ]
+  },
+  {
+   "title": "Analysts raise target price for Astra International Tbk",
+   "body": "Mock article body for development. Analysts raise target price for Astra International Tbk.",
+   "source": "https://example.com/mock-news/14",
+   "thumbnail": null,
+   "timestamp": "2026-09-14T00:00:00",
+   "sector": "industrials",
+   "sub_sector": [
+    "multi-sector-holdings"
+   ],
+   "tags": [
+    "Bullish",
+    "Analyst Rating"
+   ],
+   "symbols": [
+    "ASII.JK"
+   ]
+  },
+  {
+   "title": "PT Sumber Alfaria Trijaya Tbk. faces margin pressure from rising input costs",
+   "body": "Mock article body for development. PT Sumber Alfaria Trijaya Tbk. faces margin pressure from rising input costs.",
+   "source": "https://example.com/mock-news/5",
+   "thumbnail": null,
+   "timestamp": "2026-09-13T14:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": [
+    "food-staples-retailing"
+   ],
+   "tags": [
+    "Bearish",
+    "Earnings"
+   ],
+   "symbols": [
+    "AMRT.JK"
+   ]
+  },
+  {
+   "title": "PT Bank Mandiri (Persero) Tbk schedules annual shareholder meeting",
+   "body": "Mock article body for development. PT Bank Mandiri (Persero) Tbk schedules annual shareholder meeting.",
+   "source": "https://example.com/mock-news/32",
+   "thumbnail": null,
+   "timestamp": "2026-09-13T10:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Corporate Action"
+   ],
+   "symbols": [
+    "BMRI.JK"
+   ]
+  },
+  {
+   "title": "Analysts raise target price for Astra International Tbk",
+   "body": "Mock article body for development. Analysts raise target price for Astra International Tbk.",
+   "source": "https://example.com/mock-news/15",
+   "thumbnail": null,
+   "timestamp": "2026-09-11T11:00:00",
+   "sector": "industrials",
+   "sub_sector": [
+    "multi-sector-holdings"
+   ],
+   "tags": [
+    "Bullish",
+    "Analyst Rating"
+   ],
+   "symbols": [
+    "ASII.JK"
+   ]
+  },
+  {
+   "title": "PT Bank Central Asia Tbk. expands distribution network to eastern Indonesia",
+   "body": "Mock article body for development. PT Bank Central Asia Tbk. expands distribution network to eastern Indonesia.",
+   "source": "https://example.com/mock-news/9",
+   "thumbnail": null,
+   "timestamp": "2026-09-11T01:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Bullish",
+    "Expansion"
+   ],
+   "symbols": [
+    "BBCA.JK"
+   ]
+  },
+  {
+   "title": "PT Bank Mandiri (Persero) Tbk posts higher quarterly net profit",
+   "body": "Mock article body for development. PT Bank Mandiri (Persero) Tbk posts higher quarterly net profit.",
+   "source": "https://example.com/mock-news/8",
+   "thumbnail": null,
+   "timestamp": "2026-09-10T23:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Bullish",
+    "Earnings"
+   ],
+   "symbols": [
+    "BMRI.JK"
+   ]
+  },
+  {
+   "title": "Indofood CBP Sukses Makmur Tbk faces margin pressure from rising input costs",
+   "body": "Mock article body for development. Indofood CBP Sukses Makmur Tbk faces margin pressure from rising input costs.",
+   "source": "https://example.com/mock-news/7",
+   "thumbnail": null,
+   "timestamp": "2026-09-10T04:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": [
+    "food-beverage"
+   ],
+   "tags": [
+    "Bearish",
+    "Earnings"
+   ],
+   "symbols": [
+    "ICBP.JK"
+   ]
+  },
+  {
+   "title": "Foreign investors trim holdings in PT Sumber Alfaria Trijaya Tbk.",
+   "body": "Mock article body for development. Foreign investors trim holdings in PT Sumber Alfaria Trijaya Tbk..",
+   "source": "https://example.com/mock-news/0",
+   "thumbnail": null,
+   "timestamp": "2026-09-09T18:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": [
+    "food-staples-retailing"
+   ],
+   "tags": [
+    "Bearish",
+    "Foreign Flow"
+   ],
+   "symbols": [
+    "AMRT.JK"
+   ]
+  },
+  {
+   "title": "Foreign investors trim holdings in PT Telkom Indonesia (Persero) Tbk",
+   "body": "Mock article body for development. Foreign investors trim holdings in PT Telkom Indonesia (Persero) Tbk.",
+   "source": "https://example.com/mock-news/21",
+   "thumbnail": null,
+   "timestamp": "2026-09-08T23:00:00",
+   "sector": "infrastructures",
+   "sub_sector": [
+    "telecommunication"
+   ],
+   "tags": [
+    "Bearish",
+    "Foreign Flow"
+   ],
+   "symbols": [
+    "TLKM.JK"
+   ]
+  },
+  {
+   "title": "PT Telkom Indonesia (Persero) Tbk faces margin pressure from rising input costs",
+   "body": "Mock article body for development. PT Telkom Indonesia (Persero) Tbk faces margin pressure from rising input costs.",
+   "source": "https://example.com/mock-news/4",
+   "thumbnail": null,
+   "timestamp": "2026-09-08T18:00:00",
+   "sector": "infrastructures",
+   "sub_sector": [
+    "telecommunication"
+   ],
+   "tags": [
+    "Bearish",
+    "Earnings"
+   ],
+   "symbols": [
+    "TLKM.JK"
+   ]
+  },
+  {
+   "title": "Aneka Tambang Tbk. posts higher quarterly net profit",
+   "body": "Mock article body for development. Aneka Tambang Tbk. posts higher quarterly net profit.",
+   "source": "https://example.com/mock-news/2",
+   "thumbnail": null,
+   "timestamp": "2026-09-08T03:00:00",
+   "sector": "basic-materials",
+   "sub_sector": [
+    "basic-materials"
+   ],
+   "tags": [
+    "Bullish",
+    "Earnings"
+   ],
+   "symbols": [
+    "ANTM.JK"
+   ]
+  },
+  {
+   "title": "Unilever Indonesia Tbk schedules annual shareholder meeting",
+   "body": "Mock article body for development. Unilever Indonesia Tbk schedules annual shareholder meeting.",
+   "source": "https://example.com/mock-news/38",
+   "thumbnail": null,
+   "timestamp": "2026-09-08T01:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": [
+    "nondurable-household-products"
+   ],
+   "tags": [
+    "Corporate Action"
+   ],
+   "symbols": [
+    "UNVR.JK"
+   ]
+  },
+  {
+   "title": "Analysts raise target price for PT Bank Negara Indonesia (Persero) Tbk",
+   "body": "Mock article body for development. Analysts raise target price for PT Bank Negara Indonesia (Persero) Tbk.",
+   "source": "https://example.com/mock-news/23",
+   "thumbnail": null,
+   "timestamp": "2026-09-07T11:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Bullish",
+    "Analyst Rating"
+   ],
+   "symbols": [
+    "BBNI.JK"
+   ]
+  },
+  {
+   "title": "PT Bank Negara Indonesia (Persero) Tbk schedules annual shareholder meeting",
+   "body": "Mock article body for development. PT Bank Negara Indonesia (Persero) Tbk schedules annual shareholder meeting.",
+   "source": "https://example.com/mock-news/28",
+   "thumbnail": null,
+   "timestamp": "2026-09-05T22:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Corporate Action"
+   ],
+   "symbols": [
+    "BBNI.JK"
+   ]
+  },
+  {
+   "title": "PT Telkom Indonesia (Persero) Tbk posts higher quarterly net profit",
+   "body": "Mock article body for development. PT Telkom Indonesia (Persero) Tbk posts higher quarterly net profit.",
+   "source": "https://example.com/mock-news/3",
+   "thumbnail": null,
+   "timestamp": "2026-09-05T01:00:00",
+   "sector": "infrastructures",
+   "sub_sector": [
+    "telecommunication"
+   ],
+   "tags": [
+    "Bullish",
+    "Earnings"
+   ],
+   "symbols": [
+    "TLKM.JK"
+   ]
+  },
+  {
+   "title": "PT Bank Mandiri (Persero) Tbk announces interim dividend",
+   "body": "Mock article body for development. PT Bank Mandiri (Persero) Tbk announces interim dividend.",
+   "source": "https://example.com/mock-news/19",
+   "thumbnail": null,
+   "timestamp": "2026-09-04T17:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Bullish",
+    "Dividend"
+   ],
+   "symbols": [
+    "BMRI.JK"
+   ]
+  },
+  {
+   "title": "Unilever Indonesia Tbk announces interim dividend",
+   "body": "Mock article body for development. Unilever Indonesia Tbk announces interim dividend.",
+   "source": "https://example.com/mock-news/27",
+   "thumbnail": null,
+   "timestamp": "2026-09-03T21:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": [
+    "nondurable-household-products"
+   ],
+   "tags": [
+    "Bullish",
+    "Dividend"
+   ],
+   "symbols": [
+    "UNVR.JK"
+   ]
+  }
+ ],
+ "pagination": {
+  "total_count": 40,
+  "showing": 30,
+  "limit": 30,
+  "offset": 0,
+  "has_next": true,
+  "has_previous": false,
+  "next_offset": 30,
+  "previous_offset": null
+ }
+}

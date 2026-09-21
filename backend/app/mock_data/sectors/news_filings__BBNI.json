@@ -1,0 +1,98 @@
+{
+ "results": [
+  {
+   "title": "Insider sells shares of PT Bank Negara Indonesia (Persero) Tbk",
+   "body": "Mock filing for development.",
+   "source": "https://example.com/mock-filing/16",
+   "timestamp": "2026-09-12T01:00:00",
+   "sector": "financials",
+   "sub_sector": "banks",
+   "tags": [
+    "insider-trading"
+   ],
+   "symbol": "BBNI.JK",
+   "transaction_type": "sell",
+   "holder_type": "institution",
+   "holder_name": "Mock Holder 16",
+   "amount_transaction": 3700000,
+   "price": 3650,
+   "transaction_value": 13505000000.0,
+   "share_percentage_before": 3.95,
+   "share_percentage_after": 3.67,
+   "share_percentage_transaction": 0.28
+  },
+  {
+   "title": "Insider buys shares of PT Bank Negara Indonesia (Persero) Tbk",
+   "body": "Mock filing for development.",
+   "source": "https://example.com/mock-filing/13",
+   "timestamp": "2026-08-31T19:00:00",
+   "sector": "financials",
+   "sub_sector": "banks",
+   "tags": [
+    "insider-trading"
+   ],
+   "symbol": "BBNI.JK",
+   "transaction_type": "buy",
+   "holder_type": "insider",
+   "holder_name": "Mock Holder 13",
+   "amount_transaction": 1300000,
+   "price": 3450,
+   "transaction_value": 4485000000.0,
+   "share_percentage_before": 2.2,
+   "share_percentage_after": 2.48,
+   "share_percentage_transaction": 0.28
+  },
+  {
+   "title": "Insider buys shares of PT Bank Negara Indonesia (Persero) Tbk",
+   "body": "Mock filing for development.",
+   "source": "https://example.com/mock-filing/3",
+   "timestamp": "2026-08-30T15:00:00",
+   "sector": "financials",
+   "sub_sector": "banks",
+   "tags": [
+    "insider-trading"
+   ],
+   "symbol": "BBNI.JK",
+   "transaction_type": "buy",
+   "holder_type": "institution",
+   "holder_name": "Mock Holder 3",
+   "amount_transaction": 600000,
+   "price": 3400,
+   "transaction_value": 2040000000.0,
+   "share_percentage_before": 0.76,
+   "share_percentage_after": 0.79,
+   "share_percentage_transaction": 0.03
+  },
+  {
+   "title": "Insider sells shares of PT Bank Negara Indonesia (Persero) Tbk",
+   "body": "Mock filing for development.",
+   "source": "https://example.com/mock-filing/0",
+   "timestamp": "2026-08-28T12:00:00",
+   "sector": "financials",
+   "sub_sector": "banks",
+   "tags": [
+    "insider-trading"
+   ],
+   "symbol": "BBNI.JK",
+   "transaction_type": "sell",
+   "holder_type": "institution",
+   "holder_name": "Mock Holder 0",
+   "amount_transaction": 3400000,
+   "price": 3375,
+   "transaction_value": 11475000000.0,
+   "share_percentage_before": 3.5,
+   "share_percentage_after": 3.28,
+   "share_percentage_transaction": 0.22
+  }
+ ],
+ "pagination": {
+  "total_count": 4,
+  "showing": 4,
+  "limit": 30,
+  "offset": 0,
+  "has_next": false,
+  "has_previous": false,
+  "next_offset": null,
+  "previous_offset": null
+ }
+}

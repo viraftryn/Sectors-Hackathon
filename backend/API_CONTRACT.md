@@ -3,7 +3,7 @@
 Base URL (local): `http://localhost:8000/api`. Interactive docs: `http://localhost:8000/docs`.
 
 All prices are in IDR. `*_pct` fields are percentages (`-0.79` means -0.79%). Nullable fields are marked `| null`.
-While `USE_MOCK_SECTORS=true`, responses come from bundled sample data in the same shape.
+While `USE_MOCK_DATA=true`, responses come from bundled sample data in the same shape (the backend still needs its database for the cache).
 
 Tracked tickers: BBCA, BBRI, BMRI, BBNI, TLKM, ASII, UNVR, ICBP, AMRT, ANTM.
 
