@@ -3,7 +3,13 @@
 Switch to real API only for integration testing and demo day.
 """
 
-COMPANY_REPORT_BBCA: dict = {
+from copy import deepcopy
+from typing import Any
+
+# A Sectors JSON response is either a single object or a list of objects.
+JsonData = dict[str, Any] | list[dict[str, Any]]
+
+COMPANY_REPORT_BBCA: dict[str, Any] = {
     "symbol": "BBCA",
     "company_name": "PT Bank Central Asia Tbk",
     "sector": "Financials",
@@ -19,7 +25,7 @@ COMPANY_REPORT_BBCA: dict = {
     "dividend_yield": 1.8,
 }
 
-COMPANY_REPORT_BMRI: dict = {
+COMPANY_REPORT_BMRI: dict[str, Any] = {
     "symbol": "BMRI",
     "company_name": "PT Bank Mandiri (Persero) Tbk",
     "sector": "Financials",
@@ -35,7 +41,7 @@ COMPANY_REPORT_BMRI: dict = {
     "dividend_yield": 3.2,
 }
 
-DAILY_PRICES_BBCA: list[dict] = [
+DAILY_PRICES_BBCA: list[dict[str, Any]] = [
     {
         "date": "2026-09-18",
         "close": 9800,
@@ -62,7 +68,7 @@ DAILY_PRICES_BBCA: list[dict] = [
     },
 ]
 
-COMPANIES_LIST: list[dict] = [
+COMPANIES_LIST: list[dict[str, Any]] = [
     {"symbol": "BBCA", "company_name": "PT Bank Central Asia Tbk", "sector": "Financials"},
     {"symbol": "BMRI", "company_name": "PT Bank Mandiri (Persero) Tbk", "sector": "Financials"},
     {
@@ -78,19 +84,19 @@ COMPANIES_LIST: list[dict] = [
     {"symbol": "UNVR", "company_name": "PT Unilever Indonesia Tbk", "sector": "Consumer Staples"},
 ]
 
-MOST_TRADED: list[dict] = [
+MOST_TRADED: list[dict[str, Any]] = [
     {"symbol": "BBCA", "volume": 15000000, "value": 147000000000},
     {"symbol": "BMRI", "volume": 25000000, "value": 158750000000},
     {"symbol": "TLKM", "volume": 30000000, "value": 99000000000},
 ]
 
-TOP_COMPANIES: list[dict] = [
+TOP_COMPANIES: list[dict[str, Any]] = [
     {"symbol": "BBCA", "change_pct": 2.1, "close": 9800},
     {"symbol": "ASII", "change_pct": 1.8, "close": 5250},
     {"symbol": "TLKM", "change_pct": -0.5, "close": 3300},
 ]
 
-IDX_TOTAL: dict = {
+IDX_TOTAL: dict[str, Any] = {
     "index": "IHSG",
     "close": 7250.5,
     "change": 45.2,
@@ -99,7 +105,7 @@ IDX_TOTAL: dict = {
     "date": "2026-09-18",
 }
 
-SECTOR_REPORT: list[dict] = [
+SECTOR_REPORT: list[dict[str, Any]] = [
     {"sector": "Financials", "performance_1d": 0.8, "performance_1w": 2.1, "performance_1m": 5.3},
     {
         "sector": "Communication Services",
@@ -115,7 +121,7 @@ SECTOR_REPORT: list[dict] = [
     },
 ]
 
-NEWS_BBCA: list[dict] = [
+NEWS_BBCA: list[dict[str, Any]] = [
     {
         "title": "BBCA Reports Record Q3 2026 Net Income",
         "source": "Bisnis Indonesia",
@@ -132,7 +138,7 @@ NEWS_BBCA: list[dict] = [
     },
 ]
 
-NEWS_FILINGS_BBCA: list[dict] = [
+NEWS_FILINGS_BBCA: list[dict[str, Any]] = [
     {
         "title": "BBCA - Laporan Keuangan Q3 2026",
         "filing_type": "financial_report",
@@ -141,7 +147,7 @@ NEWS_FILINGS_BBCA: list[dict] = [
     },
 ]
 
-MOCK_RESPONSES: dict[str, dict | list] = {
+MOCK_RESPONSES: dict[str, JsonData] = {
     "company_report:BBCA": COMPANY_REPORT_BBCA,
     "company_report:BMRI": COMPANY_REPORT_BMRI,
     "daily_prices:BBCA": DAILY_PRICES_BBCA,
@@ -153,3 +159,24 @@ MOCK_RESPONSES: dict[str, dict | list] = {
     "news:BBCA": NEWS_BBCA,
     "news_filings:BBCA": NEWS_FILINGS_BBCA,
 }
+
+
+class MockDataMissingError(LookupError):
+    """Raised when mock mode is on but no fixture exists for the requested cache key."""
+
+
+def get_mock_response(cache_key: str) -> JsonData:
+    """Return a deep copy of the mock fixture for a cache key.
+
+    Keyed by the same cache keys the CachedSectorsClient uses (e.g. "company_report:BBCA").
+    A deep copy is returned so callers can mutate the result without corrupting the shared
+    fixture (or an L1-cached reference). Raises MockDataMissingError with a helpful message
+    when no fixture is registered, so devs know to add one instead of getting silent bad data.
+    """
+    if cache_key not in MOCK_RESPONSES:
+        available = ", ".join(sorted(MOCK_RESPONSES)) or "(none)"
+        raise MockDataMissingError(
+            f"No mock fixture for cache key {cache_key!r}. "
+            f"Add it to MOCK_RESPONSES in app/mock_data/fixtures.py. Available keys: {available}"
+        )
+    return deepcopy(MOCK_RESPONSES[cache_key])
