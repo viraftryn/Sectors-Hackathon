@@ -9,12 +9,15 @@
 /* Begin PBXBuildFile section */
 		1BC12EFB7A675618F165C9E0 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A396EE7CA1108341935EDA4 /* APIClient.swift */; };
 		2EF97AE706E0E9FE27007F96 /* PortfolioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36CFED0BAC1FE8FE171ABEA8 /* PortfolioView.swift */; };
+		3B9C4D5E6F7A8B9C0D1E2F3A /* HoldingLot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A8B3C4D5E6F7A8B9C0D1E2F /* HoldingLot.swift */; };
+		5B2E3D4C5A6B7C8D9E0F1A2B /* StockDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A1F2C3D4E5F6A7B8C9D0E1F /* StockDetailView.swift */; };
 		664F1086C8C365A239A4019F /* InvelioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E27E39B194A5B05D70D6F96 /* InvelioTests.swift */; };
 		76BC79C9C796F4A3EED1E951 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E80E1F46D10E577C3BB855B /* ContentView.swift */; };
 		790AFB0FC9DBC71AF69E0BF5 /* Stock.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1161490963A206CA3A1F812 /* Stock.swift */; };
 		80733EC71CF633E11F48E069 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5226C47D501454DEBC61AAD6 /* HomeView.swift */; };
 		8E916646E6DD046618D989E9 /* ChatbotView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D4DAFBEBB482239402E8E37 /* ChatbotView.swift */; };
 		921A35C0CA5ED9024F0B771E /* NotificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8110454BA26FE036A072B5A8 /* NotificationView.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E1F2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D86F7185305E5558005FD590 /* Assets.xcassets */; };
 		C52AC931BF45F914967A9F99 /* InvelioApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C65A82A9BB7B48C0C464624 /* InvelioApp.swift */; };
 /* End PBXBuildFile section */
 
@@ -31,15 +34,18 @@
 /* Begin PBXFileReference section */
 		0A396EE7CA1108341935EDA4 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		0D4DAFBEBB482239402E8E37 /* ChatbotView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatbotView.swift; sourceTree = "<group>"; };
+		2A8B3C4D5E6F7A8B9C0D1E2F /* HoldingLot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoldingLot.swift; sourceTree = "<group>"; };
 		36CFED0BAC1FE8FE171ABEA8 /* PortfolioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioView.swift; sourceTree = "<group>"; };
 		3E27E39B194A5B05D70D6F96 /* InvelioTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvelioTests.swift; sourceTree = "<group>"; };
 		3E80E1F46D10E577C3BB855B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		3F6B32F27CF44F6AEB08A066 /* InvelioTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = InvelioTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		473107F0D1D5A1D04D4C305E /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		473107F0D1D5A1D04D4C305E /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
+		4A1F2C3D4E5F6A7B8C9D0E1F /* StockDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockDetailView.swift; sourceTree = "<group>"; };
 		5226C47D501454DEBC61AAD6 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		5C65A82A9BB7B48C0C464624 /* InvelioApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvelioApp.swift; sourceTree = "<group>"; };
 		8110454BA26FE036A072B5A8 /* NotificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationView.swift; sourceTree = "<group>"; };
 		B1161490963A206CA3A1F812 /* Stock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stock.swift; sourceTree = "<group>"; };
+		D86F7185305E5558005FD590 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F30EF2A838D1272702A46C6E /* Invelio.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Invelio.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -60,6 +66,8 @@
 				5226C47D501454DEBC61AAD6 /* HomeView.swift */,
 				8110454BA26FE036A072B5A8 /* NotificationView.swift */,
 				36CFED0BAC1FE8FE171ABEA8 /* PortfolioView.swift */,
+				4A1F2C3D4E5F6A7B8C9D0E1F /* StockDetailView.swift */,
+				D86F7185305E5558005FD590 /* Assets.xcassets */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -94,6 +102,7 @@
 			isa = PBXGroup;
 			children = (
 				B1161490963A206CA3A1F812 /* Stock.swift */,
+				2A8B3C4D5E6F7A8B9C0D1E2F /* HoldingLot.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -152,6 +161,7 @@
 			buildConfigurationList = 2804A418221A2F3A296D0A46 /* Build configuration list for PBXNativeTarget "Invelio" */;
 			buildPhases = (
 				6B15DC5BC5D79E9E7F4AB0FC /* Sources */,
+				A1B2C3D4E5F6A7B8C9D0E1F3 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -172,8 +182,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
-				TargetAttributes = {
-				};
 			};
 			buildConfigurationList = 1D859689E01F6192B6550A05 /* Build configuration list for PBXProject "Invelio" */;
 			developmentRegion = en;
@@ -195,6 +203,17 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		A1B2C3D4E5F6A7B8C9D0E1F3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1B2C3D4E5F6A7B8C9D0E1F2 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		6B15DC5BC5D79E9E7F4AB0FC /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -208,6 +227,8 @@
 				921A35C0CA5ED9024F0B771E /* NotificationView.swift in Sources */,
 				2EF97AE706E0E9FE27007F96 /* PortfolioView.swift in Sources */,
 				790AFB0FC9DBC71AF69E0BF5 /* Stock.swift in Sources */,
+				5B2E3D4C5A6B7C8D9E0F1A2B /* StockDetailView.swift in Sources */,
+				3B9C4D5E6F7A8B9C0D1E2F3A /* HoldingLot.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

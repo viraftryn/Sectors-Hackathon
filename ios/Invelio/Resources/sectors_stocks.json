@@ -1,0 +1,392 @@
+[
+  {
+    "symbol": "BBCA.JK",
+    "company_name": "PT Bank Central Asia Tbk.",
+    "market": "IDX",
+    "overview": {
+      "listing_board": "Main",
+      "industry": "Banks",
+      "sub_industry": "Banks",
+      "sector": "Financials",
+      "sub_sector": "Banks",
+      "market_cap": 1214243750000000,
+      "market_cap_rank": 1,
+      "last_close_price": 9850.0,
+      "latest_close_date": "2026-09-17",
+      "daily_close_change": 0.0076923,
+      "price_change": 75.0,
+      "all_time_price": {
+        "52_w_high": 10950.0,
+        "52_w_low": 8800.0
+      }
+    },
+    "valuation": {
+      "last_close_price": 9850.0,
+      "forward_pe": 12.8,
+      "intrinsic_value": 13694.0,
+      "historical_valuation": [
+        {
+          "year": 2024,
+          "pe": 24.2,
+          "pb": 4.8,
+          "ps": 11.9
+        }
+      ]
+    },
+    "future": {
+      "analyst_rating_breakdown": {
+        "strong_buy": 18,
+        "buy": 5,
+        "hold": 4,
+        "sell": 0,
+        "strong_sell": 0,
+        "n_analyst": 27
+      }
+    },
+    "financials": {
+      "eps": 471.45,
+      "historical_financial_ratio": [
+        {
+          "year": "2024",
+          "profitability": {
+            "roa": 0.031,
+            "roe": 0.231,
+            "net_profit_margin": 0.41
+          }
+        }
+      ]
+    },
+    "dividend": {
+      "yield_ttm": 0.032,
+      "dividend_ttm": 356.0,
+      "payout_ratio": 0.74,
+      "last_ex_dividend_date": "2026-06-17"
+    },
+    "daily_prices": [
+      { "date": "2026-09-01", "close": 9650.0, "volume": 78200000 },
+      { "date": "2026-09-02", "close": 9680.0, "volume": 81300000 },
+      { "date": "2026-09-03", "close": 9660.0, "volume": 72400000 },
+      { "date": "2026-09-04", "close": 9720.0, "volume": 89000000 },
+      { "date": "2026-09-05", "close": 9750.0, "volume": 84500000 },
+      { "date": "2026-09-08", "close": 9730.0, "volume": 76000000 },
+      { "date": "2026-09-09", "close": 9780.0, "volume": 90100000 },
+      { "date": "2026-09-10", "close": 9810.0, "volume": 92300000 },
+      { "date": "2026-09-11", "close": 9800.0, "volume": 85400000 },
+      { "date": "2026-09-12", "close": 9820.0, "volume": 88700000 },
+      { "date": "2026-09-15", "close": 9840.0, "volume": 95100000 },
+      { "date": "2026-09-16", "close": 9850.0, "volume": 98000000 }
+    ]
+  },
+  {
+    "symbol": "BBRI.JK",
+    "company_name": "PT Bank Rakyat Indonesia (Persero) Tbk.",
+    "market": "IDX",
+    "overview": {
+      "listing_board": "Main",
+      "industry": "Banks",
+      "sub_industry": "Banks",
+      "sector": "Financials",
+      "sub_sector": "Banks",
+      "market_cap": 709296000000000,
+      "market_cap_rank": 2,
+      "last_close_price": 4680.0,
+      "latest_close_date": "2026-09-17",
+      "daily_close_change": -0.0063694,
+      "price_change": -30.0,
+      "all_time_price": {
+        "52_w_high": 6350.0,
+        "52_w_low": 4200.0
+      }
+    },
+    "valuation": {
+      "last_close_price": 4680.0,
+      "forward_pe": 10.4,
+      "intrinsic_value": 5800.0,
+      "historical_valuation": [
+        {
+          "year": 2024,
+          "pe": 12.1,
+          "pb": 2.2,
+          "ps": 4.1
+        }
+      ]
+    },
+    "future": {
+      "analyst_rating_breakdown": {
+        "strong_buy": 6,
+        "buy": 6,
+        "hold": 9,
+        "sell": 5,
+        "strong_sell": 1,
+        "n_analyst": 27
+      }
+    },
+    "financials": {
+      "eps": 395.2,
+      "historical_financial_ratio": [
+        {
+          "year": "2024",
+          "profitability": {
+            "roa": 0.027,
+            "roe": 0.185,
+            "net_profit_margin": 0.32
+          }
+        }
+      ]
+    },
+    "dividend": {
+      "yield_ttm": 0.054,
+      "dividend_ttm": 319.0,
+      "payout_ratio": 0.70,
+      "last_ex_dividend_date": "2026-03-22"
+    },
+    "daily_prices": [
+      { "date": "2026-09-01", "close": 4820.0, "volume": 120400000 },
+      { "date": "2026-09-02", "close": 4800.0, "volume": 115000000 },
+      { "date": "2026-09-03", "close": 4770.0, "volume": 108000000 },
+      { "date": "2026-09-04", "close": 4720.0, "volume": 130000000 },
+      { "date": "2026-09-05", "close": 4740.0, "volume": 99000000 },
+      { "date": "2026-09-08", "close": 4710.0, "volume": 105000000 },
+      { "date": "2026-09-09", "close": 4690.0, "volume": 112000000 },
+      { "date": "2026-09-10", "close": 4680.0, "volume": 98000000 },
+      { "date": "2026-09-11", "close": 4700.0, "volume": 94000000 },
+      { "date": "2026-09-12", "close": 4690.0, "volume": 89000000 },
+      { "date": "2026-09-15", "close": 4690.0, "volume": 91000000 },
+      { "date": "2026-09-16", "close": 4680.0, "volume": 104000000 }
+    ]
+  },
+  {
+    "symbol": "DCII.JK",
+    "company_name": "PT DCI Indonesia Tbk.",
+    "market": "IDX",
+    "overview": {
+      "listing_board": "Main",
+      "industry": "Data Center",
+      "sub_industry": "Data Center Services",
+      "sector": "Technology",
+      "sub_sector": "IT Services",
+      "market_cap": 101314000000000,
+      "market_cap_rank": 8,
+      "last_close_price": 42500.0,
+      "latest_close_date": "2026-09-17",
+      "daily_close_change": 0.020408,
+      "price_change": 850.0,
+      "all_time_price": {
+        "52_w_high": 48000.0,
+        "52_w_low": 32000.0
+      }
+    },
+    "valuation": {
+      "last_close_price": 42500.0,
+      "forward_pe": 48.5,
+      "intrinsic_value": 46000.0,
+      "historical_valuation": [
+        {
+          "year": 2024,
+          "pe": 55.4,
+          "pb": 16.8,
+          "ps": 22.1
+        }
+      ]
+    },
+    "future": {
+      "analyst_rating_breakdown": {
+        "strong_buy": 12,
+        "buy": 3,
+        "hold": 2,
+        "sell": 1,
+        "strong_sell": 0,
+        "n_analyst": 18
+      }
+    },
+    "financials": {
+      "eps": 780.0,
+      "historical_financial_ratio": [
+        {
+          "year": "2024",
+          "profitability": {
+            "roa": 0.142,
+            "roe": 0.285,
+            "net_profit_margin": 0.38
+          }
+        }
+      ]
+    },
+    "dividend": {
+      "yield_ttm": 0.008,
+      "dividend_ttm": 320.0,
+      "payout_ratio": 0.25,
+      "last_ex_dividend_date": "2026-05-10"
+    },
+    "daily_prices": [
+      { "date": "2026-09-01", "close": 39500.0, "volume": 1200000 },
+      { "date": "2026-09-02", "close": 39800.0, "volume": 1350000 },
+      { "date": "2026-09-03", "close": 40200.0, "volume": 1100000 },
+      { "date": "2026-09-04", "close": 40700.0, "volume": 1500000 },
+      { "date": "2026-09-05", "close": 41100.0, "volume": 1800000 },
+      { "date": "2026-09-08", "close": 41300.0, "volume": 1400000 },
+      { "date": "2026-09-09", "close": 41600.0, "volume": 1650000 },
+      { "date": "2026-09-10", "close": 41900.0, "volume": 1900000 },
+      { "date": "2026-09-11", "close": 42000.0, "volume": 1750000 },
+      { "date": "2026-09-12", "close": 42200.0, "volume": 2100000 },
+      { "date": "2026-09-15", "close": 42350.0, "volume": 2400000 },
+      { "date": "2026-09-16", "close": 42500.0, "volume": 2800000 }
+    ]
+  },
+  {
+    "symbol": "BMRI.JK",
+    "company_name": "PT Bank Mandiri (Persero) Tbk.",
+    "market": "IDX",
+    "overview": {
+      "listing_board": "Main",
+      "industry": "Banks",
+      "sub_industry": "Banks",
+      "sector": "Financials",
+      "sub_sector": "Banks",
+      "market_cap": 602000000000000,
+      "market_cap_rank": 3,
+      "last_close_price": 6450.0,
+      "latest_close_date": "2026-09-17",
+      "daily_close_change": 0.0078125,
+      "price_change": 50.0,
+      "all_time_price": {
+        "52_w_high": 7500.0,
+        "52_w_low": 5600.0
+      }
+    },
+    "valuation": {
+      "last_close_price": 6450.0,
+      "forward_pe": 10.8,
+      "intrinsic_value": 7400.0,
+      "historical_valuation": [
+        {
+          "year": 2024,
+          "pe": 11.8,
+          "pb": 2.3,
+          "ps": 4.6
+        }
+      ]
+    },
+    "future": {
+      "analyst_rating_breakdown": {
+        "strong_buy": 15,
+        "buy": 4,
+        "hold": 5,
+        "sell": 1,
+        "strong_sell": 0,
+        "n_analyst": 25
+      }
+    },
+    "financials": {
+      "eps": 590.8,
+      "historical_financial_ratio": [
+        {
+          "year": "2024",
+          "profitability": {
+            "roa": 0.029,
+            "roe": 0.205,
+            "net_profit_margin": 0.36
+          }
+        }
+      ]
+    },
+    "dividend": {
+      "yield_ttm": 0.051,
+      "dividend_ttm": 353.0,
+      "payout_ratio": 0.60,
+      "last_ex_dividend_date": "2026-04-02"
+    },
+    "daily_prices": [
+      { "date": "2026-09-01", "close": 6300.0, "volume": 75000000 },
+      { "date": "2026-09-02", "close": 6325.0, "volume": 71000000 },
+      { "date": "2026-09-03", "close": 6350.0, "volume": 68000000 },
+      { "date": "2026-09-04", "close": 6325.0, "volume": 80000000 },
+      { "date": "2026-09-05", "close": 6375.0, "volume": 82000000 },
+      { "date": "2026-09-08", "close": 6400.0, "volume": 79000000 },
+      { "date": "2026-09-09", "close": 6425.0, "volume": 86000000 },
+      { "date": "2026-09-10", "close": 6425.0, "volume": 84000000 },
+      { "date": "2026-09-11", "close": 6400.0, "volume": 78000000 },
+      { "date": "2026-09-12", "close": 6425.0, "volume": 81000000 },
+      { "date": "2026-09-15", "close": 6450.0, "volume": 88000000 },
+      { "date": "2026-09-16", "close": 6450.0, "volume": 92000000 }
+    ]
+  },
+  {
+    "symbol": "BYAN.JK",
+    "company_name": "PT Bayan Resources Tbk.",
+    "market": "IDX",
+    "overview": {
+      "listing_board": "Main",
+      "industry": "Coal Mining",
+      "sub_industry": "Thermal Coal",
+      "sector": "Energy",
+      "sub_sector": "Oil, Gas & Coal",
+      "market_cap": 573330000000000,
+      "market_cap_rank": 4,
+      "last_close_price": 17200.0,
+      "latest_close_date": "2026-09-17",
+      "daily_close_change": -0.0086455,
+      "price_change": -150.0,
+      "all_time_price": {
+        "52_w_high": 21500.0,
+        "52_w_low": 16000.0
+      }
+    },
+    "valuation": {
+      "last_close_price": 17200.0,
+      "forward_pe": 18.2,
+      "intrinsic_value": 16500.0,
+      "historical_valuation": [
+        {
+          "year": 2024,
+          "pe": 19.5,
+          "pb": 10.2,
+          "ps": 6.8
+        }
+      ]
+    },
+    "future": {
+      "analyst_rating_breakdown": {
+        "strong_buy": 3,
+        "buy": 3,
+        "hold": 8,
+        "sell": 8,
+        "strong_sell": 2,
+        "n_analyst": 24
+      }
+    },
+    "financials": {
+      "eps": 950.0,
+      "historical_financial_ratio": [
+        {
+          "year": "2024",
+          "profitability": {
+            "roa": 0.28,
+            "roe": 0.42,
+            "net_profit_margin": 0.31
+          }
+        }
+      ]
+    },
+    "dividend": {
+      "yield_ttm": 0.065,
+      "dividend_ttm": 1150.0,
+      "payout_ratio": 0.75,
+      "last_ex_dividend_date": "2026-05-18"
+    },
+    "daily_prices": [
+      { "date": "2026-09-01", "close": 17750.0, "volume": 12500000 },
+      { "date": "2026-09-02", "close": 17650.0, "volume": 11800000 },
+      { "date": "2026-09-03", "close": 17500.0, "volume": 14200000 },
+      { "date": "2026-09-04", "close": 17550.0, "volume": 13000000 },
+      { "date": "2026-09-05", "close": 17400.0, "volume": 15600000 },
+      { "date": "2026-09-08", "close": 17350.0, "volume": 14800000 },
+      { "date": "2026-09-09", "close": 17300.0, "volume": 16000000 },
+      { "date": "2026-09-10", "close": 17250.0, "volume": 13500000 },
+      { "date": "2026-09-11", "close": 17280.0, "volume": 12800000 },
+      { "date": "2026-09-12", "close": 17250.0, "volume": 13100000 },
+      { "date": "2026-09-15", "close": 17220.0, "volume": 14500000 },
+      { "date": "2026-09-16", "close": 17200.0, "volume": 16200000 }
+    ]
+  }
+]

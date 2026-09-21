@@ -15,12 +15,7 @@ struct ContentView: View {
 
             ChatbotView()
                 .tabItem {
-                    Label("Chat", systemImage: "message")
-                }
-
-            NotificationView()
-                .tabItem {
-                    Label("Alerts", systemImage: "bell")
+                    Label("Chatbot", systemImage: "bubble.left.and.bubble.right")
                 }
         }
     }
