@@ -4,6 +4,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     sectors_api_key: str = ""
     openai_api_key: str = ""
+    gemini_api_key: str = ""
     database_url: str = "postgresql+asyncpg://postgres:password@localhost:5432/invelio"
     supabase_url: str = ""
     supabase_key: str = ""
@@ -11,7 +12,20 @@ class Settings(BaseSettings):
     log_level: str = "info"
     cors_origins: list[str] = ["*"]
 
-    sectors_base_url: str = "https://api.sectors.app/v1"
+    sectors_base_url: str = "https://api.sectors.app/v2"
+    use_mock_sectors: bool = True
+    tracked_tickers: list[str] = [
+        "BBCA",
+        "BBRI",
+        "BMRI",
+        "BBNI",
+        "TLKM",
+        "ASII",
+        "UNVR",
+        "ICBP",
+        "AMRT",
+        "ANTM",
+    ]
 
     # Cache TTLs (seconds) — matches implementation plan Section 5.2
     cache_ttl_prices: int = 300  # 5 min — /daily, /most-traded, /top-companies

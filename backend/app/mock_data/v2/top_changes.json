@@ -1,0 +1,376 @@
+{
+ "top_gainers": {
+  "1d": [
+   {
+    "name": "Aneka Tambang Tbk.",
+    "symbol": "ANTM.JK",
+    "price_change": 0.0198,
+    "last_close_price": 3340,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "Unilever Indonesia Tbk",
+    "symbol": "UNVR.JK",
+    "price_change": 0.0061,
+    "last_close_price": 1650,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Bank Rakyat Indonesia (Persero) Tbk",
+    "symbol": "BBRI.JK",
+    "price_change": -0.0045,
+    "last_close_price": 3310,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "Indofood CBP Sukses Makmur Tbk",
+    "symbol": "ICBP.JK",
+    "price_change": -0.0072,
+    "last_close_price": 6900,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Bank Central Asia Tbk.",
+    "symbol": "BBCA.JK",
+    "price_change": -0.0079,
+    "last_close_price": 6300,
+    "latest_close_date": "2026-09-18"
+   }
+  ],
+  "7d": [
+   {
+    "name": "Unilever Indonesia Tbk",
+    "symbol": "UNVR.JK",
+    "price_change": 0.068,
+    "last_close_price": 1650,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Telkom Indonesia (Persero) Tbk",
+    "symbol": "TLKM.JK",
+    "price_change": 0.024,
+    "last_close_price": 2560,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Bank Rakyat Indonesia (Persero) Tbk",
+    "symbol": "BBRI.JK",
+    "price_change": 0.0185,
+    "last_close_price": 3310,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "Indofood CBP Sukses Makmur Tbk",
+    "symbol": "ICBP.JK",
+    "price_change": 0.0147,
+    "last_close_price": 6900,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "Aneka Tambang Tbk.",
+    "symbol": "ANTM.JK",
+    "price_change": 0.0045,
+    "last_close_price": 3340,
+    "latest_close_date": "2026-09-18"
+   }
+  ],
+  "14d": [
+   {
+    "name": "Astra International Tbk",
+    "symbol": "ASII.JK",
+    "price_change": 0.0771,
+    "last_close_price": 4820,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Bank Negara Indonesia (Persero) Tbk",
+    "symbol": "BBNI.JK",
+    "price_change": 0.058,
+    "last_close_price": 3650,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Bank Rakyat Indonesia (Persero) Tbk",
+    "symbol": "BBRI.JK",
+    "price_change": 0.0344,
+    "last_close_price": 3310,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Bank Central Asia Tbk.",
+    "symbol": "BBCA.JK",
+    "price_change": 0.0202,
+    "last_close_price": 6300,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "Indofood CBP Sukses Makmur Tbk",
+    "symbol": "ICBP.JK",
+    "price_change": 0.011,
+    "last_close_price": 6900,
+    "latest_close_date": "2026-09-18"
+   }
+  ],
+  "30d": [
+   {
+    "name": "PT Bank Negara Indonesia (Persero) Tbk",
+    "symbol": "BBNI.JK",
+    "price_change": 0.0815,
+    "last_close_price": 3650,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "Indofood CBP Sukses Makmur Tbk",
+    "symbol": "ICBP.JK",
+    "price_change": 0.0781,
+    "last_close_price": 6900,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "Astra International Tbk",
+    "symbol": "ASII.JK",
+    "price_change": 0.0593,
+    "last_close_price": 4820,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Bank Mandiri (Persero) Tbk",
+    "symbol": "BMRI.JK",
+    "price_change": 0.0454,
+    "last_close_price": 4260,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "Unilever Indonesia Tbk",
+    "symbol": "UNVR.JK",
+    "price_change": 0.0377,
+    "last_close_price": 1650,
+    "latest_close_date": "2026-09-18"
+   }
+  ],
+  "365d": [
+   {
+    "name": "PT Sumber Alfaria Trijaya Tbk.",
+    "symbol": "AMRT.JK",
+    "price_change": 0.3757,
+    "last_close_price": 1300,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Bank Mandiri (Persero) Tbk",
+    "symbol": "BMRI.JK",
+    "price_change": 0.2812,
+    "last_close_price": 4260,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "Indofood CBP Sukses Makmur Tbk",
+    "symbol": "ICBP.JK",
+    "price_change": 0.2,
+    "last_close_price": 6900,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Bank Rakyat Indonesia (Persero) Tbk",
+    "symbol": "BBRI.JK",
+    "price_change": 0.1414,
+    "last_close_price": 3310,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "Astra International Tbk",
+    "symbol": "ASII.JK",
+    "price_change": 0.0831,
+    "last_close_price": 4820,
+    "latest_close_date": "2026-09-18"
+   }
+  ]
+ },
+ "top_losers": {
+  "1d": [
+   {
+    "name": "PT Bank Negara Indonesia (Persero) Tbk",
+    "symbol": "BBNI.JK",
+    "price_change": -0.0267,
+    "last_close_price": 3650,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Bank Mandiri (Persero) Tbk",
+    "symbol": "BMRI.JK",
+    "price_change": -0.0207,
+    "last_close_price": 4260,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Sumber Alfaria Trijaya Tbk.",
+    "symbol": "AMRT.JK",
+    "price_change": -0.0189,
+    "last_close_price": 1300,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "Astra International Tbk",
+    "symbol": "ASII.JK",
+    "price_change": -0.0163,
+    "last_close_price": 4820,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Telkom Indonesia (Persero) Tbk",
+    "symbol": "TLKM.JK",
+    "price_change": -0.0154,
+    "last_close_price": 2560,
+    "latest_close_date": "2026-09-18"
+   }
+  ],
+  "7d": [
+   {
+    "name": "PT Sumber Alfaria Trijaya Tbk.",
+    "symbol": "AMRT.JK",
+    "price_change": -0.0511,
+    "last_close_price": 1300,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Bank Mandiri (Persero) Tbk",
+    "symbol": "BMRI.JK",
+    "price_change": -0.048,
+    "last_close_price": 4260,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "Astra International Tbk",
+    "symbol": "ASII.JK",
+    "price_change": -0.0163,
+    "last_close_price": 4820,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Bank Central Asia Tbk.",
+    "symbol": "BBCA.JK",
+    "price_change": -0.0118,
+    "last_close_price": 6300,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Bank Negara Indonesia (Persero) Tbk",
+    "symbol": "BBNI.JK",
+    "price_change": 0.0,
+    "last_close_price": 3650,
+    "latest_close_date": "2026-09-18"
+   }
+  ],
+  "14d": [
+   {
+    "name": "PT Bank Mandiri (Persero) Tbk",
+    "symbol": "BMRI.JK",
+    "price_change": -0.0427,
+    "last_close_price": 4260,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "Unilever Indonesia Tbk",
+    "symbol": "UNVR.JK",
+    "price_change": -0.0265,
+    "last_close_price": 1650,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "Aneka Tambang Tbk.",
+    "symbol": "ANTM.JK",
+    "price_change": -0.0104,
+    "last_close_price": 3340,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Telkom Indonesia (Persero) Tbk",
+    "symbol": "TLKM.JK",
+    "price_change": -0.0058,
+    "last_close_price": 2560,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Sumber Alfaria Trijaya Tbk.",
+    "symbol": "AMRT.JK",
+    "price_change": -0.0038,
+    "last_close_price": 1300,
+    "latest_close_date": "2026-09-18"
+   }
+  ],
+  "30d": [
+   {
+    "name": "PT Telkom Indonesia (Persero) Tbk",
+    "symbol": "TLKM.JK",
+    "price_change": -0.0691,
+    "last_close_price": 2560,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Bank Central Asia Tbk.",
+    "symbol": "BBCA.JK",
+    "price_change": -0.0156,
+    "last_close_price": 6300,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "Aneka Tambang Tbk.",
+    "symbol": "ANTM.JK",
+    "price_change": -0.003,
+    "last_close_price": 3340,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Bank Rakyat Indonesia (Persero) Tbk",
+    "symbol": "BBRI.JK",
+    "price_change": 0.0107,
+    "last_close_price": 3310,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Sumber Alfaria Trijaya Tbk.",
+    "symbol": "AMRT.JK",
+    "price_change": 0.0317,
+    "last_close_price": 1300,
+    "latest_close_date": "2026-09-18"
+   }
+  ],
+  "365d": [
+   {
+    "name": "PT Telkom Indonesia (Persero) Tbk",
+    "symbol": "TLKM.JK",
+    "price_change": -0.043,
+    "last_close_price": 2560,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "Aneka Tambang Tbk.",
+    "symbol": "ANTM.JK",
+    "price_change": -0.003,
+    "last_close_price": 3340,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Bank Central Asia Tbk.",
+    "symbol": "BBCA.JK",
+    "price_change": 0.0,
+    "last_close_price": 6300,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "Unilever Indonesia Tbk",
+    "symbol": "UNVR.JK",
+    "price_change": 0.0312,
+    "last_close_price": 1650,
+    "latest_close_date": "2026-09-18"
+   },
+   {
+    "name": "PT Bank Negara Indonesia (Persero) Tbk",
+    "symbol": "BBNI.JK",
+    "price_change": 0.0815,
+    "last_close_price": 3650,
+    "latest_close_date": "2026-09-18"
+   }
+  ]
+ }
+}

@@ -1,0 +1,872 @@
+[
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-05-21",
+  "close": 1750,
+  "open": 1750,
+  "high": 1765,
+  "low": 1745,
+  "volume": 209904453,
+  "market_cap": 66762500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-05-22",
+  "close": 1700,
+  "open": 1710,
+  "high": 1710,
+  "low": 1685,
+  "volume": 203216753,
+  "market_cap": 64855000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-05-25",
+  "close": 1700,
+  "open": 1715,
+  "high": 1725,
+  "low": 1685,
+  "volume": 156639625,
+  "market_cap": 64855000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-05-26",
+  "close": 1785,
+  "open": 1770,
+  "high": 1790,
+  "low": 1760,
+  "volume": 152584649,
+  "market_cap": 68097750000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-05-27",
+  "close": 1770,
+  "open": 1760,
+  "high": 1780,
+  "low": 1750,
+  "volume": 163304912,
+  "market_cap": 67525500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-05-28",
+  "close": 1815,
+  "open": 1825,
+  "high": 1835,
+  "low": 1805,
+  "volume": 213815499,
+  "market_cap": 69242250000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-05-29",
+  "close": 1765,
+  "open": 1775,
+  "high": 1780,
+  "low": 1760,
+  "volume": 115893975,
+  "market_cap": 67334750000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-06-01",
+  "close": 1720,
+  "open": 1715,
+  "high": 1725,
+  "low": 1710,
+  "volume": 173259220,
+  "market_cap": 65618000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-06-02",
+  "close": 1755,
+  "open": 1740,
+  "high": 1765,
+  "low": 1740,
+  "volume": 223351129,
+  "market_cap": 66953250000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-06-03",
+  "close": 1785,
+  "open": 1770,
+  "high": 1800,
+  "low": 1760,
+  "volume": 246108060,
+  "market_cap": 68097750000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-06-04",
+  "close": 1795,
+  "open": 1790,
+  "high": 1810,
+  "low": 1790,
+  "volume": 176932347,
+  "market_cap": 68479250000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-06-05",
+  "close": 1795,
+  "open": 1800,
+  "high": 1800,
+  "low": 1790,
+  "volume": 127060762,
+  "market_cap": 68479250000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-06-08",
+  "close": 1770,
+  "open": 1770,
+  "high": 1775,
+  "low": 1760,
+  "volume": 208261114,
+  "market_cap": 67525500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-06-09",
+  "close": 1760,
+  "open": 1760,
+  "high": 1770,
+  "low": 1755,
+  "volume": 221950819,
+  "market_cap": 67144000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-06-10",
+  "close": 1705,
+  "open": 1710,
+  "high": 1710,
+  "low": 1695,
+  "volume": 233735112,
+  "market_cap": 65045750000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-06-11",
+  "close": 1690,
+  "open": 1705,
+  "high": 1710,
+  "low": 1675,
+  "volume": 121331117,
+  "market_cap": 64473500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-06-12",
+  "close": 1650,
+  "open": 1660,
+  "high": 1670,
+  "low": 1650,
+  "volume": 255664538,
+  "market_cap": 62947500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-06-15",
+  "close": 1610,
+  "open": 1590,
+  "high": 1620,
+  "low": 1590,
+  "volume": 77528221,
+  "market_cap": 61421500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-06-16",
+  "close": 1590,
+  "open": 1605,
+  "high": 1615,
+  "low": 1585,
+  "volume": 196009530,
+  "market_cap": 60658500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-06-17",
+  "close": 1590,
+  "open": 1595,
+  "high": 1600,
+  "low": 1580,
+  "volume": 222246002,
+  "market_cap": 60658500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-06-18",
+  "close": 1620,
+  "open": 1600,
+  "high": 1625,
+  "low": 1595,
+  "volume": 132364655,
+  "market_cap": 61803000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-06-19",
+  "close": 1625,
+  "open": 1630,
+  "high": 1635,
+  "low": 1620,
+  "volume": 218340499,
+  "market_cap": 61993750000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-06-22",
+  "close": 1620,
+  "open": 1635,
+  "high": 1635,
+  "low": 1605,
+  "volume": 82923675,
+  "market_cap": 61803000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-06-23",
+  "close": 1675,
+  "open": 1675,
+  "high": 1680,
+  "low": 1665,
+  "volume": 76100801,
+  "market_cap": 63901250000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-06-24",
+  "close": 1635,
+  "open": 1645,
+  "high": 1660,
+  "low": 1630,
+  "volume": 82788414,
+  "market_cap": 62375250000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-06-25",
+  "close": 1590,
+  "open": 1600,
+  "high": 1610,
+  "low": 1575,
+  "volume": 229032095,
+  "market_cap": 60658500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-06-26",
+  "close": 1600,
+  "open": 1595,
+  "high": 1610,
+  "low": 1595,
+  "volume": 227886132,
+  "market_cap": 61040000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-06-29",
+  "close": 1625,
+  "open": 1620,
+  "high": 1630,
+  "low": 1620,
+  "volume": 228320356,
+  "market_cap": 61993750000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-06-30",
+  "close": 1665,
+  "open": 1670,
+  "high": 1675,
+  "low": 1650,
+  "volume": 180900630,
+  "market_cap": 63519750000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-07-01",
+  "close": 1700,
+  "open": 1690,
+  "high": 1705,
+  "low": 1680,
+  "volume": 139557974,
+  "market_cap": 64855000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-07-02",
+  "close": 1700,
+  "open": 1705,
+  "high": 1715,
+  "low": 1695,
+  "volume": 260310113,
+  "market_cap": 64855000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-07-03",
+  "close": 1675,
+  "open": 1665,
+  "high": 1675,
+  "low": 1665,
+  "volume": 205443001,
+  "market_cap": 63901250000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-07-06",
+  "close": 1650,
+  "open": 1640,
+  "high": 1665,
+  "low": 1635,
+  "volume": 251376809,
+  "market_cap": 62947500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-07-07",
+  "close": 1615,
+  "open": 1605,
+  "high": 1615,
+  "low": 1595,
+  "volume": 149367658,
+  "market_cap": 61612250000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-07-08",
+  "close": 1590,
+  "open": 1580,
+  "high": 1590,
+  "low": 1565,
+  "volume": 125035158,
+  "market_cap": 60658500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-07-09",
+  "close": 1610,
+  "open": 1610,
+  "high": 1620,
+  "low": 1595,
+  "volume": 169926918,
+  "market_cap": 61421500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-07-10",
+  "close": 1635,
+  "open": 1635,
+  "high": 1645,
+  "low": 1630,
+  "volume": 137460987,
+  "market_cap": 62375250000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-07-13",
+  "close": 1675,
+  "open": 1680,
+  "high": 1680,
+  "low": 1675,
+  "volume": 116102387,
+  "market_cap": 63901250000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-07-14",
+  "close": 1635,
+  "open": 1635,
+  "high": 1640,
+  "low": 1620,
+  "volume": 237954690,
+  "market_cap": 62375250000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-07-15",
+  "close": 1660,
+  "open": 1665,
+  "high": 1680,
+  "low": 1660,
+  "volume": 220643711,
+  "market_cap": 63329000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-07-16",
+  "close": 1710,
+  "open": 1730,
+  "high": 1735,
+  "low": 1710,
+  "volume": 164548920,
+  "market_cap": 65236500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-07-17",
+  "close": 1690,
+  "open": 1690,
+  "high": 1690,
+  "low": 1685,
+  "volume": 229871883,
+  "market_cap": 64473500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-07-20",
+  "close": 1640,
+  "open": 1645,
+  "high": 1645,
+  "low": 1635,
+  "volume": 252642382,
+  "market_cap": 62566000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-07-21",
+  "close": 1670,
+  "open": 1660,
+  "high": 1685,
+  "low": 1645,
+  "volume": 136698827,
+  "market_cap": 63710500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-07-22",
+  "close": 1700,
+  "open": 1705,
+  "high": 1720,
+  "low": 1700,
+  "volume": 179292702,
+  "market_cap": 64855000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-07-23",
+  "close": 1720,
+  "open": 1710,
+  "high": 1720,
+  "low": 1710,
+  "volume": 144751527,
+  "market_cap": 65618000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-07-24",
+  "close": 1745,
+  "open": 1735,
+  "high": 1745,
+  "low": 1725,
+  "volume": 228443920,
+  "market_cap": 66571750000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-07-27",
+  "close": 1715,
+  "open": 1715,
+  "high": 1730,
+  "low": 1700,
+  "volume": 152047085,
+  "market_cap": 65427250000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-07-28",
+  "close": 1725,
+  "open": 1730,
+  "high": 1730,
+  "low": 1710,
+  "volume": 105483077,
+  "market_cap": 65808750000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-07-29",
+  "close": 1685,
+  "open": 1690,
+  "high": 1700,
+  "low": 1680,
+  "volume": 133121018,
+  "market_cap": 64282750000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-07-30",
+  "close": 1730,
+  "open": 1745,
+  "high": 1755,
+  "low": 1730,
+  "volume": 182937216,
+  "market_cap": 65999500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-07-31",
+  "close": 1705,
+  "open": 1700,
+  "high": 1705,
+  "low": 1685,
+  "volume": 179744649,
+  "market_cap": 65045750000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-08-03",
+  "close": 1700,
+  "open": 1700,
+  "high": 1700,
+  "low": 1690,
+  "volume": 115960313,
+  "market_cap": 64855000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-08-04",
+  "close": 1660,
+  "open": 1660,
+  "high": 1665,
+  "low": 1645,
+  "volume": 251597465,
+  "market_cap": 63329000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-08-05",
+  "close": 1660,
+  "open": 1645,
+  "high": 1665,
+  "low": 1640,
+  "volume": 110878580,
+  "market_cap": 63329000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-08-06",
+  "close": 1630,
+  "open": 1625,
+  "high": 1630,
+  "low": 1620,
+  "volume": 205840692,
+  "market_cap": 62184500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-08-07",
+  "close": 1635,
+  "open": 1630,
+  "high": 1635,
+  "low": 1615,
+  "volume": 200711530,
+  "market_cap": 62375250000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-08-10",
+  "close": 1585,
+  "open": 1600,
+  "high": 1610,
+  "low": 1585,
+  "volume": 113496430,
+  "market_cap": 60467750000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-08-11",
+  "close": 1585,
+  "open": 1590,
+  "high": 1605,
+  "low": 1575,
+  "volume": 144641980,
+  "market_cap": 60467750000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-08-12",
+  "close": 1610,
+  "open": 1605,
+  "high": 1620,
+  "low": 1605,
+  "volume": 250523125,
+  "market_cap": 61421500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-08-13",
+  "close": 1620,
+  "open": 1615,
+  "high": 1630,
+  "low": 1600,
+  "volume": 162875965,
+  "market_cap": 61803000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-08-14",
+  "close": 1630,
+  "open": 1625,
+  "high": 1635,
+  "low": 1615,
+  "volume": 232501454,
+  "market_cap": 62184500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-08-17",
+  "close": 1615,
+  "open": 1610,
+  "high": 1630,
+  "low": 1605,
+  "volume": 75942217,
+  "market_cap": 61612250000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-08-18",
+  "close": 1585,
+  "open": 1585,
+  "high": 1600,
+  "low": 1575,
+  "volume": 238821461,
+  "market_cap": 60467750000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-08-19",
+  "close": 1550,
+  "open": 1555,
+  "high": 1560,
+  "low": 1540,
+  "volume": 246187736,
+  "market_cap": 59132500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-08-20",
+  "close": 1590,
+  "open": 1580,
+  "high": 1600,
+  "low": 1565,
+  "volume": 182576006,
+  "market_cap": 60658500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-08-21",
+  "close": 1590,
+  "open": 1590,
+  "high": 1595,
+  "low": 1590,
+  "volume": 239149634,
+  "market_cap": 60658500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-08-24",
+  "close": 1630,
+  "open": 1635,
+  "high": 1640,
+  "low": 1620,
+  "volume": 218041200,
+  "market_cap": 62184500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-08-25",
+  "close": 1610,
+  "open": 1605,
+  "high": 1610,
+  "low": 1605,
+  "volume": 248960511,
+  "market_cap": 61421500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-08-26",
+  "close": 1620,
+  "open": 1630,
+  "high": 1645,
+  "low": 1615,
+  "volume": 251729197,
+  "market_cap": 61803000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-08-27",
+  "close": 1645,
+  "open": 1635,
+  "high": 1655,
+  "low": 1620,
+  "volume": 202512087,
+  "market_cap": 62756750000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-08-28",
+  "close": 1645,
+  "open": 1650,
+  "high": 1660,
+  "low": 1640,
+  "volume": 165616722,
+  "market_cap": 62756750000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-08-31",
+  "close": 1645,
+  "open": 1655,
+  "high": 1655,
+  "low": 1630,
+  "volume": 145953783,
+  "market_cap": 62756750000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-09-01",
+  "close": 1660,
+  "open": 1665,
+  "high": 1670,
+  "low": 1655,
+  "volume": 162012986,
+  "market_cap": 63329000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-09-02",
+  "close": 1665,
+  "open": 1665,
+  "high": 1670,
+  "low": 1660,
+  "volume": 218504362,
+  "market_cap": 63519750000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-09-03",
+  "close": 1700,
+  "open": 1690,
+  "high": 1705,
+  "low": 1675,
+  "volume": 120191231,
+  "market_cap": 64855000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-09-04",
+  "close": 1695,
+  "open": 1695,
+  "high": 1705,
+  "low": 1685,
+  "volume": 120633640,
+  "market_cap": 64664250000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-09-07",
+  "close": 1625,
+  "open": 1620,
+  "high": 1635,
+  "low": 1605,
+  "volume": 166586474,
+  "market_cap": 61993750000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-09-08",
+  "close": 1650,
+  "open": 1640,
+  "high": 1665,
+  "low": 1640,
+  "volume": 82781416,
+  "market_cap": 62947500000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-09-09",
+  "close": 1620,
+  "open": 1615,
+  "high": 1630,
+  "low": 1605,
+  "volume": 187833129,
+  "market_cap": 61803000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-09-10",
+  "close": 1575,
+  "open": 1570,
+  "high": 1580,
+  "low": 1555,
+  "volume": 202466686,
+  "market_cap": 60086250000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-09-11",
+  "close": 1545,
+  "open": 1535,
+  "high": 1545,
+  "low": 1525,
+  "volume": 148384112,
+  "market_cap": 58941750000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-09-14",
+  "close": 1580,
+  "open": 1590,
+  "high": 1595,
+  "low": 1565,
+  "volume": 143815111,
+  "market_cap": 60277000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-09-15",
+  "close": 1600,
+  "open": 1605,
+  "high": 1620,
+  "low": 1600,
+  "volume": 172858211,
+  "market_cap": 61040000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-09-16",
+  "close": 1635,
+  "open": 1625,
+  "high": 1640,
+  "low": 1610,
+  "volume": 107293135,
+  "market_cap": 62375250000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-09-17",
+  "close": 1640,
+  "open": 1655,
+  "high": 1660,
+  "low": 1635,
+  "volume": 111446606,
+  "market_cap": 62566000000000
+ },
+ {
+  "symbol": "UNVR.JK",
+  "date": "2026-09-18",
+  "close": 1650,
+  "open": 1655,
+  "high": 1665,
+  "low": 1650,
+  "volume": 203916380,
+  "market_cap": 62947500000000
+ }
+]

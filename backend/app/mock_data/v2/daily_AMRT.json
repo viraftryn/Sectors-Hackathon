@@ -1,0 +1,872 @@
+[
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-05-21",
+  "close": 895,
+  "open": 895,
+  "high": 895,
+  "low": 895,
+  "volume": 170844220,
+  "market_cap": 37164429021500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-05-22",
+  "close": 895,
+  "open": 900,
+  "high": 915,
+  "low": 885,
+  "volume": 110470565,
+  "market_cap": 37164429021500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-05-25",
+  "close": 895,
+  "open": 905,
+  "high": 920,
+  "low": 885,
+  "volume": 145267021,
+  "market_cap": 37164429021500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-05-26",
+  "close": 895,
+  "open": 890,
+  "high": 905,
+  "low": 875,
+  "volume": 256293180,
+  "market_cap": 37164429021500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-05-27",
+  "close": 905,
+  "open": 905,
+  "high": 920,
+  "low": 890,
+  "volume": 126694037,
+  "market_cap": 37579674038500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-05-28",
+  "close": 925,
+  "open": 920,
+  "high": 935,
+  "low": 910,
+  "volume": 260616339,
+  "market_cap": 38410164072500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-05-29",
+  "close": 925,
+  "open": 925,
+  "high": 940,
+  "low": 920,
+  "volume": 278789257,
+  "market_cap": 38410164072500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-06-01",
+  "close": 920,
+  "open": 915,
+  "high": 935,
+  "low": 910,
+  "volume": 109052661,
+  "market_cap": 38202541564000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-06-02",
+  "close": 895,
+  "open": 885,
+  "high": 910,
+  "low": 875,
+  "volume": 266612004,
+  "market_cap": 37164429021500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-06-03",
+  "close": 895,
+  "open": 890,
+  "high": 895,
+  "low": 885,
+  "volume": 174009417,
+  "market_cap": 37164429021500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-06-04",
+  "close": 900,
+  "open": 895,
+  "high": 900,
+  "low": 895,
+  "volume": 271650154,
+  "market_cap": 37372051530000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-06-05",
+  "close": 920,
+  "open": 915,
+  "high": 920,
+  "low": 915,
+  "volume": 145669390,
+  "market_cap": 38202541564000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-06-08",
+  "close": 935,
+  "open": 935,
+  "high": 945,
+  "low": 935,
+  "volume": 223470590,
+  "market_cap": 38825409089500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-06-09",
+  "close": 910,
+  "open": 910,
+  "high": 925,
+  "low": 900,
+  "volume": 246540151,
+  "market_cap": 37787296547000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-06-10",
+  "close": 885,
+  "open": 875,
+  "high": 885,
+  "low": 870,
+  "volume": 230501516,
+  "market_cap": 36749184004500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-06-11",
+  "close": 905,
+  "open": 900,
+  "high": 915,
+  "low": 895,
+  "volume": 94058743,
+  "market_cap": 37579674038500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-06-12",
+  "close": 900,
+  "open": 900,
+  "high": 905,
+  "low": 895,
+  "volume": 238088083,
+  "market_cap": 37372051530000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-06-15",
+  "close": 930,
+  "open": 925,
+  "high": 935,
+  "low": 925,
+  "volume": 310684175,
+  "market_cap": 38617786581000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-06-16",
+  "close": 910,
+  "open": 915,
+  "high": 930,
+  "low": 900,
+  "volume": 237106994,
+  "market_cap": 37787296547000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-06-17",
+  "close": 950,
+  "open": 945,
+  "high": 950,
+  "low": 945,
+  "volume": 293223002,
+  "market_cap": 39448276615000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-06-18",
+  "close": 965,
+  "open": 965,
+  "high": 975,
+  "low": 955,
+  "volume": 164647147,
+  "market_cap": 40071144140500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-06-19",
+  "close": 950,
+  "open": 950,
+  "high": 955,
+  "low": 935,
+  "volume": 295592642,
+  "market_cap": 39448276615000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-06-22",
+  "close": 940,
+  "open": 935,
+  "high": 940,
+  "low": 925,
+  "volume": 125865323,
+  "market_cap": 39033031598000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-06-23",
+  "close": 955,
+  "open": 950,
+  "high": 965,
+  "low": 940,
+  "volume": 299483778,
+  "market_cap": 39655899123500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-06-24",
+  "close": 965,
+  "open": 965,
+  "high": 975,
+  "low": 955,
+  "volume": 242623749,
+  "market_cap": 40071144140500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-06-25",
+  "close": 945,
+  "open": 950,
+  "high": 955,
+  "low": 935,
+  "volume": 302682589,
+  "market_cap": 39240654106500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-06-26",
+  "close": 945,
+  "open": 945,
+  "high": 960,
+  "low": 930,
+  "volume": 288128207,
+  "market_cap": 39240654106500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-06-29",
+  "close": 945,
+  "open": 950,
+  "high": 960,
+  "low": 945,
+  "volume": 172563213,
+  "market_cap": 39240654106500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-06-30",
+  "close": 975,
+  "open": 970,
+  "high": 980,
+  "low": 965,
+  "volume": 266456297,
+  "market_cap": 40486389157500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-07-01",
+  "close": 1000,
+  "open": 995,
+  "high": 1000,
+  "low": 985,
+  "volume": 142333136,
+  "market_cap": 41524501700000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-07-02",
+  "close": 1005,
+  "open": 1010,
+  "high": 1010,
+  "low": 990,
+  "volume": 238014661,
+  "market_cap": 41732124208500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-07-03",
+  "close": 1005,
+  "open": 1005,
+  "high": 1010,
+  "low": 990,
+  "volume": 157089988,
+  "market_cap": 41732124208500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-07-06",
+  "close": 1020,
+  "open": 1020,
+  "high": 1025,
+  "low": 1010,
+  "volume": 127608223,
+  "market_cap": 42354991734000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-07-07",
+  "close": 1005,
+  "open": 1005,
+  "high": 1010,
+  "low": 990,
+  "volume": 252276544,
+  "market_cap": 41732124208500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-07-08",
+  "close": 1020,
+  "open": 1005,
+  "high": 1025,
+  "low": 1000,
+  "volume": 282779787,
+  "market_cap": 42354991734000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-07-09",
+  "close": 1000,
+  "open": 1000,
+  "high": 1005,
+  "low": 990,
+  "volume": 121583403,
+  "market_cap": 41524501700000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-07-10",
+  "close": 1005,
+  "open": 1010,
+  "high": 1010,
+  "low": 1005,
+  "volume": 293450310,
+  "market_cap": 41732124208500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-07-13",
+  "close": 1015,
+  "open": 1010,
+  "high": 1015,
+  "low": 1010,
+  "volume": 277217582,
+  "market_cap": 42147369225500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-07-14",
+  "close": 1050,
+  "open": 1040,
+  "high": 1060,
+  "low": 1030,
+  "volume": 197227350,
+  "market_cap": 43600726785000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-07-15",
+  "close": 1060,
+  "open": 1075,
+  "high": 1085,
+  "low": 1045,
+  "volume": 127627882,
+  "market_cap": 44015971802000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-07-16",
+  "close": 1070,
+  "open": 1070,
+  "high": 1080,
+  "low": 1055,
+  "volume": 136448666,
+  "market_cap": 44431216819000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-07-17",
+  "close": 1110,
+  "open": 1110,
+  "high": 1125,
+  "low": 1095,
+  "volume": 297828279,
+  "market_cap": 46092196887000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-07-20",
+  "close": 1110,
+  "open": 1110,
+  "high": 1110,
+  "low": 1100,
+  "volume": 175046935,
+  "market_cap": 46092196887000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-07-21",
+  "close": 1105,
+  "open": 1105,
+  "high": 1105,
+  "low": 1090,
+  "volume": 157489969,
+  "market_cap": 45884574378500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-07-22",
+  "close": 1100,
+  "open": 1095,
+  "high": 1100,
+  "low": 1095,
+  "volume": 238105778,
+  "market_cap": 45676951870000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-07-23",
+  "close": 1080,
+  "open": 1080,
+  "high": 1090,
+  "low": 1070,
+  "volume": 128590584,
+  "market_cap": 44846461836000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-07-24",
+  "close": 1095,
+  "open": 1095,
+  "high": 1105,
+  "low": 1090,
+  "volume": 147089910,
+  "market_cap": 45469329361500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-07-27",
+  "close": 1070,
+  "open": 1075,
+  "high": 1080,
+  "low": 1055,
+  "volume": 181844753,
+  "market_cap": 44431216819000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-07-28",
+  "close": 1045,
+  "open": 1045,
+  "high": 1060,
+  "low": 1035,
+  "volume": 168606039,
+  "market_cap": 43393104276500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-07-29",
+  "close": 1030,
+  "open": 1025,
+  "high": 1035,
+  "low": 1020,
+  "volume": 269611480,
+  "market_cap": 42770236751000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-07-30",
+  "close": 1050,
+  "open": 1055,
+  "high": 1065,
+  "low": 1045,
+  "volume": 211395976,
+  "market_cap": 43600726785000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-07-31",
+  "close": 1065,
+  "open": 1070,
+  "high": 1075,
+  "low": 1050,
+  "volume": 267694814,
+  "market_cap": 44223594310500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-08-03",
+  "close": 1080,
+  "open": 1075,
+  "high": 1085,
+  "low": 1060,
+  "volume": 198859551,
+  "market_cap": 44846461836000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-08-04",
+  "close": 1110,
+  "open": 1125,
+  "high": 1135,
+  "low": 1095,
+  "volume": 153977687,
+  "market_cap": 46092196887000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-08-05",
+  "close": 1105,
+  "open": 1105,
+  "high": 1105,
+  "low": 1090,
+  "volume": 108759432,
+  "market_cap": 45884574378500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-08-06",
+  "close": 1115,
+  "open": 1115,
+  "high": 1125,
+  "low": 1100,
+  "volume": 275184737,
+  "market_cap": 46299819395500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-08-07",
+  "close": 1110,
+  "open": 1115,
+  "high": 1115,
+  "low": 1095,
+  "volume": 253959015,
+  "market_cap": 46092196887000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-08-10",
+  "close": 1125,
+  "open": 1125,
+  "high": 1135,
+  "low": 1115,
+  "volume": 90960966,
+  "market_cap": 46715064412500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-08-11",
+  "close": 1140,
+  "open": 1145,
+  "high": 1145,
+  "low": 1130,
+  "volume": 281571194,
+  "market_cap": 47337931938000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-08-12",
+  "close": 1160,
+  "open": 1165,
+  "high": 1170,
+  "low": 1150,
+  "volume": 166364022,
+  "market_cap": 48168421972000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-08-13",
+  "close": 1165,
+  "open": 1165,
+  "high": 1180,
+  "low": 1150,
+  "volume": 286578337,
+  "market_cap": 48376044480500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-08-14",
+  "close": 1150,
+  "open": 1145,
+  "high": 1155,
+  "low": 1140,
+  "volume": 230566588,
+  "market_cap": 47753176955000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-08-17",
+  "close": 1190,
+  "open": 1195,
+  "high": 1205,
+  "low": 1175,
+  "volume": 228473389,
+  "market_cap": 49414157023000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-08-18",
+  "close": 1195,
+  "open": 1180,
+  "high": 1195,
+  "low": 1180,
+  "volume": 122933685,
+  "market_cap": 49621779531500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-08-19",
+  "close": 1230,
+  "open": 1225,
+  "high": 1235,
+  "low": 1215,
+  "volume": 157765916,
+  "market_cap": 51075137091000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-08-20",
+  "close": 1260,
+  "open": 1260,
+  "high": 1275,
+  "low": 1250,
+  "volume": 286141887,
+  "market_cap": 52320872142000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-08-21",
+  "close": 1225,
+  "open": 1230,
+  "high": 1240,
+  "low": 1210,
+  "volume": 179606139,
+  "market_cap": 50867514582500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-08-24",
+  "close": 1280,
+  "open": 1280,
+  "high": 1285,
+  "low": 1270,
+  "volume": 298004357,
+  "market_cap": 53151362176000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-08-25",
+  "close": 1290,
+  "open": 1290,
+  "high": 1290,
+  "low": 1285,
+  "volume": 124038163,
+  "market_cap": 53566607193000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-08-26",
+  "close": 1265,
+  "open": 1265,
+  "high": 1280,
+  "low": 1265,
+  "volume": 92429469,
+  "market_cap": 52528494650500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-08-27",
+  "close": 1255,
+  "open": 1255,
+  "high": 1270,
+  "low": 1255,
+  "volume": 109873498,
+  "market_cap": 52113249633500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-08-28",
+  "close": 1245,
+  "open": 1245,
+  "high": 1260,
+  "low": 1235,
+  "volume": 138082154,
+  "market_cap": 51698004616500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-08-31",
+  "close": 1250,
+  "open": 1250,
+  "high": 1260,
+  "low": 1235,
+  "volume": 227395505,
+  "market_cap": 51905627125000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-09-01",
+  "close": 1300,
+  "open": 1310,
+  "high": 1310,
+  "low": 1300,
+  "volume": 235732200,
+  "market_cap": 53981852210000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-09-02",
+  "close": 1305,
+  "open": 1315,
+  "high": 1325,
+  "low": 1290,
+  "volume": 191571812,
+  "market_cap": 54189474718500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-09-03",
+  "close": 1320,
+  "open": 1335,
+  "high": 1350,
+  "low": 1315,
+  "volume": 304550055,
+  "market_cap": 54812342244000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-09-04",
+  "close": 1305,
+  "open": 1290,
+  "high": 1310,
+  "low": 1275,
+  "volume": 228422587,
+  "market_cap": 54189474718500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-09-07",
+  "close": 1305,
+  "open": 1300,
+  "high": 1315,
+  "low": 1290,
+  "volume": 194823463,
+  "market_cap": 54189474718500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-09-08",
+  "close": 1325,
+  "open": 1315,
+  "high": 1330,
+  "low": 1315,
+  "volume": 185874382,
+  "market_cap": 55019964752500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-09-09",
+  "close": 1340,
+  "open": 1335,
+  "high": 1350,
+  "low": 1335,
+  "volume": 86520768,
+  "market_cap": 55642832278000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-09-10",
+  "close": 1335,
+  "open": 1340,
+  "high": 1345,
+  "low": 1325,
+  "volume": 150992829,
+  "market_cap": 55435209769500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-09-11",
+  "close": 1370,
+  "open": 1360,
+  "high": 1385,
+  "low": 1345,
+  "volume": 153882405,
+  "market_cap": 56888567329000
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-09-14",
+  "close": 1345,
+  "open": 1340,
+  "high": 1360,
+  "low": 1330,
+  "volume": 220766143,
+  "market_cap": 55850454786500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-09-15",
+  "close": 1315,
+  "open": 1320,
+  "high": 1325,
+  "low": 1300,
+  "volume": 284898249,
+  "market_cap": 54604719735500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-09-16",
+  "close": 1305,
+  "open": 1295,
+  "high": 1320,
+  "low": 1280,
+  "volume": 142701636,
+  "market_cap": 54189474718500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-09-17",
+  "close": 1325,
+  "open": 1320,
+  "high": 1340,
+  "low": 1315,
+  "volume": 145644263,
+  "market_cap": 55019964752500
+ },
+ {
+  "symbol": "AMRT.JK",
+  "date": "2026-09-18",
+  "close": 1300,
+  "open": 1290,
+  "high": 1315,
+  "low": 1285,
+  "volume": 202685602,
+  "market_cap": 53981852210000
+ }
+]
