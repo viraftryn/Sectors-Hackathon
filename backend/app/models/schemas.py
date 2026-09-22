@@ -1,4 +1,7 @@
-from pydantic import BaseModel
+import uuid
+from datetime import datetime
+
+from pydantic import BaseModel, Field
 
 
 class StatusResponse(BaseModel):
@@ -121,3 +124,46 @@ class Alert(BaseModel):
 class AlertList(BaseModel):
     unread_count: int
     alerts: list[Alert]
+
+
+class HoldingLotIn(BaseModel):
+    id: uuid.UUID | None = None
+    ticker: str
+    price_per_share: float = Field(gt=0)
+    shares: float | None = Field(default=None, gt=0)
+    total_invested: float | None = Field(default=None, gt=0)
+    buy_date: datetime | None = None
+
+
+class HoldingLot(BaseModel):
+    id: str
+    ticker: str
+    stock_name: str | None
+    shares: float
+    price_per_share: float
+    total_invested: float
+    buy_date: str
+
+
+class HoldingLotList(BaseModel):
+    lots: list[HoldingLot]
+
+
+class Position(BaseModel):
+    ticker: str
+    name: str
+    shares: float
+    avg_buy_price: float
+    total_cost: float
+    current_price: float
+    current_value: float
+    pnl: float
+    pnl_pct: float
+
+
+class PortfolioSummary(BaseModel):
+    total_cost: float
+    current_value: float
+    pnl: float
+    pnl_pct: float
+    positions: list[Position]

@@ -143,7 +143,64 @@ Query params: `unread_only` (default `false`), `limit` (default 50, max 200).
 Marks one alert as read and returns it (same shape as one item above). Send `X-Device-Id`.
 Returns 404 if the alert does not exist or belongs to another device.
 
+## Portfolio
+
+All portfolio endpoints require the `X-Device-Id` header (400 without it). Holdings are stored per
+device in Supabase `user_holdings`. Fields match the iOS `HoldingLot` model. Only tracked tickers.
+
+### POST /portfolio/lots
+
+Add one buy lot. Send `shares` or `total_invested` (the other is computed). `id` is optional: pass
+the SwiftData `HoldingLot.id` to keep both sides in sync. `buy_date` defaults to now (ISO 8601).
+
+```json
+{"id": "3f2b8c1e-5d4a-4b7e-9c1a-2e6f8d0a1b2c", "ticker": "BBCA", "price_per_share": 6000, "total_invested": 600000, "buy_date": "2026-09-01T00:00:00Z"}
+```
+
+Returns 201:
+
+```json
+{"id": "3f2b8c1e-5d4a-4b7e-9c1a-2e6f8d0a1b2c", "ticker": "BBCA", "stock_name": "PT Bank Central Asia Tbk.", "shares": 100.0, "price_per_share": 6000.0, "total_invested": 600000.0, "buy_date": "2026-09-01T00:00:00Z"}
+```
+
+422 for an untracked ticker or when neither `shares` nor `total_invested` is sent.
+
+### GET /portfolio/lots
+
+`{"lots": [ ...same shape as above... ]}`, newest `buy_date` first.
+
+### DELETE /portfolio/lots/{id}
+
+204 on success, 404 if the lot does not exist or belongs to another device.
+
+### GET /portfolio
+
+Positions grouped by ticker, valued at the latest close.
+
+```json
+{
+  "total_cost": 1300000.0,
+  "current_value": 1260000.0,
+  "pnl": -40000.0,
+  "pnl_pct": -3.08,
+  "positions": [
+    {
+      "ticker": "BBCA",
+      "name": "PT Bank Central Asia Tbk.",
+      "shares": 200.0,
+      "avg_buy_price": 6500.0,
+      "total_cost": 1300000.0,
+      "current_price": 6300.0,
+      "current_value": 1260000.0,
+      "pnl": -40000.0,
+      "pnl_pct": -3.08
+    }
+  ]
+}
+```
+
 ## Errors
 
-- `404` `{"detail": "..."}`: unknown or untracked ticker.
+- `400` `{"detail": "X-Device-Id header is required"}`: portfolio call without the header.
+- `404` `{"detail": "..."}`: unknown or untracked ticker, or a lot/alert not owned by the device.
 - `502` `{"detail": "Market data unavailable", "upstream_status": 429}`: the market data provider failed.
