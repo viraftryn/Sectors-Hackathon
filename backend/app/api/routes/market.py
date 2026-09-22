@@ -1,3 +1,5 @@
+import logging
+from collections.abc import Awaitable
 from typing import Any, cast
 
 from fastapi import APIRouter, Depends
@@ -5,7 +7,7 @@ from fastapi import APIRouter, Depends
 from app.api.deps import get_sectors
 from app.api.routes.stocks import pct
 from app.clients.cached_sectors import CachedSectorsClient
-from app.clients.sectors import bare_symbol
+from app.clients.sectors import SectorsError, bare_symbol
 from app.models.schemas import (
     ForeignFlow,
     IndexPoint,
@@ -16,14 +18,24 @@ from app.models.schemas import (
 )
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
+
+
+async def optional(call: Awaitable[Any], default: Any) -> Any:
+    try:
+        return await call
+    except SectorsError as exc:
+        logger.warning("Market overview panel unavailable: %s", exc)
+        return default
 
 
 @router.get("/market-overview", response_model=MarketOverview)
 async def market_overview(sectors: CachedSectorsClient = Depends(get_sectors)) -> MarketOverview:
     ihsg = cast(list[dict[str, Any]], await sectors.get_ihsg())
-    movers = cast(dict[str, Any], await sectors.get_top_companies())
-    traded = cast(dict[str, Any], await sectors.get_most_traded())
-    flow = cast(dict[str, Any], await sectors.get_foreign_flow("IHSG"))
+    # Secondary panels degrade to empty instead of failing the whole screen.
+    movers = cast(dict[str, Any], await optional(sectors.get_top_companies(), {}))
+    traded = cast(dict[str, Any], await optional(sectors.get_most_traded(), {}))
+    flow = cast(dict[str, Any], await optional(sectors.get_foreign_flow("IHSG"), {"data": []}))
 
     last = ihsg[-1]
     change = last["price"] / ihsg[-2]["price"] - 1 if len(ihsg) > 1 else None
@@ -54,8 +66,8 @@ async def market_overview(sectors: CachedSectorsClient = Depends(get_sectors)) -
         )
         if latest_flow
         else None,
-        top_gainers=to_movers(movers["top_gainers"].get("1d", [])),
-        top_losers=to_movers(movers["top_losers"].get("1d", [])),
+        top_gainers=to_movers(movers.get("top_gainers", {}).get("1d", [])),
+        top_losers=to_movers(movers.get("top_losers", {}).get("1d", [])),
         most_traded=[
             TradedStock(
                 ticker=bare_symbol(t["symbol"]),

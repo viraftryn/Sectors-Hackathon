@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any
 
 from fastapi import APIRouter, Depends
@@ -13,6 +14,7 @@ from app.db.scores import last_scored_at, latest_scores, save_scores
 from app.models.schemas import Recommendation, RecommendationList, ScoreBreakdown
 
 router = APIRouter()
+_run_lock = asyncio.Lock()
 
 
 def to_recommendation(row: dict[str, Any]) -> Recommendation:
@@ -50,8 +52,10 @@ async def get_recommendations(db: AsyncSession = Depends(get_db)) -> Recommendat
 async def trigger_scoring(
     db: AsyncSession = Depends(get_db), sectors: CachedSectorsClient = Depends(get_sectors)
 ) -> RecommendationList:
-    last = await last_scored_at(db)
-    fresh = last and (_utcnow() - last).total_seconds() < settings.scoring_min_interval_seconds
-    if not fresh:
-        await save_scores(db, await run_scoring(sectors))
+    # A second concurrent trigger waits, then sees the fresh run instead of paying for another.
+    async with _run_lock:
+        last = await last_scored_at(db)
+        fresh = last and (_utcnow() - last).total_seconds() < settings.scoring_min_interval_seconds
+        if not fresh:
+            await save_scores(db, await run_scoring(sectors))
     return await recommendation_list(db)
