@@ -335,8 +335,121 @@ public final class StockDetailViewModel: ObservableObject {
 
 
 // MARK: - ==========================================
-// MARK: 4. INTERACTIVE CHART COMPONENT
+// MARK: 4. INTERACTIVE CHART COMPONENT & MORPHING SHAPES
 // MARK: - ==========================================
+
+// MARK: - MorphPoint (VectorArithmetic for chart morphing)
+
+public struct MorphPoint: VectorArithmetic, Sendable {
+    public var x: CGFloat
+    public var y: CGFloat
+
+    public static var zero: MorphPoint { .init(x: 0, y: 0) }
+
+    public static func + (lhs: Self, rhs: Self) -> Self { .init(x: lhs.x + rhs.x, y: lhs.y + rhs.y) }
+    public static func - (lhs: Self, rhs: Self) -> Self { .init(x: lhs.x - rhs.x, y: lhs.y - rhs.y) }
+
+    public mutating func scale(by rhs: Double) { x *= CGFloat(rhs); y *= CGFloat(rhs) }
+
+    public var magnitudeSquared: Double { Double(x * x + y * y) }
+}
+
+// MARK: - AnimatableChartData
+
+public struct AnimatableChartData: VectorArithmetic, Equatable, Sendable {
+    public var points: [MorphPoint]
+
+    public static var zero: Self { .init(points: []) }
+
+    public static func + (lhs: Self, rhs: Self) -> Self {
+        let n = max(lhs.points.count, rhs.points.count)
+        let lp = lhs.padded(to: n); let rp = rhs.padded(to: n)
+        var result: [MorphPoint] = []; result.reserveCapacity(n)
+        for i in 0..<n { result.append(lp[i] + rp[i]) }
+        return .init(points: result)
+    }
+
+    public static func - (lhs: Self, rhs: Self) -> Self {
+        let n = max(lhs.points.count, rhs.points.count)
+        let lp = lhs.padded(to: n); let rp = rhs.padded(to: n)
+        var result: [MorphPoint] = []; result.reserveCapacity(n)
+        for i in 0..<n { result.append(lp[i] - rp[i]) }
+        return .init(points: result)
+    }
+
+    public mutating func scale(by rhs: Double) { for i in points.indices { points[i].scale(by: rhs) } }
+
+    public var magnitudeSquared: Double { points.reduce(0) { $0 + $1.magnitudeSquared } }
+
+    private func padded(to count: Int) -> [MorphPoint] {
+        guard let last = points.last else { return Array(repeating: .zero, count: count) }
+        if points.count >= count { return points }
+        return points + Array(repeating: last, count: count - points.count)
+    }
+}
+
+// MARK: - Morphing Line & Area Shapes
+
+public struct MorphingXYLineShape: Shape {
+    public var data: AnimatableChartData
+    public var animatableData: AnimatableChartData { get { data } set { data = newValue } }
+
+    public func path(in rect: CGRect) -> Path {
+        let pts = data.points; guard pts.count > 1 else { return Path() }
+        var path = Path(); path.move(to: CGPoint(x: pts[0].x, y: pts[0].y))
+        for i in 1..<pts.count {
+            path.addLine(to: CGPoint(x: pts[i].x, y: pts[i].y))
+        }
+        return path
+    }
+}
+
+public struct MorphingXYAreaShape: Shape {
+    public var data: AnimatableChartData; public var closingY: CGFloat
+    public var animatableData: AnimatablePair<AnimatableChartData, CGFloat> {
+        get { AnimatablePair(data, closingY) }
+        set { data = newValue.first; closingY = newValue.second }
+    }
+
+    public func path(in rect: CGRect) -> Path {
+        let pts = data.points; guard pts.count > 1 else { return Path() }
+        var path = Path(); path.move(to: CGPoint(x: pts[0].x, y: pts[0].y))
+        for i in 1..<pts.count {
+            path.addLine(to: CGPoint(x: pts[i].x, y: pts[i].y))
+        }
+        path.addLine(to: CGPoint(x: pts.last!.x, y: closingY))
+        path.addLine(to: CGPoint(x: pts.first!.x, y: closingY))
+        path.closeSubpath()
+        return path
+    }
+}
+
+public struct AnimatableClipAbove: Shape {
+    public var cutY: CGFloat
+    public var animatableData: CGFloat { get { cutY } set { cutY = newValue } }
+    public func path(in rect: CGRect) -> Path { Path(CGRect(x: 0, y: 0, width: rect.width, height: max(0, cutY))) }
+}
+
+public struct AnimatableClipBelow: Shape {
+    public var cutY: CGFloat; public var totalHeight: CGFloat
+    public var animatableData: AnimatablePair<CGFloat, CGFloat> {
+        get { AnimatablePair(cutY, totalHeight) }
+        set { cutY = newValue.first; totalHeight = newValue.second }
+    }
+    public func path(in rect: CGRect) -> Path {
+        Path(CGRect(x: 0, y: cutY, width: rect.width, height: max(0, totalHeight - cutY)))
+    }
+}
+
+public struct AnimatableHDashLine: Shape {
+    public var y: CGFloat
+    public var animatableData: CGFloat { get { y } set { y = newValue } }
+    public func path(in rect: CGRect) -> Path {
+        var p = Path(); p.move(to: CGPoint(x: 0, y: y)); p.addLine(to: CGPoint(x: rect.width, y: y)); return p
+    }
+}
+
+// MARK: - Interactive Chart View
 
 public struct StockInteractiveChartView: View {
     @ObservedObject var viewModel: StockDetailViewModel
@@ -345,18 +458,66 @@ public struct StockInteractiveChartView: View {
 
     let accentColor: Color
 
+    @State private var chartSize: CGSize = .zero
+    @State private var animatedData: AnimatableChartData = .zero
+    @State private var animatedBaselineY: CGFloat = 0
+
+    private let resampleCount = 200
+
     public var body: some View {
         VStack(spacing: 12) {
             GeometryReader { geo in
                 let size = geo.size
                 ZStack(alignment: .topLeading) {
-                    if viewModel.isLoading {
+                    if viewModel.isLoading && animatedData.points.isEmpty {
                         ProgressView()
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    } else if !viewModel.dataPoints.isEmpty {
-                        // Area & Line Path
-                        chartArea(size: size)
-                        chartLine(size: size)
+                    } else if !animatedData.points.isEmpty || !viewModel.dataPoints.isEmpty {
+                        // Start point baseline guide line
+                        AnimatableHDashLine(y: animatedBaselineY)
+                            .stroke(Color.white.opacity(0.20), style: StrokeStyle(lineWidth: 1, dash: [6, 4]))
+
+                        // Green Area (Above start point baseline)
+                        MorphingXYAreaShape(data: animatedData, closingY: animatedBaselineY)
+                            .fill(LinearGradient(stops: [
+                                .init(color: Color.ProfitGreen.opacity(0.35), location: 0.0),
+                                .init(color: Color.ProfitGreen.opacity(0.15), location: 0.6),
+                                .init(color: Color.ProfitGreen.opacity(0.0),  location: 1.0)
+                            ], startPoint: .top, endPoint: .bottom))
+                            .clipShape(AnimatableClipAbove(cutY: animatedBaselineY))
+
+                        // Red Area (Below start point baseline)
+                        MorphingXYAreaShape(data: animatedData, closingY: animatedBaselineY)
+                            .fill(LinearGradient(stops: [
+                                .init(color: Color.PortfolioLossRed.opacity(0.35), location: 0.0),
+                                .init(color: Color.PortfolioLossRed.opacity(0.15), location: 0.6),
+                                .init(color: Color.PortfolioLossRed.opacity(0.0),  location: 1.0)
+                            ], startPoint: .bottom, endPoint: .top))
+                            .clipShape(AnimatableClipBelow(cutY: animatedBaselineY, totalHeight: size.height))
+
+                        // Green Line (Above start point baseline)
+                        MorphingXYLineShape(data: animatedData)
+                            .stroke(Color.ProfitGreen, style: StrokeStyle(lineWidth: 2.2, lineCap: .round, lineJoin: .round))
+                            .clipShape(AnimatableClipAbove(cutY: animatedBaselineY))
+
+                        // Red Line (Below start point baseline)
+                        MorphingXYLineShape(data: animatedData)
+                            .stroke(Color.PortfolioLossRed, style: StrokeStyle(lineWidth: 2.2, lineCap: .round, lineJoin: .round))
+                            .clipShape(AnimatableClipBelow(cutY: animatedBaselineY, totalHeight: size.height))
+
+                        // End point indicator dot (Latest Price)
+                        if !isDragging, let lastPt = animatedData.points.last {
+                            let dotColor = viewModel.latestPrice >= viewModel.startPrice ? Color.ProfitGreen : Color.PortfolioLossRed
+                            Circle()
+                                .fill(dotColor)
+                                .frame(width: 8, height: 8)
+                                .shadow(color: dotColor.opacity(0.7), radius: 5)
+                                .position(x: lastPt.x, y: lastPt.y)
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 3.5, height: 3.5)
+                                .position(x: lastPt.x, y: lastPt.y)
+                        }
 
                         // Max (top-right) & Min (bottom-right) Price Overlay
                         maxMinOverlay(size: size)
@@ -375,31 +536,20 @@ public struct StockInteractiveChartView: View {
                     }
                 }
                 .contentShape(Rectangle())
-                .gesture(
-                    DragGesture(minimumDistance: 0)
-                        .onChanged { value in
-                            isDragging = true
-                            let xPos = max(0, min(value.location.x, size.width))
-                            let fraction = xPos / size.width
-                            let idx = min(Int(fraction * CGFloat(viewModel.dataPoints.count)), viewModel.dataPoints.count - 1)
-                            if idx >= 0 && idx < viewModel.dataPoints.count {
-                                let newPt = viewModel.dataPoints[idx]
-                                if selectedPoint?.id != newPt.id {
-                                    selectedPoint = newPt
-                                    let gen = UIImpactFeedbackGenerator(style: .light)
-                                    gen.impactOccurred()
-                                }
-                            }
-                        }
-                        .onEnded { _ in
-                            withAnimation(.easeOut(duration: 0.2)) {
-                                isDragging = false
-                                selectedPoint = nil
-                            }
-                        }
-                )
+                .onAppear {
+                    chartSize = geo.size
+                    applyChartData()
+                }
+                .onChange(of: geo.size) { _, newSize in
+                    chartSize = newSize
+                    applyChartData()
+                }
+                .gesture(dragGesture(size: size))
             }
             .frame(height: 220)
+            .onChange(of: viewModel.dataPoints) { _, _ in
+                applyChartData()
+            }
 
             // Timeframe Selector
             Picker("Timeframe", selection: $viewModel.selectedRange) {
@@ -408,7 +558,7 @@ public struct StockInteractiveChartView: View {
                 }
             }
             .pickerStyle(.segmented)
-            .onChange(of: viewModel.selectedRange) { _ in
+            .onChange(of: viewModel.selectedRange) { _, _ in
                 let gen = UIImpactFeedbackGenerator(style: .medium)
                 gen.impactOccurred()
                 selectedPoint = nil
@@ -418,92 +568,162 @@ public struct StockInteractiveChartView: View {
         }
     }
 
-    private func normalizeY(price: Double, height: CGFloat) -> CGFloat {
-        let minP = viewModel.minPrice
-        let maxP = viewModel.maxPrice
-        let diff = maxP - minP
-        guard diff > 0 else { return height / 2 }
-        let topPadding: CGFloat = 28
-        let bottomPadding: CGFloat = 16
-        let usableH = height - topPadding - bottomPadding
-        let normalized = CGFloat((price - minP) / diff)
-        return height - bottomPadding - (normalized * usableH)
+    private func applyChartData() {
+        guard !viewModel.dataPoints.isEmpty, chartSize.width > 0, chartSize.height > 0 else { return }
+        let target = buildMorphPoints(viewModel.dataPoints, size: chartSize)
+        let targetBaselineY = yPos(for: viewModel.startPrice, in: chartSize)
+
+        if animatedData.points.isEmpty {
+            animatedData = target
+            animatedBaselineY = targetBaselineY
+        } else {
+            withAnimation(.spring(response: 1.1, dampingFraction: 0.9)) {
+                animatedData = target
+                animatedBaselineY = targetBaselineY
+            }
+        }
     }
 
-    private func normalizeX(index: Int, total: Int, width: CGFloat) -> CGFloat {
-        guard total > 1 else { return width / 2 }
-        return CGFloat(index) / CGFloat(total - 1) * width
+    private func buildMorphPoints(_ data: [StockHistoryPoint], size: CGSize) -> AnimatableChartData {
+        guard !data.isEmpty, size.width > 0, size.height > 0 else { return .zero }
+
+        if data.count == 1 {
+            let singleY = yPos(for: data[0].price, in: size)
+            let pts = (0..<resampleCount).map { i -> MorphPoint in
+                let t = CGFloat(i) / CGFloat(resampleCount - 1)
+                return MorphPoint(x: 4 + t * (size.width - 8), y: singleY)
+            }
+            return AnimatableChartData(points: pts)
+        }
+
+        let closes = data.map(\.price)
+        let minV   = closes.min() ?? 0
+        let maxV   = closes.max() ?? 1
+        let vRange = maxV - minV
+        let topPad: CGFloat = 28
+        let bottomPad: CGFloat = 20
+        let hPad: CGFloat = 4
+        let usable = size.height - topPad - bottomPad
+        let innerW = size.width - hPad * 2
+
+        let points: [MorphPoint] = (0..<resampleCount).map { i in
+            let tData = Double(i) / Double(resampleCount - 1) * Double(data.count - 1)
+            let lo    = max(0, min(Int(tData), data.count - 1))
+            let hi    = min(lo + 1, data.count - 1)
+            let frac  = tData - Double(lo)
+
+            let p0Val = closes[max(lo - 1, 0)]
+            let p1Val = closes[lo]
+            let p2Val = closes[hi]
+            let p3Val = closes[min(hi + 1, closes.count - 1)]
+
+            let linearVal = p1Val * (1.0 - frac) + p2Val * frac
+
+            // Tamed Catmull-Rom cubic spline interpolation across data points
+            let t2    = frac * frac
+            let t3    = t2 * frac
+            let splineVal = 0.5 * (
+                (2.0 * p1Val) +
+                (-p0Val + p2Val) * frac +
+                (2.0 * p0Val - 5.0 * p1Val + 4.0 * p2Val - p3Val) * t2 +
+                (-p0Val + 3.0 * p1Val - 3.0 * p2Val + p3Val) * t3
+            )
+
+            // Blend 80% linear with 20% spline to reduce excessive curvature/waves while keeping smooth transitions
+            let val = linearVal * 0.80 + splineVal * 0.20
+
+            let normY = vRange > 0 ? (val - minV) / vRange : 0.5
+            let y     = topPad + usable * CGFloat(1.0 - normY)
+            let t = CGFloat(i) / CGFloat(resampleCount - 1)
+            let x = hPad + t * innerW
+            return MorphPoint(x: x, y: y)
+        }
+        return AnimatableChartData(points: points)
     }
 
-    private func chartLine(size: CGSize) -> some View {
-        Path { path in
-            let count = viewModel.dataPoints.count
-            for (idx, pt) in viewModel.dataPoints.enumerated() {
-                let x = normalizeX(index: idx, total: count, width: size.width)
-                let y = normalizeY(price: pt.price, height: size.height)
-                if idx == 0 {
-                    path.move(to: CGPoint(x: x, y: y))
+    private func yPos(for value: Double, in size: CGSize) -> CGFloat {
+        let topPad: CGFloat = 28
+        let bottomPad: CGFloat = 20
+        let usable = size.height - topPad - bottomPad
+        guard usable > 0 else { return size.height / 2 }
+        let range = viewModel.maxPrice - viewModel.minPrice
+        let norm  = range > 0 ? (value - viewModel.minPrice) / range : 0.5
+        return topPad + usable * (1.0 - CGFloat(norm))
+    }
+
+    private func dragGesture(size: CGSize) -> some Gesture {
+        DragGesture(minimumDistance: 0)
+            .onChanged { value in
+                isDragging = true
+                let data = viewModel.dataPoints
+                guard !data.isEmpty, size.width > 0 else { return }
+
+                let innerW = size.width - 8
+                let touchX = max(0, min(value.location.x - 4, innerW))
+
+                if !animatedData.points.isEmpty {
+                    let bestMorphIdx = animatedData.points.indices.min(by: {
+                        abs(animatedData.points[$0].x - (touchX + 4)) <
+                        abs(animatedData.points[$1].x - (touchX + 4))
+                    }) ?? 0
+                    let dataFrac = CGFloat(bestMorphIdx) / CGFloat(max(animatedData.points.count - 1, 1))
+                    let i = max(0, min(Int((dataFrac * CGFloat(data.count - 1)).rounded()), data.count - 1))
+                    let newPt = data[i]
+                    if selectedPoint?.id != newPt.id {
+                        selectedPoint = newPt
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    }
                 } else {
-                    path.addLine(to: CGPoint(x: x, y: y))
+                    let fraction = touchX / innerW
+                    let idx = max(0, min(Int((fraction * CGFloat(data.count - 1)).rounded()), data.count - 1))
+                    let newPt = data[idx]
+                    if selectedPoint?.id != newPt.id {
+                        selectedPoint = newPt
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    }
                 }
             }
-        }
-        .stroke(accentColor, style: StrokeStyle(lineWidth: 2.2, lineCap: .round, lineJoin: .round))
-    }
-
-    private func chartArea(size: CGSize) -> some View {
-        Path { path in
-            let count = viewModel.dataPoints.count
-            guard count > 0 else { return }
-            path.move(to: CGPoint(x: 0, y: size.height))
-            for (idx, pt) in viewModel.dataPoints.enumerated() {
-                let x = normalizeX(index: idx, total: count, width: size.width)
-                let y = normalizeY(price: pt.price, height: size.height)
-                path.addLine(to: CGPoint(x: x, y: y))
+            .onEnded { _ in
+                withAnimation(.easeOut(duration: 0.2)) {
+                    isDragging = false
+                    selectedPoint = nil
+                }
             }
-            path.addLine(to: CGPoint(x: size.width, y: size.height))
-            path.closeSubpath()
-        }
-        .fill(
-            LinearGradient(
-                colors: [accentColor.opacity(0.35), accentColor.opacity(0.0)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        )
     }
 
     private func scrubberOverlay(pt: StockHistoryPoint, size: CGSize) -> some View {
         let count = viewModel.dataPoints.count
         let idx = viewModel.dataPoints.firstIndex(where: { $0.id == pt.id }) ?? 0
-        let x = normalizeX(index: idx, total: count, width: size.width)
-        let y = normalizeY(price: pt.price, height: size.height)
+        let innerW = size.width - 8
+        let xPos = count > 1 ? 4 + CGFloat(idx) / CGFloat(count - 1) * innerW : size.width / 2
+        let y = yPos(for: pt.price, in: size)
+
+        let isPositive = pt.price >= viewModel.startPrice
+        let ptColor = isPositive ? Color.ProfitGreen : Color.PortfolioLossRed
 
         let labelText = StockFormatters.formatScrubDate(pt.date)
-        // Posisi horizontal mengikuti drag X (dibatasi batas chart)
-        let labelX = min(max(50, x), size.width - 50)
-        // Posisi vertikal tetap di atas chart
+        let labelX = min(max(55, xPos), size.width - 55)
         let labelY: CGFloat = 10
 
         return ZStack {
             // Vertical Line
             Path { path in
-                path.move(to: CGPoint(x: x, y: 22))
-                path.addLine(to: CGPoint(x: x, y: size.height))
+                path.move(to: CGPoint(x: xPos, y: 22))
+                path.addLine(to: CGPoint(x: xPos, y: size.height))
             }
             .stroke(Color.white.opacity(0.35), style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
 
-            // Circle Indicator (Drag Point pada kurva harga)
+            // Circle Indicator on curve
             Circle()
-                .fill(accentColor)
+                .fill(ptColor)
                 .frame(width: 10, height: 10)
                 .overlay(Circle().stroke(Color.white, lineWidth: 2))
-                .position(x: x, y: y)
+                .position(x: xPos, y: y)
 
-            // Label di atas chart secara vertikal, mengikuti posisi horizontal drag
+            // Date tooltip label
             Text(labelText)
                 .font(.system(size: 11.5, weight: .semibold, design: .rounded))
-                .foregroundStyle(Color.white.opacity(0.85))
+                .foregroundStyle(Color.white.opacity(0.9))
                 .shadow(color: .black.opacity(0.8), radius: 3, x: 0, y: 1)
                 .position(x: labelX, y: labelY)
         }
