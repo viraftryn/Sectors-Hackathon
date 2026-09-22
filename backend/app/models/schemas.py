@@ -1,4 +1,6 @@
-from pydantic import BaseModel
+import uuid
+
+from pydantic import BaseModel, Field
 
 
 class StatusResponse(BaseModel):
@@ -83,3 +85,16 @@ class MarketOverview(BaseModel):
     top_gainers: list[Mover]
     top_losers: list[Mover]
     most_traded: list[TradedStock]
+
+
+# -- Chat -------------------------------------------------------------------
+
+
+class ChatRequest(BaseModel):
+    message: str
+    session_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+
+
+class ChatResponse(BaseModel):
+    session_id: uuid.UUID
+    response: str
