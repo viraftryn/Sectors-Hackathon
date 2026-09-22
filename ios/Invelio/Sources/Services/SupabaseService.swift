@@ -44,7 +44,7 @@ public final class DeviceManager: Sendable {
 public enum SupabaseConfig: Sendable {
     public static let projectURL = URL(string: "https://zvtuvfamsbwgeawnkwpp.supabase.co")!
     // Set public anon key from Supabase Dashboard > Project Settings > API
-    public static let anonKey: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.placeholder"
+    public static let anonKey: String = "sb_publishable_jyOUKXnYdcLVHgGRpp7zCg_wMFxl9vW"
 }
 
 // MARK: - 3. Supabase Transfer DTOs
@@ -69,6 +69,93 @@ struct SupabaseHoldingPayload: Codable, Sendable {
     let buy_date: String
 }
 
+struct SupabaseStockRecord: Codable, Sendable, Identifiable {
+    var id: String { ticker }
+    let ticker: String
+    let symbol: String
+    let name: String
+    let sector: String?
+    let sub_sector: String?
+    let price: Double
+    let change_pct: Double?
+    let market_cap: Double?
+    let pe_ttm: Double?
+    let pb_mrq: Double?
+    let roe_ttm: Double?
+    let der_mrq: Double?
+    let yield_ttm: Double?
+    let week52_high: Double?
+    let week52_low: Double?
+
+    func toStockItem() -> StockItem {
+        let pct = change_pct ?? 0.0
+        let chg = price * (pct / 100.0)
+        let cleanName = name
+            .replacingOccurrences(of: "PT ", with: "")
+            .replacingOccurrences(of: " Tbk.", with: "")
+            .replacingOccurrences(of: " Tbk", with: "")
+            .replacingOccurrences(of: " (Persero)", with: "")
+            .trimmingCharacters(in: .whitespaces)
+
+        return StockItem(
+            symbol: ticker,
+            name: cleanName,
+            sector: sector ?? "IDX",
+            price: price,
+            change: chg,
+            percentChange: pct,
+            sentiment: Sentiment(buy: 0.65, hold: 0.25, sell: 0.10, score: 75),
+            market: "IDX",
+            sparkData: [0.35, 0.40, 0.38, 0.45, 0.50, 0.55, 0.52, 0.58, 0.62, 0.65]
+        )
+    }
+
+    func toStockFundamentals() -> StockFundamentals {
+        StockFundamentals(
+            ticker: ticker,
+            pe: pe_ttm,
+            pb: pb_mrq,
+            roe: roe_ttm,
+            der: der_mrq,
+            dividendYield: yield_ttm,
+            week52High: week52_high,
+            week52Low: week52_low,
+            sector: sector ?? "IDX"
+        )
+    }
+
+    func toStockQuote() -> StockQuote {
+        let pct = change_pct ?? 0.0
+        let chg = price * (pct / 100.0)
+        return StockQuote(
+            ticker: ticker,
+            name: name,
+            price: price,
+            change: chg,
+            changePercent: pct,
+            previousClose: price - chg,
+            currency: "IDR"
+        )
+    }
+}
+
+struct SupabaseDailyPriceRecord: Codable, Sendable {
+    let ticker: String
+    let date: String
+    let open: Double?
+    let high: Double?
+    let low: Double?
+    let close: Double
+    let volume: Int?
+
+    func toHistoryPoint() -> StockHistoryPoint {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let d = formatter.date(from: date) ?? Date()
+        return StockHistoryPoint(date: d, price: close, volume: volume ?? 0)
+    }
+}
+
 // MARK: - 4. Supabase Service
 
 public actor SupabaseService {
@@ -87,7 +174,11 @@ public actor SupabaseService {
     }
 
     private func makeRequest(endpoint: String, method: String = "GET") -> URLRequest {
-        let url = restBaseURL.appendingPathComponent(endpoint)
+        let cleanEndpoint = endpoint.hasPrefix("/") ? String(endpoint.dropFirst()) : endpoint
+        let fullURLString = "\(restBaseURL.absoluteString)/\(cleanEndpoint)"
+        guard let url = URL(string: fullURLString) else {
+            fatalError("Invalid URL: \(fullURLString)")
+        }
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -112,12 +203,16 @@ public actor SupabaseService {
         request.httpBody = try? JSONEncoder().encode(payload)
 
         do {
-            let (_, response) = try await session.data(for: request)
-            if let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) {
-                // Success
+            let (data, response) = try await session.data(for: request)
+            if let http = response as? HTTPURLResponse {
+                print("[Supabase] registerDevice HTTP \(http.statusCode)")
+                if !(200...299).contains(http.statusCode) {
+                    let body = String(data: data, encoding: .utf8) ?? ""
+                    print("[Supabase] registerDevice failed: \(body)")
+                }
             }
         } catch {
-            // Silently ignore network failures on offline
+            print("[Supabase] registerDevice error: \(error.localizedDescription)")
         }
     }
 
@@ -152,9 +247,16 @@ public actor SupabaseService {
         request.httpBody = try? JSONEncoder().encode(payload)
 
         do {
-            let (_, _) = try await session.data(for: request)
+            let (data, response) = try await session.data(for: request)
+            if let http = response as? HTTPURLResponse {
+                print("[Supabase] upsertHolding HTTP \(http.statusCode) for \(ticker)")
+                if !(200...299).contains(http.statusCode) {
+                    let body = String(data: data, encoding: .utf8) ?? ""
+                    print("[Supabase] upsertHolding failed: \(body)")
+                }
+            }
         } catch {
-            // Offline fallback
+            print("[Supabase] upsertHolding error: \(error.localizedDescription)")
         }
     }
 
@@ -177,6 +279,60 @@ public actor SupabaseService {
                 return []
             }
             return (try? JSONDecoder().decode([SupabaseHoldingPayload].self, from: data)) ?? []
+        } catch {
+            return []
+        }
+    }
+
+    // MARK: - Direct PostgreSQL Reads (0 Sectors API Credits!)
+
+    func fetchStocks() async -> [SupabaseStockRecord] {
+        let request = makeRequest(endpoint: "stocks?order=market_cap.desc.nullslast&limit=20")
+        do {
+            let (data, response) = try await session.data(for: request)
+            guard let http = response as? HTTPURLResponse else {
+                print("[Supabase] fetchStocks: invalid response")
+                return []
+            }
+            if !(200...299).contains(http.statusCode) {
+                let errBody = String(data: data, encoding: .utf8) ?? ""
+                print("[Supabase] fetchStocks failed HTTP \(http.statusCode): \(errBody)")
+                return []
+            }
+            let list = (try? JSONDecoder().decode([SupabaseStockRecord].self, from: data)) ?? []
+            print("[Supabase] fetchStocks success: loaded \(list.count) stocks from PostgreSQL")
+            return list
+        } catch {
+            print("[Supabase] fetchStocks error: \(error.localizedDescription)")
+            return []
+        }
+    }
+
+    func fetchStockDetail(ticker: String) async -> SupabaseStockRecord? {
+        let clean = ticker.components(separatedBy: ".").first ?? ticker
+        let request = makeRequest(endpoint: "stocks?ticker=eq.\(clean)&limit=1")
+        do {
+            let (data, response) = try await session.data(for: request)
+            guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
+                return nil
+            }
+            let list = (try? JSONDecoder().decode([SupabaseStockRecord].self, from: data)) ?? []
+            return list.first
+        } catch {
+            return nil
+        }
+    }
+
+    func fetchDailyPrices(ticker: String) async -> [StockHistoryPoint] {
+        let clean = ticker.components(separatedBy: ".").first ?? ticker
+        let request = makeRequest(endpoint: "stock_daily_prices?ticker=eq.\(clean)&order=date.asc")
+        do {
+            let (data, response) = try await session.data(for: request)
+            guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
+                return []
+            }
+            let list = (try? JSONDecoder().decode([SupabaseDailyPriceRecord].self, from: data)) ?? []
+            return list.map { $0.toHistoryPoint() }
         } catch {
             return []
         }

@@ -264,6 +264,15 @@ public final class StockDetailViewModel: ObservableObject {
 
     public func fetchChartData() async {
         isLoading = true
+
+        // 1. Direct from Supabase PostgreSQL (0 Credit!)
+        let dbPoints = await SupabaseService.shared.fetchDailyPrices(ticker: quote.ticker)
+        if !dbPoints.isEmpty {
+            self.dataPoints = dbPoints
+            self.isLoading = false
+            return
+        }
+
         if let fetcher = customHistoryFetcher {
             do {
                 let pts = try await fetcher(quote.ticker, selectedRange)
@@ -624,6 +633,15 @@ public struct StockDetailView: View {
     }
 
     private func fetchLiveStockDetail() async {
+        // 1. Direct from Supabase PostgreSQL (0 Credit!)
+        if let pgStock = await SupabaseService.shared.fetchStockDetail(ticker: quote.ticker) {
+            await MainActor.run {
+                self.liveFundamentals = pgStock.toStockFundamentals()
+            }
+            return
+        }
+
+        // 2. Fallback to APIClient
         do {
             let detail = try await APIClient.shared.fetchStockDetail(ticker: quote.ticker)
             await MainActor.run {

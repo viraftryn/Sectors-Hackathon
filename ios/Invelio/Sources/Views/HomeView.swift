@@ -19,6 +19,7 @@ import SwiftData
 extension Color {
     // App background (deep navy-purple)
     static let DarkPurpleAppBackground = Color(red: 18/255, green: 17/255, blue: 46/255)
+    static let PrimaryPurple           = Color(red: 102/255, green: 94/255, blue: 191/255)
     // Primary accent
     static let PrimaryYellow = Color(red: 234/255, green: 179/255, blue: 8/255)
     // Profit / Loss
@@ -113,35 +114,11 @@ struct PortfolioSummaryData {
 
 
 // ╔══════════════════════════════════════════════════════════════════╗
-// ║  3.  DUMMY DATA                                                ║
+// ║  3.  DATA & HELPERS                                            ║
 // ╚══════════════════════════════════════════════════════════════════╝
 
 let dummySummary = PortfolioSummaryData(totalValue: 0, totalCost: 0)
 
-let dummyStocks: [StockItem] = {
-    let loaded = SectorsStocksLoader.loadStockItems()
-    if !loaded.isEmpty {
-        return loaded
-    }
-    // Fallback list jika file JSON tidak dapat diakses
-    return [
-        StockItem(symbol: "BBCA", name: "Bank Central Asia", sector: "Financials", price: 9850, change: 75, percentChange: 0.77,
-                  sentiment: Sentiment(buy: 0.70, hold: 0.20, sell: 0.10, score: 85), market: "IDX",
-                  sparkData: [0.30, 0.35, 0.32, 0.45, 0.50, 0.48, 0.55, 0.60, 0.58, 0.62, 0.65, 0.70]),
-        StockItem(symbol: "BBRI", name: "Bank Rakyat Indonesia", sector: "Financials", price: 4680, change: -30, percentChange: -0.64,
-                  sentiment: Sentiment(buy: 0.45, hold: 0.35, sell: 0.20, score: 55), market: "IDX",
-                  sparkData: [0.60, 0.58, 0.55, 0.50, 0.52, 0.48, 0.45, 0.42, 0.44, 0.40, 0.38, 0.35]),
-        StockItem(symbol: "DCII", name: "DCI Indonesia", sector: "Technology", price: 42500, change: 850, percentChange: 2.04,
-                  sentiment: Sentiment(buy: 0.82, hold: 0.12, sell: 0.06, score: 90), market: "IDX",
-                  sparkData: [0.20, 0.25, 0.32, 0.40, 0.48, 0.52, 0.60, 0.68, 0.72, 0.78, 0.85, 0.92]),
-        StockItem(symbol: "BMRI", name: "Bank Mandiri", sector: "Financials", price: 6450, change: 50, percentChange: 0.78,
-                  sentiment: Sentiment(buy: 0.68, hold: 0.22, sell: 0.10, score: 82), market: "IDX",
-                  sparkData: [0.40, 0.42, 0.45, 0.43, 0.48, 0.52, 0.55, 0.58, 0.60, 0.62, 0.65, 0.68]),
-        StockItem(symbol: "BYAN", name: "Bayan Resources", sector: "Energy", price: 17200, change: -150, percentChange: -0.86,
-                  sentiment: Sentiment(buy: 0.25, hold: 0.35, sell: 0.40, score: 38), market: "IDX",
-                  sparkData: [0.70, 0.68, 0.62, 0.65, 0.58, 0.55, 0.50, 0.48, 0.45, 0.42, 0.38, 0.35])
-    ]
-}()
 
 let dummyInsightChips: [InsightChip] = [
     InsightChip(label: "Technical Analysis",
@@ -750,9 +727,11 @@ struct InvelioLogoView: View {
 struct HomeView: View {
     @Query private var holdingLots: [HoldingLot]
     @State private var liveStocks: [StockItem] = []
+    @State private var isLoading: Bool = true
+    @State private var loadErrorMessage: String? = nil
 
     private var displayedStocks: [StockItem] {
-        liveStocks.isEmpty ? dummyStocks : liveStocks
+        liveStocks
     }
 
     private var dynamicSummary: PortfolioSummaryData {
@@ -806,10 +785,16 @@ struct HomeView: View {
                         .padding(.top, 16)
                         .padding(.bottom, 6)
 
-                    // 4) Stock List
-                    StockListView(items: displayedStocks)
+                    // 4) Stock List from PostgreSQL
+                    if isLoading && liveStocks.isEmpty {
+                        stocksLoadingPlaceholderView
+                    } else if liveStocks.isEmpty {
+                        emptyOrRetryView
+                    } else {
+                        StockListView(items: displayedStocks)
+                    }
 
-                    // 6) Search Hint
+                    // 5) Search Hint
                     searchHint
                         .padding(.top, 8).padding(.bottom, 20)
                 }
@@ -819,19 +804,111 @@ struct HomeView: View {
             .toolbar(.hidden, for: .navigationBar)
             .safeAreaInset(edge: .top) { topBar }
             .task {
-                do {
-                    let fetched = try await APIClient.shared.fetchStocks()
-                    if !fetched.isEmpty {
-                        await MainActor.run {
-                            self.liveStocks = fetched.map { $0.toStockItem() }
-                        }
-                    }
-                } catch {
-                    // Fallback to dummyStocks if backend is offline
-                }
+                await loadStocksFromPostgres()
+            }
+            .refreshable {
+                await loadStocksFromPostgres()
             }
         }
     }
+
+    private func loadStocksFromPostgres() async {
+        if liveStocks.isEmpty {
+            await MainActor.run {
+                self.isLoading = true
+                self.loadErrorMessage = nil
+            }
+        }
+
+        // 1. Direct from Supabase PostgreSQL (0 Credit cost!)
+        let pgStocks = await SupabaseService.shared.fetchStocks()
+        if !pgStocks.isEmpty {
+            await MainActor.run {
+                self.liveStocks = pgStocks.map { $0.toStockItem() }
+                self.isLoading = false
+            }
+            return
+        }
+
+        // 2. Offline / local fallback from seeded sectors_stocks.json
+        let localSeeds = SectorsStocksLoader.loadStockItems()
+        await MainActor.run {
+            if !localSeeds.isEmpty {
+                self.liveStocks = localSeeds
+            } else {
+                self.loadErrorMessage = "Belum dapat memuat data saham dari PostgreSQL."
+            }
+            self.isLoading = false
+        }
+    }
+
+    // MARK: - Skeleton Shimmer Loading Placeholder
+
+    private var stocksLoadingPlaceholderView: some View {
+        VStack(spacing: 12) {
+            ForEach(0..<5, id: \.self) { _ in
+                HStack(spacing: 12) {
+                    Circle()
+                        .fill(Color.white.opacity(0.08))
+                        .frame(width: DS.avatarS, height: DS.avatarS)
+                    VStack(alignment: .leading, spacing: 6) {
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color.white.opacity(0.12))
+                            .frame(width: 50, height: 14)
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(Color.white.opacity(0.07))
+                            .frame(width: 110, height: 10)
+                    }
+                    Spacer()
+                    VStack(alignment: .trailing, spacing: 6) {
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color.white.opacity(0.12))
+                            .frame(width: 75, height: 14)
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(Color.white.opacity(0.07))
+                            .frame(width: 50, height: 10)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                Divider().overlay(Color.white.opacity(0.08)).padding(.horizontal, 16)
+            }
+        }
+        .padding(.vertical, 8)
+    }
+
+    // MARK: - Empty or Retry View
+
+    private var emptyOrRetryView: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "server.rack")
+                .font(.system(size: 32))
+                .foregroundColor(.PrimaryYellow)
+            Text(loadErrorMessage ?? "Belum ada data saham dari PostgreSQL.")
+                .font(.subheadline)
+                .foregroundColor(.white.opacity(0.8))
+                .multilineTextAlignment(.center)
+            Button(action: {
+                Task {
+                    await loadStocksFromPostgres()
+                }
+            }) {
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.clockwise")
+                    Text("Muat Ulang")
+                }
+                .font(.footnote.weight(.semibold))
+                .padding(.horizontal, 18)
+                .padding(.vertical, 9)
+                .background(Color.PrimaryPurple)
+                .foregroundColor(.white)
+                .clipShape(Capsule())
+            }
+        }
+        .padding(.vertical, 32)
+        .frame(maxWidth: .infinity)
+    }
+
 
     // MARK: - Top Bar
 

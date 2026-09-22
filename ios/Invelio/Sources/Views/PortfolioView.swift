@@ -269,15 +269,21 @@ struct PortfolioView: View {
         isRefreshing = true
         defer { isRefreshing = false }
 
-        // 1. Fetch live stock prices from Backend API
-        do {
-            let backendSummaries = try await APIClient.shared.fetchStocks()
-            let mapped = backendSummaries.map { $0.toStockItem() }
-            if !mapped.isEmpty {
-                self.liveStocks = mapped
+        // 1. Fetch live stock prices from Supabase PostgreSQL (0 Credit!)
+        let pgStocks = await SupabaseService.shared.fetchStocks()
+        if !pgStocks.isEmpty {
+            self.liveStocks = pgStocks.map { $0.toStockItem() }
+        } else {
+            // Fallback to Backend API
+            do {
+                let backendSummaries = try await APIClient.shared.fetchStocks()
+                let mapped = backendSummaries.map { $0.toStockItem() }
+                if !mapped.isEmpty {
+                    self.liveStocks = mapped
+                }
+            } catch {
+                // Fallback to bundled data
             }
-        } catch {
-            // Fallback to bundled data
         }
 
         // 2. If local holding lots are empty, restore from Supabase remote records for this device

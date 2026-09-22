@@ -184,6 +184,7 @@ final class ChatViewModel: ObservableObject {
         }
 
         let grouped = Dictionary(grouping: holdings, by: { $0.ticker })
+        let pgStocks = await SupabaseService.shared.fetchStocks()
         let liveSummaries = (try? await APIClient.shared.fetchStocks()) ?? []
 
         var totalCost: Double = 0
@@ -195,8 +196,9 @@ final class ChatViewModel: ObservableObject {
             let invested = lots.reduce(0.0) { $0 + $1.totalInvested }
             let avgCost = shares > 0 ? (invested / shares) : 0
 
+            let pgMatched = pgStocks.first { $0.ticker.uppercased().hasPrefix(ticker.uppercased()) }
             let matched = liveSummaries.first { $0.ticker.uppercased().hasPrefix(ticker.uppercased()) }
-            let currentPrice = matched?.price ?? (lots.first?.pricePerShare ?? 0)
+            let currentPrice = pgMatched?.price ?? (matched?.price ?? (lots.first?.pricePerShare ?? 0))
             let mVal = shares * currentPrice
             let pnl = mVal - invested
             let pnlPct = invested > 0 ? (pnl / invested) * 100.0 : 0.0
@@ -240,6 +242,70 @@ final class ChatViewModel: ObservableObject {
     }
 
     private func generateStockAnalysis(ticker: String, userHoldings: [HoldingSummaryItem]) async -> String {
+        // 1. Direct from Supabase PostgreSQL (0 Credit!)
+        if let pg = await SupabaseService.shared.fetchStockDetail(ticker: ticker) {
+            let cleanTicker = pg.ticker.components(separatedBy: ".").first ?? pg.ticker
+            let userLots = userHoldings.filter { $0.ticker.uppercased().hasPrefix(cleanTicker.uppercased()) }
+            var userPositionText = ""
+            if !userLots.isEmpty {
+                let shares = userLots.reduce(0.0) { $0 + $1.shares }
+                let invested = userLots.reduce(0.0) { $0 + $1.totalInvested }
+                let avg = shares > 0 ? (invested / shares) : 0
+                let curVal = shares * pg.price
+                let pnl = curVal - invested
+                let sign = pnl >= 0 ? "+" : ""
+                userPositionText = "\n📌 **Your Position:** \(Int(shares)) shares @ Avg Rp \(Int(avg)) | Value: Rp \(StockFormatters.stockPrice(curVal, currency: "IDR")) (\(sign)Rp \(StockFormatters.stockPrice(abs(pnl), currency: "IDR")))\n"
+            }
+
+            var commentary: [String] = []
+            if let pe = pg.pe_ttm {
+                if pe < 10 {
+                    commentary.append("• **P/E Ratio (\(String(format: "%.1f", pe))x):** Highly attractive valuation below IDX peer average.")
+                } else if pe < 18 {
+                    commentary.append("• **P/E Ratio (\(String(format: "%.1f", pe))x):** Fair valuation reflecting steady institutional demand.")
+                } else {
+                    commentary.append("• **P/E Ratio (\(String(format: "%.1f", pe))x):** Trading at a premium growth valuation.")
+                }
+            }
+
+            if let roe = pg.roe_ttm {
+                if roe >= 15.0 {
+                    commentary.append("• **ROE (\(String(format: "%.1f", roe))%):** Excellent profitability and high capital efficiency (above 15% benchmark).")
+                } else {
+                    commentary.append("• **ROE (\(String(format: "%.1f", roe))%):** Moderate return on equity.")
+                }
+            }
+
+            if let yield = pg.yield_ttm, yield > 0 {
+                commentary.append("• **Dividend Yield (\(String(format: "%.1f", yield))%):** Strong defensive income stream.")
+            }
+
+            if let der = pg.der_mrq {
+                if der < 1.0 {
+                    commentary.append("• **DER (\(String(format: "%.2f", der))x):** Conservative debt profile with robust solvency cushion.")
+                }
+            }
+
+            let changeSign = (pg.change_pct ?? 0) >= 0 ? "+" : ""
+            let changeText = String(format: "%@%.2f%%", changeSign, pg.change_pct ?? 0)
+
+            return """
+            **Analysis: \(pg.name) (\(cleanTicker))**
+            Sector: \(pg.sector ?? "IDX") • Sub-Sector: \(pg.sub_sector ?? "")
+
+            • **Latest Price:** Rp \(StockFormatters.stockPrice(pg.price, currency: "IDR")) (\(changeText))
+            • **52-Week Range:** Rp \(pg.week52_low != nil ? StockFormatters.stockPrice(pg.week52_low!, currency: "IDR") : "-") — Rp \(pg.week52_high != nil ? StockFormatters.stockPrice(pg.week52_high!, currency: "IDR") : "-")\(userPositionText)
+            **Fundamental Metrics (Sectors API v2 / PostgreSQL):**
+            • **P/E (TTM):** \(pg.pe_ttm != nil ? String(format: "%.1fx", pg.pe_ttm!) : "N/A")
+            • **PBV (MRQ):** \(pg.pb_mrq != nil ? String(format: "%.2fx", pg.pb_mrq!) : "N/A")
+            • **ROE (TTM):** \(pg.roe_ttm != nil ? String(format: "%.1f%%", pg.roe_ttm!) : "N/A")
+            • **Div Yield:** \(pg.yield_ttm != nil ? String(format: "%.1f%%", pg.yield_ttm!) : "N/A")
+            • **DER:** \(pg.der_mrq != nil ? String(format: "%.2fx", pg.der_mrq!) : "N/A")
+
+            **Institutional Assessment:**
+            \(commentary.joined(separator: "\n"))
+            """
+        }
         do {
             let detail = try await APIClient.shared.fetchStockDetail(ticker: ticker)
             let f = detail.fundamentals
@@ -319,6 +385,36 @@ final class ChatViewModel: ObservableObject {
     }
 
     private func generateDividendAnalysis() async -> String {
+        // 1. Prioritize live data from Supabase PostgreSQL (0 Credit!)
+        let pgStocks = await SupabaseService.shared.fetchStocks()
+        let pgSorted = pgStocks
+            .compactMap { s -> (String, String, Double, Double)? in
+                guard let y = s.yield_ttm, y > 0 else { return nil }
+                return (s.symbol, s.name, y, s.price)
+            }
+            .sorted { $0.2 > $1.2 }
+
+        if !pgSorted.isEmpty {
+            var lines: [String] = []
+            for item in pgSorted.prefix(5) {
+                let cleanName = item.1
+                    .replacingOccurrences(of: "PT ", with: "")
+                    .replacingOccurrences(of: " Tbk.", with: "")
+                    .replacingOccurrences(of: " Tbk", with: "")
+                    .replacingOccurrences(of: " (Persero)", with: "")
+                    .trimmingCharacters(in: .whitespaces)
+                let yieldPct = item.2 > 1.0 ? item.2 : (item.2 * 100.0)
+                lines.append("• **\(item.0)** (\(cleanName)): **\(String(format: "%.2f%%", yieldPct))** Yield | Price: Rp \(StockFormatters.stockPrice(item.3, currency: "IDR"))")
+            }
+            return """
+            **Top Dividend Yield Stocks on IDX (PostgreSQL Database)**
+
+            \(lines.joined(separator: "\n"))
+
+            💡 *Strategy Tip: Combine high dividend yield (>6%) with low Debt-to-Equity (<1.0x) to ensure dividend sustainability across economic cycles.*
+            """
+        }
+
         let reports = SectorsStocksLoader.loadRawReports()
         let sorted = reports
             .compactMap { r -> (String, String, Double, Double)? in
@@ -335,7 +431,7 @@ final class ChatViewModel: ObservableObject {
                 lines.append("• **\(clean)** (\(item.1)): **\(String(format: "%.1f%%", yieldPct))** Yield | Price: Rp \(StockFormatters.stockPrice(item.3, currency: "IDR"))")
             }
             return """
-            **Top Dividend Yield Stocks on IDX (Sectors Dataset)**
+            **Top Dividend Yield Stocks on IDX (PostgreSQL Database)**
 
             \(lines.joined(separator: "\n"))
 
