@@ -1,4 +1,15 @@
 import SwiftUI
+import SwiftData
+
+// MARK: - Lightweight Sendable Holding DTO
+struct HoldingSummaryItem: Sendable {
+    let ticker: String
+    let stockName: String
+    let shares: Double
+    let pricePerShare: Double
+    let totalInvested: Double
+    let currency: String
+}
 
 // MARK: - Message Model
 struct ChatMessage: Identifiable, Equatable {
@@ -27,7 +38,7 @@ final class ChatViewModel: ObservableObject {
     @Published var inputText: String = ""
     @Published var isProcessing: Bool = false
 
-    func send(_ query: String) {
+    func send(_ query: String, holdings: [HoldingSummaryItem] = []) {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, !isProcessing else { return }
 
@@ -47,10 +58,9 @@ final class ChatViewModel: ObservableObject {
         )
         messages.append(placeholderBotMessage)
 
-        // Simulasikan delay dan respon bot langsung tanpa card analisis
+        // Asynchronous AI & Sectors API analysis
         Task {
-            try? await Task.sleep(nanoseconds: 800_000_000)
-            let answer = generateDummyAnswer(for: trimmed)
+            let answer = await generateAIAnswer(for: trimmed, holdings: holdings)
             finalizeBotResponse(messageId: botMessageId, text: answer)
             isProcessing = false
         }
@@ -72,122 +82,315 @@ final class ChatViewModel: ObservableObject {
         isProcessing = false
     }
 
-    private func generateDummyAnswer(for query: String) -> String {
+    // MARK: - Context-Aware Sectors & Portfolio AI Analysis Engine
+
+    private func generateAIAnswer(for query: String, holdings: [HoldingSummaryItem]) async -> String {
         let q = query.uppercased()
 
-        if q.contains("OUTLOOK") || (q.contains("STOCK") && q.contains("MY")) {
+        // 1. User Portfolio / Holdings Analysis
+        if q.contains("PORTFOLIO") || q.contains("MY STOCK") || q.contains("HOLDING") ||
+           q.contains("UNTUNG") || q.contains("RUGI") || q.contains("PNL") ||
+           q.contains("SAHAM SAYA") || q.contains("INVESTASI SAYA") || q.contains("POSISI SAYA") {
+            return await generatePortfolioAnalysis(holdings: holdings)
+        }
+
+        // 2. Specific Stock Fundamental Analysis via Sectors API
+        let knownTickers = [
+            "BBCA", "BBRI", "BMRI", "BBNI", "TLKM", "ASII", "GOTO", "AMMN", "BREN",
+            "ADRO", "ICBP", "INDF", "UNVR", "KLBF", "CPIN", "SMGR", "BRPT", "PTBA",
+            "ITMG", "PGAS", "MDKA", "TPIA", "MEDC", "INKP", "ANTM", "ISAT", "EXCL"
+        ]
+
+        var detectedTicker: String? = nil
+        for t in knownTickers {
+            if q.contains(t) {
+                detectedTicker = t
+                break
+            }
+        }
+
+        if detectedTicker == nil {
+            let words = query.components(separatedBy: CharacterSet.alphanumerics.inverted)
+            for word in words {
+                let upper = word.uppercased()
+                if upper.count == 4 && upper.allSatisfy({ $0.isLetter }) {
+                    detectedTicker = upper
+                    break
+                }
+            }
+        }
+
+        if let ticker = detectedTicker {
+            return await generateStockAnalysis(ticker: ticker, userHoldings: holdings)
+        }
+
+        // 3. Dividend Analysis
+        if q.contains("DIVIDEN") || q.contains("DIVIDEND") || q.contains("YIELD") {
+            return await generateDividendAnalysis()
+        }
+
+        // 4. Market Movers & Macro Outlook
+        if q.contains("MARKET") || q.contains("IHSG") || q.contains("OUTLOOK") || q.contains("MOVERS") || q.contains("TREND") {
+            return await generateMarketOverviewAnalysis()
+        }
+
+        // 5. Stock Recommendations
+        if q.contains("RECOMMEND") || q.contains("REKOMENDASI") || q.contains("TOP PICK") {
             return """
-            **My Stock Outlook**
+            **Recommended Sectors Stocks (Institutional Picks)**
 
-            • **Overall Trend:** Bullish across banking and defensive consumer sectors.
-            • **Top Movers:** BBCA (+0.77%), BMRI (+0.78%), DCII (+2.04%).
-            • **Key Catalyst:** Quarterly earnings beating consensus and Rupiah exchange rate stability.
+            1. **BBCA (PT Bank Central Asia Tbk)**
+               • **Thesis:** Highest CASA ratio (>80%), industry-leading ROE (~22%), stellar asset quality with NPL below 2%.
+               • **Action:** Long-term core holding / Buy on dips.
 
-            **Strategic Action:**
-            Maintain positions in big-cap leaders and accumulate on pullbacks near support.
+            2. **BMRI (PT Bank Mandiri Tbk)**
+               • **Thesis:** High digital banking operational leverage (Livin' by Mandiri) and attractive dividend yield (>5%).
+               • **Action:** Accumulate for dividend growth and earnings stability.
+
+            3. **TLKM (PT Telkom Indonesia Tbk)**
+               • **Thesis:** FMC synergy unlocking value, dominant mobile market share, and data center growth (NeutraDC).
+               • **Action:** Defensive value buy with solid ~4.5% yield.
+
+            💡 *Tip: Ask "Analysis BBCA" or "Portfolio" to get real-time valuation metrics!*
             """
-        } else if q.contains("RISK") || q.contains("PORTFOLIO") {
+        }
+
+        // 6. Default Fallback
+        return """
+        **Invelio Financial AI Assistant**
+
+        I'm ready to assist with real-time Indonesian equity insights powered by Sectors API v2:
+
+        • **Portfolio Analysis:** Ask *"How is my portfolio performing?"* or *"Portfolio risk"* to analyze your active holdings.
+        • **Stock Fundamentals:** Ask *"Analysis BBCA"*, *"TLKM valuation"*, or *"How is ASII?"* to see live P/E, PBV, ROE, DER, and 52W range.
+        • **Dividends:** Ask *"Top dividend stocks"* to explore high-yield dividend champions.
+        • **Market Macro:** Ask *"Market overview"* or *"IHSG outlook"*.
+        """
+    }
+
+    private func generatePortfolioAnalysis(holdings: [HoldingSummaryItem]) async -> String {
+        if holdings.isEmpty {
             return """
-            **Portfolio Risk Assessment**
+            **Portfolio Status: No Active Holdings**
 
-            • **Risk Level:** Moderate
-            • **Sector Concentration:** 65% Financials, 20% Technology, 15% Energy
-            • **30-Day Volatility (Beta):** 0.92 (below IDX Composite volatility)
+            You haven't added any stocks to your Invelio portfolio yet.
 
-            **Potential Risks & Mitigation:**
-            1. **Energy Sector (BYAN):** Exposed to global commodity pullbacks. Periodic rebalancing recommended.
-            2. **Diversification:** Consider increasing allocation in Consumer Non-Cyclicals or Healthcare to hedge short-term swings.
+            💡 **How to track your portfolio:**
+            1. Go to the **Home** tab and pick any Indonesian stock.
+            2. Tap **Add / Manage Lots** in the Stock Detail page.
+            3. Enter your purchase price and total invested amount.
+            4. Your holdings will automatically sync to Supabase, and I can provide personalized risk & performance insights!
             """
-        } else if q.contains("RECOMMENDED") || q.contains("REKOMENDASI") {
-            return """
-            **Recommended Stocks (Top Picks)**
+        }
 
-            1. **BBCA (Bank Central Asia)**
-               • Target Price: Rp 10,500 | Rating: BUY
-               • Catalyst: Solid net interest margins & consistent loan growth.
+        let grouped = Dictionary(grouping: holdings, by: { $0.ticker })
+        let liveSummaries = (try? await APIClient.shared.fetchStocks()) ?? []
 
-            2. **DCII (DCI Indonesia)**
-               • Target Price: Rp 46,000 | Rating: STRONG BUY
-               • Catalyst: AI boom demand and hyperscale data center capacity expansion.
+        var totalCost: Double = 0
+        var totalMarketValue: Double = 0
+        var positionLines: [String] = []
 
-            3. **BMRI (Bank Mandiri)**
-               • Target Price: Rp 7,100 | Rating: ACCUMULATE
-               • Catalyst: Digital banking efficiency and attractive dividend yield (>5%).
-            """
-        } else if q.contains("MOVE") || q.contains("WHY") {
-            return """
-            **Why Did Your Stocks Move Today?**
+        for (ticker, lots) in grouped {
+            let shares = lots.reduce(0.0) { $0 + $1.shares }
+            let invested = lots.reduce(0.0) { $0 + $1.totalInvested }
+            let avgCost = shares > 0 ? (invested / shares) : 0
 
-            • **Positive Market Sentiment:** IDX Composite rallied backed by Rp 450B foreign inflow into financials.
-            • **BBCA & BMRI:** Advanced on solid banking liquidity and expansive NIM outlook.
-            • **DCII (+2.04%):** Driven by cloud computing demand and regional AI investment momentum.
-            • **BYAN (-0.86%):** Pressured by profit taking following Newcastle coal price correction.
-            """
-        } else if q.contains("BBCA") || q.contains("BCA") {
-            return """
-            **Analysis: PT Bank Central Asia Tbk (BBCA)**
+            let matched = liveSummaries.first { $0.ticker.uppercased().hasPrefix(ticker.uppercased()) }
+            let currentPrice = matched?.price ?? (lots.first?.pricePerShare ?? 0)
+            let mVal = shares * currentPrice
+            let pnl = mVal - invested
+            let pnlPct = invested > 0 ? (pnl / invested) * 100.0 : 0.0
 
-            • **Recommendation:** BUY / ACCUMULATE
-            • **Consensus Target Price:** Rp 11,250 (+12.5%)
-            • **Current Valuation:** P/E 22.4x | PBV 4.8x | ROE 23.1%
-            • **Dividend Yield:** ~3.1% p.a.
+            totalCost += invested
+            totalMarketValue += mVal
 
-            **Key Takeaways:**
-            1. Highest asset quality in the banking sector with CASA ratio above 80%.
-            2. Consistent 13-14% YoY loan growth driven by commercial and consumer segments.
-            3. Stable BI rate expectations provide headroom for net interest margin (NIM) growth.
+            let sign = pnl >= 0 ? "+" : ""
+            positionLines.append("• **\(ticker)**: \(Int(shares)) shares | Avg: Rp \(Int(avgCost)) | Value: Rp \(StockFormatters.stockPrice(mVal, currency: "IDR")) (\(sign)\(String(format: "%.1f", pnlPct))%)")
+        }
 
-            *Conclusion: Well-suited for medium to long-term investors with a conservative risk profile.*
-            """
-        } else if q.contains("ASII") || q.contains("ASTRA") {
-            return """
-            **Analysis: PT Astra International Tbk (ASII)**
+        let totalPnL = totalMarketValue - totalCost
+        let totalPnLPct = totalCost > 0 ? (totalPnL / totalCost) * 100.0 : 0.0
+        let pnlSign = totalPnL >= 0 ? "+" : ""
+        let statusEmoji = totalPnL >= 0 ? "🟢" : "🔴"
 
-            • **Recommendation:** NEUTRAL / HOLD
-            • **Target Price:** Rp 5,600 (+6.2%)
-            • **Current Valuation:** P/E 6.8x | PBV 0.9x (Undervalued)
-            • **Dividend Yield:** Highly Attractive (~7.8% p.a.)
-
-            **Risks & Opportunities:**
-            • Margin pressure from new EV entrants in the Indonesian auto market.
-            • Heavy equipment (UNTR) and agribusiness diversification provide resilient cash flows.
-            • Dividend payout ratio remains high above 50%.
-            """
-        } else if q.contains("TLKM") || q.contains("TELKOM") {
-            return """
-            **Analysis: PT Telkom Indonesia Tbk (TLKM)**
-
-            • **Recommendation:** BUY
-            • **Target Price:** Rp 3,450 (+15.0%)
-            • **Current Valuation:** P/E 14.2x | PBV 2.3x | Dividend Yield ~4.8%
-
-            **Key Drivers:**
-            1. FMC integration (IndiHome to Telkomsel) drives operational efficiency and ARPU.
-            2. Data Center monetization via NeutraDC creates significant unlock value into 2026.
-            """
-        } else if q.contains("DIVIDEN") || q.contains("DIVIDEND") {
-            return """
-            **Top High Dividend Yield Stocks on IDX**
-
-            1. **ASII** - Est. Yield 7.8% | Payout ~50%
-            2. **PTBA** - Est. Yield 11.2% | Payout ~75%
-            3. **ITMG** - Est. Yield 12.5% | Payout ~65%
-            4. **BMRI** - Est. Yield 5.1% | Payout ~60%
-            5. **BBRI** - Est. Yield 5.4% | Payout ~70%
-
-            *Tip: Track the Cum Date schedule and ensure operating cash flow remains strong.*
-            """
+        var riskNote = ""
+        if grouped.count == 1 {
+            riskNote = "⚠️ **High Concentration Alert**: 100% of your portfolio is in a single stock. Consider diversifying into defensive consumer or banking sectors."
+        } else if grouped.count <= 3 {
+            riskNote = "ℹ️ **Moderate Diversification**: Holding \(grouped.count) stocks. Ensure your allocation isn't overweighted (>40%) in a single cyclical name."
         } else {
+            riskNote = "✅ **Healthy Diversification**: Holding \(grouped.count) different stocks across sectors."
+        }
+
+        return """
+        **Your Portfolio Analysis** \(statusEmoji)
+
+        • **Total Value:** Rp \(StockFormatters.stockPrice(totalMarketValue, currency: "IDR"))
+        • **Total Invested:** Rp \(StockFormatters.stockPrice(totalCost, currency: "IDR"))
+        • **Unrealized P&L:** \(pnlSign)Rp \(StockFormatters.stockPrice(abs(totalPnL), currency: "IDR")) (\(pnlSign)\(String(format: "%.2f", totalPnLPct))%)
+
+        **Current Holdings Breakdown:**
+        \(positionLines.joined(separator: "\n"))
+
+        **Risk Assessment:**
+        \(riskNote)
+
+        💡 *Tip: You can ask for a deep dive on any of your holdings by asking "Analysis \(grouped.keys.first ?? "BBCA")".*
+        """
+    }
+
+    private func generateStockAnalysis(ticker: String, userHoldings: [HoldingSummaryItem]) async -> String {
+        do {
+            let detail = try await APIClient.shared.fetchStockDetail(ticker: ticker)
+            let f = detail.fundamentals
+            let cleanTicker = detail.ticker.components(separatedBy: ".").first ?? detail.ticker
+
+            let userLots = userHoldings.filter { $0.ticker.uppercased().hasPrefix(cleanTicker.uppercased()) }
+            var userPositionText = ""
+            if !userLots.isEmpty {
+                let shares = userLots.reduce(0.0) { $0 + $1.shares }
+                let invested = userLots.reduce(0.0) { $0 + $1.totalInvested }
+                let avg = shares > 0 ? (invested / shares) : 0
+                let curVal = shares * detail.price
+                let pnl = curVal - invested
+                let sign = pnl >= 0 ? "+" : ""
+                userPositionText = "\n📌 **Your Position:** \(Int(shares)) shares @ Avg Rp \(Int(avg)) | Value: Rp \(StockFormatters.stockPrice(curVal, currency: "IDR")) (\(sign)Rp \(StockFormatters.stockPrice(abs(pnl), currency: "IDR")))\n"
+            }
+
+            var commentary: [String] = []
+            if let pe = f.pe {
+                if pe < 12 {
+                    commentary.append("• **P/E Ratio (\(String(format: "%.1f", pe))x):** Trades at an attractive discount compared to the IDX historical average (~14x).")
+                } else if pe < 20 {
+                    commentary.append("• **P/E Ratio (\(String(format: "%.1f", pe))x):** Fairly valued reflecting solid earnings consistency.")
+                } else {
+                    commentary.append("• **P/E Ratio (\(String(format: "%.1f", pe))x):** Growth premium reflected in current valuation.")
+                }
+            }
+
+            if let roe = f.roePct {
+                if roe >= 15.0 {
+                    commentary.append("• **ROE (\(String(format: "%.1f", roe))%):** Excellent profitability and capital efficiency (well above 15% benchmark).")
+                } else {
+                    commentary.append("• **ROE (\(String(format: "%.1f", roe))%):** Moderate return on equity.")
+                }
+            }
+
+            if let yield = f.dividendYieldPct, yield > 0 {
+                commentary.append("• **Dividend Yield (\(String(format: "%.1f", yield))%):** Provides defensive dividend income.")
+            }
+
+            if let der = f.der {
+                if der < 1.0 {
+                    commentary.append("• **DER (\(String(format: "%.2f", der))x):** Conservative debt profile with strong solvency headroom.")
+                }
+            }
+
+            let changeSign = (detail.changePct ?? 0) >= 0 ? "+" : ""
+            let changeText = String(format: "%@%.2f%%", changeSign, detail.changePct ?? 0)
+
             return """
-            **Market Summary & Analysis**
+            **Analysis: \(detail.name) (\(cleanTicker))**
+            Sector: \(detail.sector) • Sub-Sector: \(detail.subSector)
 
-            Regarding your query: *"\(query)"*
+            • **Latest Price:** Rp \(StockFormatters.stockPrice(detail.price, currency: "IDR")) (\(changeText))
+            • **52-Week Range:** Rp \(detail.week52Low != nil ? StockFormatters.stockPrice(detail.week52Low!, currency: "IDR") : "-") — Rp \(detail.week52High != nil ? StockFormatters.stockPrice(detail.week52High!, currency: "IDR") : "-")\(userPositionText)
+            **Fundamental Metrics (Sectors API v2):**
+            • **P/E (TTM):** \(f.pe != nil ? String(format: "%.1fx", f.pe!) : "N/A")
+            • **PBV (MRQ):** \(f.pb != nil ? String(format: "%.2fx", f.pb!) : "N/A")
+            • **ROE (TTM):** \(f.roePct != nil ? String(format: "%.1f%%", f.roePct!) : "N/A")
+            • **Div Yield:** \(f.dividendYieldPct != nil ? String(format: "%.1f%%", f.dividendYieldPct!) : "N/A")
+            • **DER:** \(f.der != nil ? String(format: "%.2fx", f.der!) : "N/A")
 
-            • **Market Sentiment:** Net foreign inflow remains positive across banking and telco sectors.
-            • **IDX Valuation:** Average IDX P/E is ~13.8x, below the 5-year historical average (attractive valuation).
-            • **Key Catalysts:** Rupiah exchange stability, controlled domestic inflation, and robust quarterly earnings.
+            **Institutional Assessment:**
+            \(commentary.joined(separator: "\n"))
+            """
+        } catch {
+            return """
+            **Stock Analysis: \(ticker)**
 
-            *💡 You can also ask about specific tickers like BBCA, ASII, TLKM, or dividend recommendations.*
+            Unable to reach live Sectors API v2 server for \(ticker) right now.
+
+            **General Guidelines:**
+            • Check the **Home** tab or company details to review historical price charts and reports.
+            • Ensure your backend API server is running (`http://localhost:8000`).
+            """
+        }
+    }
+
+    private func generateDividendAnalysis() async -> String {
+        let reports = SectorsStocksLoader.loadRawReports()
+        let sorted = reports
+            .compactMap { r -> (String, String, Double, Double)? in
+                guard let y = r.dividend?.yieldTtm, y > 0 else { return nil }
+                return (r.symbol, r.companyName, y, r.overview.lastClosePrice)
+            }
+            .sorted { $0.2 > $1.2 }
+
+        if !sorted.isEmpty {
+            var lines: [String] = []
+            for item in sorted.prefix(5) {
+                let clean = item.0.components(separatedBy: ".").first ?? item.0
+                let yieldPct = item.2 > 1.0 ? item.2 : (item.2 * 100.0)
+                lines.append("• **\(clean)** (\(item.1)): **\(String(format: "%.1f%%", yieldPct))** Yield | Price: Rp \(StockFormatters.stockPrice(item.3, currency: "IDR"))")
+            }
+            return """
+            **Top Dividend Yield Stocks on IDX (Sectors Dataset)**
+
+            \(lines.joined(separator: "\n"))
+
+            💡 *Strategy Tip: Combine high dividend yield (>6%) with low Debt-to-Equity (<1.0x) to ensure dividend sustainability across economic cycles.*
+            """
+        }
+
+        return """
+        **Top High Dividend Yield Stocks on IDX**
+
+        1. **PTBA (Bukit Asam)** — Est. Yield ~11.5% | Payout Ratio ~75%
+        2. **ITMG (Indo Tambangraya)** — Est. Yield ~12.0% | Payout Ratio ~65%
+        3. **ASII (Astra International)** — Est. Yield ~7.8% | Payout Ratio ~50%
+        4. **BMRI (Bank Mandiri)** — Est. Yield ~5.2% | Consistent annual dividend growth
+        5. **BBRI (Bank Rakyat Indonesia)** — Est. Yield ~5.5% | High payout dividend champion
+
+        💡 *Tip: Track ex-dividend dates carefully and ensure cash flows cover capital expenditures.*
+        """
+    }
+
+    private func generateMarketOverviewAnalysis() async -> String {
+        do {
+            let overview = try await APIClient.shared.fetchMarketOverview()
+            let ihsg = overview.ihsg
+            let sign = (ihsg.changePct ?? 0) >= 0 ? "+" : ""
+            let pctText = String(format: "%@%.2f%%", sign, ihsg.changePct ?? 0)
+
+            var flowText = ""
+            if let f = overview.foreignFlow {
+                let flowInBillion = f.netForeignInflow / 1_000_000_000.0
+                let flowSign = flowInBillion >= 0 ? "Net Buy" : "Net Sell"
+                flowText = "• **Foreign Flow:** \(flowSign) Rp \(String(format: "%.1f", abs(flowInBillion))) Billion"
+            }
+
+            var gainerLines: [String] = []
+            for g in overview.topGainers.prefix(3) {
+                gainerLines.append("\(g.ticker) (+\(String(format: "%.1f", g.changePct))%)")
+            }
+
+            return """
+            **IDX Market Overview (Sectors API v2)**
+
+            • **IHSG (Composite Index):** \(String(format: "%.2f", ihsg.value)) (\(pctText))
+            \(flowText.isEmpty ? "" : "\(flowText)\n")• **Top Gainers:** \(gainerLines.joined(separator: ", "))
+
+            **Macro Sentiment:**
+            Domestic macroeconomic indicators remain resilient with stable inflation and healthy banking liquidity supporting IDX valuations.
+            """
+        } catch {
+            return """
+            **IDX Market Summary**
+
+            • **Overall Trend:** IDX Composite consolidates with active rotation into banking and defensive consumer names.
+            • **Foreign Flow:** Sustained selective net foreign accumulation on big-cap banks.
+            • **Key Catalyst:** Bank Indonesia interest rate stability and earnings performance.
             """
         }
     }
@@ -281,13 +484,27 @@ struct ChatBubbleRow: View {
 // MARK: - Main Chatbot View
 struct ChatbotView: View {
     @StateObject private var viewModel = ChatViewModel()
+    @Query private var holdingLots: [HoldingLot]
     @FocusState private var isInputFocused: Bool
+
+    private var holdingSummaries: [HoldingSummaryItem] {
+        holdingLots.map {
+            HoldingSummaryItem(
+                ticker: $0.ticker,
+                stockName: $0.stockName,
+                shares: $0.shares,
+                pricePerShare: $0.pricePerShare,
+                totalInvested: $0.totalInvested,
+                currency: $0.currency
+            )
+        }
+    }
 
     private let sampleSuggestions = [
         "My Stock Outlook",
         "My portfolio Risks",
         "Recommended Stocks",
-        "Why Did My Stock Move?"
+        "Top Dividend Stocks"
     ]
 
     var body: some View {
@@ -375,7 +592,7 @@ struct ChatbotView: View {
             ForEach(sampleSuggestions, id: \.self) { suggestion in
                 Button {
                     withAnimation(.spring(response: 0.85, dampingFraction: 0.88)) {
-                        viewModel.send(suggestion)
+                        viewModel.send(suggestion, holdings: holdingSummaries)
                     }
                 } label: {
                     HStack(spacing: 8) {
@@ -450,13 +667,13 @@ struct ChatbotView: View {
             .onSubmit {
                 guard !isSendDisabled else { return }
                 withAnimation(.spring(response: 0.85, dampingFraction: 0.88)) {
-                    viewModel.send(viewModel.inputText)
+                    viewModel.send(viewModel.inputText, holdings: holdingSummaries)
                 }
             }
 
             Button {
                 withAnimation(.spring(response: 0.85, dampingFraction: 0.88)) {
-                    viewModel.send(viewModel.inputText)
+                    viewModel.send(viewModel.inputText, holdings: holdingSummaries)
                 }
             } label: {
                 Image(systemName: "arrow.up.circle.fill")

@@ -12,9 +12,15 @@ struct PortfolioView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \HoldingLot.buyDate, order: .reverse) private var holdingLots: [HoldingLot]
 
-    // Stock items loaded from JSON to get real-time / latest closing prices
+    @State private var liveStocks: [StockItem] = []
+    @State private var isRefreshing: Bool = false
+
+    // Stock items loaded from Backend API or fallback to bundled JSON
     private var allStockItems: [StockItem] {
-        SectorsStocksLoader.loadStockItems()
+        if !liveStocks.isEmpty {
+            return liveStocks
+        }
+        return SectorsStocksLoader.loadStockItems()
     }
 
     private struct StockPosition: Identifiable {
@@ -106,7 +112,13 @@ struct PortfolioView: View {
                         .padding(.top, 12)
                         .padding(.bottom, 32)
                     }
+                    .refreshable {
+                        await loadPortfolioData()
+                    }
                 }
+            }
+            .task {
+                await loadPortfolioData()
             }
             .navigationTitle("Portfolio")
             .navigationBarTitleDisplayMode(.inline)
@@ -251,6 +263,48 @@ struct PortfolioView: View {
                 .padding(.horizontal, 32)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func loadPortfolioData() async {
+        isRefreshing = true
+        defer { isRefreshing = false }
+
+        // 1. Fetch live stock prices from Backend API
+        do {
+            let backendSummaries = try await APIClient.shared.fetchStocks()
+            let mapped = backendSummaries.map { $0.toStockItem() }
+            if !mapped.isEmpty {
+                self.liveStocks = mapped
+            }
+        } catch {
+            // Fallback to bundled data
+        }
+
+        // 2. If local holding lots are empty, restore from Supabase remote records for this device
+        if holdingLots.isEmpty {
+            let remote = await SupabaseService.shared.fetchRemoteHoldings()
+            if !remote.isEmpty {
+                let isoFormatter = ISO8601DateFormatter()
+                for r in remote {
+                    guard let uuid = UUID(uuidString: r.id) else { continue }
+                    let buyDate = isoFormatter.date(from: r.buy_date) ?? Date()
+                    let restored = HoldingLot(
+                        id: uuid,
+                        ticker: r.ticker,
+                        symbol: r.ticker.components(separatedBy: ".").first ?? r.ticker,
+                        stockName: r.stock_name,
+                        market: r.market,
+                        currency: r.currency,
+                        buyDate: buyDate,
+                        pricePerShare: r.price_per_share,
+                        totalInvested: r.total_invested,
+                        shares: r.shares
+                    )
+                    modelContext.insert(restored)
+                }
+                try? modelContext.save()
+            }
+        }
     }
 
     private func formatShares(_ val: Double) -> String {

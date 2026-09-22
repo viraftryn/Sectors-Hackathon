@@ -663,7 +663,11 @@ public struct StockDetailView: View {
         // Remove lots deleted in UI
         for lot in stockLots {
             if !activeIDs.contains(lot.id) {
+                let deletedId = lot.id
                 modelContext.delete(lot)
+                Task {
+                    await SupabaseService.shared.deleteHolding(id: deletedId)
+                }
             }
         }
 
@@ -688,6 +692,30 @@ public struct StockDetailView: View {
                     shares: entry.shares
                 )
                 modelContext.insert(newLot)
+            }
+
+            let entryId = entry.id
+            let ticker = quote.ticker
+            let name = quote.name
+            let mkt = detectedMarket
+            let curr = quote.currency
+            let shares = entry.shares
+            let price = entry.price
+            let total = entry.total
+            let date = entry.date
+
+            Task {
+                await SupabaseService.shared.upsertHolding(
+                    id: entryId,
+                    ticker: ticker,
+                    stockName: name,
+                    market: mkt,
+                    currency: curr,
+                    shares: shares,
+                    pricePerShare: price,
+                    totalInvested: total,
+                    buyDate: date
+                )
             }
         }
         try? modelContext.save()
@@ -931,6 +959,9 @@ public struct StockDetailView: View {
                                         if let existing = allHoldingLots.first(where: { $0.id == idToDelete }) {
                                             modelContext.delete(existing)
                                             try? modelContext.save()
+                                            Task {
+                                                await SupabaseService.shared.deleteHolding(id: idToDelete)
+                                            }
                                         }
                                         if purchaseEntries.isEmpty {
                                             purchaseEntries = [PurchaseFormEntry(date: Date(), priceInput: formatNumber(quote.price), totalInput: "")]
