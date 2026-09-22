@@ -1,4 +1,4 @@
-"""Chatbot Agent — LangGraph workflow with Sectors MCP tool-calling.
+"""Chatbot Agent — LangGraph workflow with LLM tool-calling over Sectors API.
 
 Three-node graph: classify_question -> retrieve_context -> generate_response.
 The LLM autonomously picks which Sectors endpoints to query based on the
@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 import logging
 from collections.abc import AsyncIterator
-from typing import Any, TypedDict
+from typing import Any, TypedDict, cast
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import (
@@ -21,6 +21,7 @@ from langchain_core.messages import (
 )
 from langchain_core.tools import tool
 from langgraph.graph import END, StateGraph
+from pydantic import SecretStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.clients.cached_sectors import CachedSectorsClient
@@ -115,15 +116,12 @@ def _extract_text(content: Any) -> str:
         return content
     if isinstance(content, list):
         return "".join(
-            block.get("text", "") if isinstance(block, dict) else str(block)
-            for block in content
+            block.get("text", "") if isinstance(block, dict) else str(block) for block in content
         )
     return str(content)
 
 
-def _get_llm(
-    temperature: float = 0.0, streaming: bool = False
-) -> BaseChatModel:
+def _get_llm(temperature: float = 0.0, streaming: bool = False) -> BaseChatModel:
     if settings.chatbot_provider == "gemini":
         from langchain_google_genai import ChatGoogleGenerativeAI
 
@@ -138,7 +136,7 @@ def _get_llm(
     return ChatOpenAI(
         model=settings.chatbot_model,
         temperature=temperature,
-        api_key=settings.openai_api_key,
+        api_key=SecretStr(settings.openai_api_key) if settings.openai_api_key else None,
         streaming=streaming,
     )
 
@@ -148,22 +146,34 @@ def _get_llm(
 # ---------------------------------------------------------------------------
 
 
-def _build_tools(client: CachedSectorsClient) -> list:
+def _validate_ticker(ticker: str) -> str | None:
+    """Return normalized ticker if tracked, else None."""
+    t = ticker.upper().removesuffix(".JK")
+    return t if t in settings.tracked_tickers else None
+
+
+def _build_tools(client: CachedSectorsClient) -> list[Any]:
     @tool
     async def get_company_report(ticker: str) -> str:
         """Get a company's financial report: overview, valuation
         (PE, PBV, ROE, DER), market cap, dividend yield.
 
-        IDX tickers: BBCA BBRI BMRI BBNI TLKM ASII UNVR ICBP AMRT ANTM."""
-        data = await client.get_company_report(ticker)
+        Tracked: BBCA BBRI BMRI BBNI TLKM ASII UNVR ICBP AMRT ANTM."""
+        t = _validate_ticker(ticker)
+        if t is None:
+            return f"Ticker {ticker!r} is not tracked."
+        data = await client.get_company_report(t)
         return _truncate(json.dumps(data, default=str))
 
     @tool
     async def get_daily_prices(ticker: str) -> str:
         """Get 90-day daily OHLCV price history for a stock.
 
-        Tracked tickers: BBCA, BBRI, BMRI, BBNI, TLKM, ASII, UNVR, ICBP, AMRT, ANTM."""
-        data = await client.get_daily_prices(ticker)
+        Tracked: BBCA BBRI BMRI BBNI TLKM ASII UNVR ICBP AMRT ANTM."""
+        t = _validate_ticker(ticker)
+        if t is None:
+            return f"Ticker {ticker!r} is not tracked."
+        data = await client.get_daily_prices(t)
         if isinstance(data, list) and len(data) > 10:
             summary = {
                 "total_days": len(data),
@@ -194,7 +204,7 @@ def _build_tools(client: CachedSectorsClient) -> list:
     @tool
     async def get_market_index() -> str:
         """Get the IHSG (Jakarta Composite Index) data and recent trend."""
-        data = await client.get_idx_total()
+        data = await client.get_ihsg()
         if isinstance(data, list) and len(data) > 10:
             summary = {"total_days": len(data), "latest_10": data[-10:]}
             return _truncate(json.dumps(summary, default=str))
@@ -213,13 +223,26 @@ def _build_tools(client: CachedSectorsClient) -> list:
     async def get_news(ticker: str = "") -> str:
         """Get latest news articles. Pass a ticker for stock-specific
         news, or empty string for all market news."""
-        data = await client.get_news(ticker if ticker else None)
+        if ticker:
+            t = _validate_ticker(ticker)
+            if t is None:
+                return f"Ticker {ticker!r} is not tracked."
+            data = await client.get_news(t)
+        else:
+            data = await client.get_news(None)
         return _truncate(json.dumps(data, default=str))
 
     @tool
-    async def get_filings(ticker: str = "") -> str:
-        """Get official filings with sentiment tags. Pass a ticker or empty for all."""
-        data = await client.get_news_filings(ticker if ticker else None)
+    async def get_insider_transactions(ticker: str = "") -> str:
+        """Get insider transactions (buy/sell) for a stock.
+        Pass a ticker or empty for all."""
+        if ticker:
+            t = _validate_ticker(ticker)
+            if t is None:
+                return f"Ticker {ticker!r} is not tracked."
+            data = await client.get_news_filings(t)
+        else:
+            data = await client.get_news_filings(None)
         return _truncate(json.dumps(data, default=str))
 
     return [
@@ -231,7 +254,7 @@ def _build_tools(client: CachedSectorsClient) -> list:
         get_market_index,
         get_sector_report,
         get_news,
-        get_filings,
+        get_insider_transactions,
     ]
 
 
@@ -241,7 +264,7 @@ def _build_tools(client: CachedSectorsClient) -> list:
 
 
 class ChatbotAgent:
-    """LangGraph chatbot with Sectors MCP tool-calling.
+    """LangGraph chatbot with LLM tool-calling over the Sectors API.
 
     Nodes:
       1. classify_question  — categorize the question + extract tickers
@@ -279,7 +302,7 @@ class ChatbotAgent:
             question_type=state["question_type"],
             entities=state["entities"],
         )
-        messages: list = [
+        messages: list[Any] = [
             SystemMessage(content=system),
             HumanMessage(content=state["user_message"]),
         ]
@@ -303,12 +326,8 @@ class ChatbotAgent:
                         logger.warning("Tool %s failed: %s", tc["name"], exc)
                         tool_output = f"Error fetching data: {exc}"
 
-                context_parts.append(
-                    {"tool": tc["name"], "args": tc["args"], "data": tool_output}
-                )
-                messages.append(
-                    ToolMessage(content=str(tool_output), tool_call_id=tc["id"])
-                )
+                context_parts.append({"tool": tc["name"], "args": tc["args"], "data": tool_output})
+                messages.append(ToolMessage(content=str(tool_output), tool_call_id=tc["id"]))
 
         return {"context": context_parts}
 
@@ -316,18 +335,16 @@ class ChatbotAgent:
         parts = []
         for item in context:
             args_str = (
-                ", ".join(f"{k}={v!r}" for k, v in item["args"].items())
-                if item["args"]
-                else ""
+                ", ".join(f"{k}={v!r}" for k, v in item["args"].items()) if item["args"] else ""
             )
             parts.append(f"### {item['tool']}({args_str})\n{item['data']}")
         return "\n\n".join(parts) if parts else "(no data retrieved)"
 
-    def _build_response_messages(self, state: ChatState) -> list:
+    def _build_response_messages(self, state: ChatState) -> list[Any]:
         context_text = self._format_context(state.get("context", []))
         system = RESPONSE_PROMPT.format(context=context_text)
 
-        history_msgs: list = []
+        history_msgs: list[Any] = []
         for msg in (state.get("chat_history") or [])[-6:]:
             if msg["role"] == "user":
                 history_msgs.append(HumanMessage(content=msg["content"]))
@@ -373,7 +390,7 @@ class ChatbotAgent:
             "response": "",
         }
         result = await graph.ainvoke(initial)
-        return result["response"]
+        return cast(str, result["response"])
 
     async def stream(
         self, message: str, history: list[dict[str, str]] | None = None
@@ -389,10 +406,11 @@ class ChatbotAgent:
         }
 
         classified = await self._classify_question(state)
-        state.update(classified)
+        state["question_type"] = classified["question_type"]
+        state["entities"] = classified["entities"]
 
         retrieved = await self._retrieve_context(state)
-        state.update(retrieved)
+        state["context"] = retrieved["context"]
 
         messages = self._build_response_messages(state)
         llm = _get_llm(temperature=0.3, streaming=True)

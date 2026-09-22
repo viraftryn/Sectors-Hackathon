@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import uuid
+from collections.abc import AsyncGenerator
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
@@ -25,7 +26,7 @@ router = APIRouter()
 # ---------------------------------------------------------------------------
 
 
-async def _get_optional_db() -> AsyncSession | None:
+async def _get_optional_db() -> AsyncGenerator[AsyncSession | None, None]:
     try:
         from app.db.database import get_db
 
@@ -42,9 +43,7 @@ async def _get_optional_db() -> AsyncSession | None:
         await gen.aclose()
 
 
-async def _load_history(
-    db: AsyncSession | None, session_id: uuid.UUID
-) -> list[dict[str, str]]:
+async def _load_history(db: AsyncSession | None, session_id: uuid.UUID) -> list[dict[str, str]]:
     if db is None:
         return []
     try:
@@ -100,7 +99,7 @@ def _require_llm_key() -> None:
 async def chat(
     request: ChatRequest,
     db: AsyncSession | None = Depends(_get_optional_db),
-):
+) -> ChatResponse:
     """Send a message and receive a complete JSON response."""
     _require_llm_key()
     agent = ChatbotAgent(db)
@@ -117,9 +116,7 @@ async def chat(
                 status_code=429,
                 detail="LLM rate limit exceeded — retry shortly",
             ) from exc
-        raise HTTPException(
-            status_code=502, detail="LLM service error"
-        ) from exc
+        raise HTTPException(status_code=502, detail="LLM service error") from exc
     await _save_message(db, request.session_id, "assistant", response_text)
 
     return ChatResponse(session_id=request.session_id, response=response_text)
@@ -129,14 +126,14 @@ async def chat(
 async def chat_stream(
     request: ChatRequest,
     db: AsyncSession | None = Depends(_get_optional_db),
-):
+) -> StreamingResponse:
     """Send a message and receive a streaming SSE response."""
     _require_llm_key()
     agent = ChatbotAgent(db)
     history = await _load_history(db, request.session_id)
     await _save_message(db, request.session_id, "user", request.message)
 
-    async def event_generator():
+    async def event_generator() -> AsyncGenerator[str, None]:
         full_response: list[str] = []
         try:
             async for chunk in agent.stream(request.message, history):
