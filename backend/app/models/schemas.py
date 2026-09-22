@@ -88,6 +88,17 @@ class MarketOverview(BaseModel):
     most_traded: list[TradedStock]
 
 
+# -- Chat -------------------------------------------------------------------
+
+
+class ChatRequest(BaseModel):
+    message: str
+    session_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+
+
+class ChatResponse(BaseModel):
+    session_id: uuid.UUID
+    response: str
 class ScoreBreakdown(BaseModel):
     fundamental: float
     macro: float

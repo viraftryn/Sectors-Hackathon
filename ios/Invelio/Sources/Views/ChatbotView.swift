@@ -27,169 +27,59 @@ final class ChatViewModel: ObservableObject {
     @Published var inputText: String = ""
     @Published var isProcessing: Bool = false
 
+    private var sessionId = UUID()
+    private var streamTask: Task<Void, Never>?
+
     func send(_ query: String) {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, !isProcessing else { return }
 
-        // Tambahkan pesan user
         let userMessage = ChatMessage(text: trimmed, isUser: true)
         messages.append(userMessage)
         inputText = ""
         isProcessing = true
 
-        // Placeholder respon bot
         let botMessageId = UUID()
-        let placeholderBotMessage = ChatMessage(
-            id: botMessageId,
-            text: "",
-            isUser: false,
-            timestamp: Date()
-        )
-        messages.append(placeholderBotMessage)
+        messages.append(ChatMessage(id: botMessageId, text: "", isUser: false))
 
-        // Simulasikan delay dan respon bot langsung tanpa card analisis
-        Task {
-            try? await Task.sleep(nanoseconds: 800_000_000)
-            let answer = generateDummyAnswer(for: trimmed)
-            finalizeBotResponse(messageId: botMessageId, text: answer)
-            isProcessing = false
+        streamTask = Task {
+            await streamFromAgent(query: trimmed, botMessageId: botMessageId)
         }
     }
 
-    private func finalizeBotResponse(messageId: UUID, text: String) {
-        guard let index = messages.firstIndex(where: { $0.id == messageId }) else { return }
-        messages[index] = ChatMessage(
-            id: messageId,
-            text: text,
-            isUser: false,
-            timestamp: Date()
+    private func streamFromAgent(query: String, botMessageId: UUID) async {
+        var accumulated = ""
+        let stream = APIClient.shared.chatStream(
+            message: query,
+            sessionId: sessionId
         )
-    }
 
-    func resetSession() {
-        messages.removeAll()
-        inputText = ""
+        do {
+            for try await chunk in stream {
+                accumulated += chunk
+                updateBotMessage(id: botMessageId, text: accumulated)
+            }
+        } catch {
+            print("[ChatBot] Stream error: \(error)")
+            if accumulated.isEmpty {
+                accumulated = "Error: \(error.localizedDescription)"
+            }
+            updateBotMessage(id: botMessageId, text: accumulated)
+        }
         isProcessing = false
     }
 
-    private func generateDummyAnswer(for query: String) -> String {
-        let q = query.uppercased()
+    private func updateBotMessage(id: UUID, text: String) {
+        guard let index = messages.firstIndex(where: { $0.id == id }) else { return }
+        messages[index] = ChatMessage(id: id, text: text, isUser: false)
+    }
 
-        if q.contains("OUTLOOK") || (q.contains("STOCK") && q.contains("MY")) {
-            return """
-            **My Stock Outlook**
-
-            • **Overall Trend:** Bullish across banking and defensive consumer sectors.
-            • **Top Movers:** BBCA (+0.77%), BMRI (+0.78%), DCII (+2.04%).
-            • **Key Catalyst:** Quarterly earnings beating consensus and Rupiah exchange rate stability.
-
-            **Strategic Action:**
-            Maintain positions in big-cap leaders and accumulate on pullbacks near support.
-            """
-        } else if q.contains("RISK") || q.contains("PORTFOLIO") {
-            return """
-            **Portfolio Risk Assessment**
-
-            • **Risk Level:** Moderate
-            • **Sector Concentration:** 65% Financials, 20% Technology, 15% Energy
-            • **30-Day Volatility (Beta):** 0.92 (below IDX Composite volatility)
-
-            **Potential Risks & Mitigation:**
-            1. **Energy Sector (BYAN):** Exposed to global commodity pullbacks. Periodic rebalancing recommended.
-            2. **Diversification:** Consider increasing allocation in Consumer Non-Cyclicals or Healthcare to hedge short-term swings.
-            """
-        } else if q.contains("RECOMMENDED") || q.contains("REKOMENDASI") {
-            return """
-            **Recommended Stocks (Top Picks)**
-
-            1. **BBCA (Bank Central Asia)**
-               • Target Price: Rp 10,500 | Rating: BUY
-               • Catalyst: Solid net interest margins & consistent loan growth.
-
-            2. **DCII (DCI Indonesia)**
-               • Target Price: Rp 46,000 | Rating: STRONG BUY
-               • Catalyst: AI boom demand and hyperscale data center capacity expansion.
-
-            3. **BMRI (Bank Mandiri)**
-               • Target Price: Rp 7,100 | Rating: ACCUMULATE
-               • Catalyst: Digital banking efficiency and attractive dividend yield (>5%).
-            """
-        } else if q.contains("MOVE") || q.contains("WHY") {
-            return """
-            **Why Did Your Stocks Move Today?**
-
-            • **Positive Market Sentiment:** IDX Composite rallied backed by Rp 450B foreign inflow into financials.
-            • **BBCA & BMRI:** Advanced on solid banking liquidity and expansive NIM outlook.
-            • **DCII (+2.04%):** Driven by cloud computing demand and regional AI investment momentum.
-            • **BYAN (-0.86%):** Pressured by profit taking following Newcastle coal price correction.
-            """
-        } else if q.contains("BBCA") || q.contains("BCA") {
-            return """
-            **Analysis: PT Bank Central Asia Tbk (BBCA)**
-
-            • **Recommendation:** BUY / ACCUMULATE
-            • **Consensus Target Price:** Rp 11,250 (+12.5%)
-            • **Current Valuation:** P/E 22.4x | PBV 4.8x | ROE 23.1%
-            • **Dividend Yield:** ~3.1% p.a.
-
-            **Key Takeaways:**
-            1. Highest asset quality in the banking sector with CASA ratio above 80%.
-            2. Consistent 13-14% YoY loan growth driven by commercial and consumer segments.
-            3. Stable BI rate expectations provide headroom for net interest margin (NIM) growth.
-
-            *Conclusion: Well-suited for medium to long-term investors with a conservative risk profile.*
-            """
-        } else if q.contains("ASII") || q.contains("ASTRA") {
-            return """
-            **Analysis: PT Astra International Tbk (ASII)**
-
-            • **Recommendation:** NEUTRAL / HOLD
-            • **Target Price:** Rp 5,600 (+6.2%)
-            • **Current Valuation:** P/E 6.8x | PBV 0.9x (Undervalued)
-            • **Dividend Yield:** Highly Attractive (~7.8% p.a.)
-
-            **Risks & Opportunities:**
-            • Margin pressure from new EV entrants in the Indonesian auto market.
-            • Heavy equipment (UNTR) and agribusiness diversification provide resilient cash flows.
-            • Dividend payout ratio remains high above 50%.
-            """
-        } else if q.contains("TLKM") || q.contains("TELKOM") {
-            return """
-            **Analysis: PT Telkom Indonesia Tbk (TLKM)**
-
-            • **Recommendation:** BUY
-            • **Target Price:** Rp 3,450 (+15.0%)
-            • **Current Valuation:** P/E 14.2x | PBV 2.3x | Dividend Yield ~4.8%
-
-            **Key Drivers:**
-            1. FMC integration (IndiHome to Telkomsel) drives operational efficiency and ARPU.
-            2. Data Center monetization via NeutraDC creates significant unlock value into 2026.
-            """
-        } else if q.contains("DIVIDEN") || q.contains("DIVIDEND") {
-            return """
-            **Top High Dividend Yield Stocks on IDX**
-
-            1. **ASII** - Est. Yield 7.8% | Payout ~50%
-            2. **PTBA** - Est. Yield 11.2% | Payout ~75%
-            3. **ITMG** - Est. Yield 12.5% | Payout ~65%
-            4. **BMRI** - Est. Yield 5.1% | Payout ~60%
-            5. **BBRI** - Est. Yield 5.4% | Payout ~70%
-
-            *Tip: Track the Cum Date schedule and ensure operating cash flow remains strong.*
-            """
-        } else {
-            return """
-            **Market Summary & Analysis**
-
-            Regarding your query: *"\(query)"*
-
-            • **Market Sentiment:** Net foreign inflow remains positive across banking and telco sectors.
-            • **IDX Valuation:** Average IDX P/E is ~13.8x, below the 5-year historical average (attractive valuation).
-            • **Key Catalysts:** Rupiah exchange stability, controlled domestic inflation, and robust quarterly earnings.
-
-            *💡 You can also ask about specific tickers like BBCA, ASII, TLKM, or dividend recommendations.*
-            """
-        }
+    func resetSession() {
+        streamTask?.cancel()
+        messages.removeAll()
+        inputText = ""
+        isProcessing = false
+        sessionId = UUID()
     }
 }
 
