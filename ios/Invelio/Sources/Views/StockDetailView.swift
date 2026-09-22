@@ -120,17 +120,12 @@ public struct StockHistoryPoint: Identifiable, Sendable, Equatable {
 }
 
 public enum StockTimeRange: String, CaseIterable, Sendable {
-    case oneDay     = "1D"
     case oneWeek    = "1W"
     case oneMonth   = "1M"
     case threeMonth = "3M"
-    case ytd        = "YTD"
-    case oneYear    = "1Y"
-    case fiveYear   = "5Y"
-    case all        = "ALL"
 
     public var isIntraday: Bool {
-        self == .oneDay || self == .oneWeek
+        false
     }
 }
 
@@ -245,11 +240,12 @@ fileprivate extension Color {
 @MainActor
 public final class StockDetailViewModel: ObservableObject {
     @Published public private(set) var dataPoints: [StockHistoryPoint] = []
-    @Published public var selectedRange: StockTimeRange = .oneDay
+    @Published public var selectedRange: StockTimeRange = .oneWeek
     @Published public private(set) var isLoading: Bool = false
 
     public let quote: StockQuote
     public var customHistoryFetcher: ((String, StockTimeRange) async throws -> [StockHistoryPoint])?
+    private var allHistoricalPoints: [StockHistoryPoint] = []
 
     public init(quote: StockQuote, fetcher: ((String, StockTimeRange) async throws -> [StockHistoryPoint])? = nil) {
         self.quote = quote
@@ -266,9 +262,15 @@ public final class StockDetailViewModel: ObservableObject {
         isLoading = true
 
         // 1. Direct from Supabase PostgreSQL (0 Credit!)
-        let dbPoints = await SupabaseService.shared.fetchDailyPrices(ticker: quote.ticker)
-        if !dbPoints.isEmpty {
-            self.dataPoints = dbPoints
+        if allHistoricalPoints.isEmpty {
+            let dbPoints = await SupabaseService.shared.fetchDailyPrices(ticker: quote.ticker)
+            if !dbPoints.isEmpty {
+                self.allHistoricalPoints = dbPoints
+            }
+        }
+
+        if !allHistoricalPoints.isEmpty {
+            self.dataPoints = filterPoints(allHistoricalPoints, for: selectedRange)
             self.isLoading = false
             return
         }
@@ -291,17 +293,23 @@ public final class StockDetailViewModel: ObservableObject {
         self.isLoading = false
     }
 
+    private func filterPoints(_ points: [StockHistoryPoint], for range: StockTimeRange) -> [StockHistoryPoint] {
+        switch range {
+        case .oneWeek:
+            return Array(points.suffix(5))
+        case .oneMonth:
+            return Array(points.suffix(22))
+        case .threeMonth:
+            return points
+        }
+    }
+
     private func generateMockPoints(for range: StockTimeRange) -> [StockHistoryPoint] {
         let (count, interval): (Int, TimeInterval) = {
             switch range {
-            case .oneDay:     return (78, 5 * 60)
-            case .oneWeek:    return (50, 30 * 60)
-            case .oneMonth:   return (30, 24 * 3600)
-            case .threeMonth: return (90, 24 * 3600)
-            case .ytd:        return (120, 24 * 3600)
-            case .oneYear:    return (252, 24 * 3600)
-            case .fiveYear:   return (260, 7 * 24 * 3600)
-            case .all:        return (300, 7 * 24 * 3600)
+            case .oneWeek:    return (5, 24 * 3600)
+            case .oneMonth:   return (22, 24 * 3600)
+            case .threeMonth: return (66, 24 * 3600)
             }
         }()
 
@@ -522,6 +530,7 @@ public struct StockDetailView: View {
 
     // Purchase / Lots management state
     @State private var purchaseEntries: [PurchaseFormEntry] = []
+    @State private var cachedAnalysisChips: [InsightChip] = []
 
     public init(
         quote: StockQuote,
@@ -626,6 +635,9 @@ public struct StockDetailView: View {
             loadExistingHoldings()
             await fetchLiveStockDetail()
             await viewModel.fetchChartData()
+            if cachedAnalysisChips.isEmpty {
+                self.cachedAnalysisChips = stockAnalysisChips
+            }
         }
         .onChange(of: purchaseEntries) { _ in
             syncHoldingsToSwiftData()
@@ -637,6 +649,9 @@ public struct StockDetailView: View {
         if let pgStock = await SupabaseService.shared.fetchStockDetail(ticker: quote.ticker) {
             await MainActor.run {
                 self.liveFundamentals = pgStock.toStockFundamentals()
+                if self.cachedAnalysisChips.isEmpty {
+                    self.cachedAnalysisChips = self.stockAnalysisChips
+                }
             }
             return
         }
@@ -646,6 +661,9 @@ public struct StockDetailView: View {
             let detail = try await APIClient.shared.fetchStockDetail(ticker: quote.ticker)
             await MainActor.run {
                 self.liveFundamentals = detail.toStockFundamentals()
+                if self.cachedAnalysisChips.isEmpty {
+                    self.cachedAnalysisChips = self.stockAnalysisChips
+                }
             }
         } catch {
             // Retain initial/fallback fundamentals gracefully
@@ -817,10 +835,17 @@ public struct StockDetailView: View {
     // MARK: - AI Analysis Section
     private var aiAnalysisSection: some View {
         AIInsightCardView(
-            chips: stockAnalysisChips,
+            chips: currentAnalysisChips,
             title: "AI Analysis",
             horizontalPadding: 0
         )
+    }
+
+    private var currentAnalysisChips: [InsightChip] {
+        if !cachedAnalysisChips.isEmpty {
+            return cachedAnalysisChips
+        }
+        return stockAnalysisChips
     }
 
     private var stockAnalysisChips: [InsightChip] {
@@ -1184,7 +1209,7 @@ extension StockDetailView {
                     }
                 }
                 // 2. Fallback ke laporan lokal
-                if (range == .oneMonth || range == .oneDay) && !fallbackHistory.isEmpty {
+                if (range == .oneMonth || range == .oneWeek) && !fallbackHistory.isEmpty {
                     return fallbackHistory
                 }
                 return []

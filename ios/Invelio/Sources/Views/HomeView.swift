@@ -97,8 +97,8 @@ struct StockItem: Identifiable {
     let sparkData: [Double]       // normalised 0‒1 for mini chart
 }
 
-struct InsightChip: Identifiable {
-    let id = UUID()
+struct InsightChip: Identifiable, Equatable {
+    var id: String { label }
     let label: String
     let text: String
 }
@@ -304,9 +304,6 @@ struct StockRowView: View {
             }
             .layoutPriority(1)
             Spacer(minLength: 0)
-            MiniSparklineView(data: stock.sparkData, isPositive: stock.change >= 0)
-                .frame(width: DS.sparkW, height: DS.sparkH)
-                .padding(.trailing, 8)
             PriceBadgeView(price: stock.price, change: stock.change,
                            percentChange: stock.percentChange, market: stock.market)
                 .fixedSize(horizontal: true, vertical: false)
@@ -344,8 +341,8 @@ struct PortfolioSummaryCardView: View {
     var horizontalPadding: CGFloat = 16
     var showChart: Bool = false
 
-    @State private var selectedRange: String = "1D"
-    private let ranges: [String] = ["1D", "1W", "1M", "3M", "YTD", "1Y", "5Y"]
+    @State private var selectedRange: String = "1W"
+    private let ranges: [String] = ["1W", "1M", "3M"]
 
     private let green = Color.ProfitGreen
     private let red   = Color.PortfolioLossRed
@@ -572,12 +569,13 @@ struct AIInsightCardView: View {
                 startTyping(text: chip.text)
             }
         }
-        .onChange(of: chips.first?.id) { _ in
+        .onChange(of: chips.first?.text) { newText in
+            guard let newText = newText, !newText.isEmpty else { return }
+            let currentTarget = targetWords.joined(separator: " ")
+            guard newText != currentTarget else { return }
             selectedIndex = 0
             isExpanded = false
-            if let chip = chips.first {
-                startTyping(text: chip.text)
-            }
+            startTyping(text: newText)
         }
         .onDisappear { timer?.invalidate(); timer = nil }
     }
