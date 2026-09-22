@@ -12,6 +12,8 @@ jobs:
   deploy:
     name: Push Migrations to Supabase
     runs-on: ubuntu-latest
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
 
     steps:
       - name: Checkout repository
