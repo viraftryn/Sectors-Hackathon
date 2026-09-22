@@ -23,12 +23,16 @@ from app.db.database import get_db
 from app.main import app
 from tests.conftest import SQLITE_CACHE_DDL, make_sqlite_engine
 
+# Mirrors supabase/migrations/*_invelio_schema.sql for the tables scoring touches.
 SQLITE_SCORE_DDL = [
     SQLITE_CACHE_DDL,
     """CREATE TABLE IF NOT EXISTS stocks (
-        ticker VARCHAR(10) PRIMARY KEY, name VARCHAR(200) NOT NULL, sector VARCHAR(100),
-        subsector VARCHAR(100), updated_at TIMESTAMP)""",
-    """CREATE TABLE IF NOT EXISTS scores (
+        ticker VARCHAR(10) PRIMARY KEY, symbol VARCHAR(15) NOT NULL, name VARCHAR(200) NOT NULL,
+        sector VARCHAR(100), sub_sector VARCHAR(100), price NUMERIC NOT NULL DEFAULT 0,
+        change_pct NUMERIC, market_cap NUMERIC, pe_ttm NUMERIC, pb_mrq NUMERIC, roe_ttm NUMERIC,
+        der_mrq NUMERIC, yield_ttm NUMERIC, week52_high NUMERIC, week52_low NUMERIC,
+        updated_at TIMESTAMP)""",
+    """CREATE TABLE IF NOT EXISTS stock_scores (
         id INTEGER PRIMARY KEY AUTOINCREMENT, ticker VARCHAR(10) NOT NULL REFERENCES stocks(ticker),
         fundamental_score FLOAT, macro_score FLOAT, sector_score FLOAT, risk_score FLOAT,
         sentiment_score FLOAT, overall_score FLOAT, recommendation VARCHAR(10), reasoning TEXT,
