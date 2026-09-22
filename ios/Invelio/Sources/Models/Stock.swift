@@ -230,3 +230,220 @@ extension SectorsCompanyReportResponse {
         )
     }
 }
+
+// MARK: - ==========================================
+// MARK: - Backend FastAPI Schema Models (v2)
+// MARK: - ==========================================
+
+struct BackendStockSummary: Codable, Identifiable, Sendable {
+    var id: String { ticker }
+    let ticker: String
+    let name: String
+    let sector: String
+    let subSector: String
+    let price: Double
+    let changePct: Double?
+    let marketCap: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case ticker
+        case name
+        case sector
+        case subSector = "sub_sector"
+        case price
+        case changePct = "change_pct"
+        case marketCap = "market_cap"
+    }
+
+    func toStockItem() -> StockItem {
+        let pct = changePct ?? 0.0
+        let chg = price * (pct / 100.0)
+        let cleanName = name
+            .replacingOccurrences(of: "PT ", with: "")
+            .replacingOccurrences(of: " Tbk.", with: "")
+            .replacingOccurrences(of: " Tbk", with: "")
+            .replacingOccurrences(of: " (Persero)", with: "")
+            .trimmingCharacters(in: .whitespaces)
+
+        return StockItem(
+            symbol: ticker,
+            name: cleanName,
+            sector: sector,
+            price: price,
+            change: chg,
+            percentChange: pct,
+            sentiment: Sentiment(buy: 0.65, hold: 0.25, sell: 0.10, score: 75),
+            market: "IDX",
+            sparkData: [0.35, 0.40, 0.38, 0.45, 0.50, 0.55, 0.52, 0.58, 0.62, 0.65]
+        )
+    }
+}
+
+struct BackendStockListResponse: Codable, Sendable {
+    let stocks: [BackendStockSummary]
+}
+
+struct BackendFundamentals: Codable, Sendable {
+    let pe: Double?
+    let pb: Double?
+    let roePct: Double?
+    let der: Double?
+    let dividendYieldPct: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case pe
+        case pb
+        case roePct = "roe_pct"
+        case der
+        case dividendYieldPct = "dividend_yield_pct"
+    }
+}
+
+struct BackendPricePoint: Codable, Identifiable, Sendable {
+    var id: String { date }
+    let date: String
+    let open: Double?
+    let high: Double?
+    let low: Double?
+    let close: Double
+    let volume: Int?
+}
+
+struct BackendStockDetail: Codable, Identifiable, Sendable {
+    var id: String { ticker }
+    let ticker: String
+    let name: String
+    let sector: String
+    let subSector: String
+    let price: Double
+    let changePct: Double?
+    let marketCap: Double?
+    let fundamentals: BackendFundamentals
+    let week52High: Double?
+    let week52Low: Double?
+    let prices: [BackendPricePoint]
+
+    enum CodingKeys: String, CodingKey {
+        case ticker
+        case name
+        case sector
+        case subSector = "sub_sector"
+        case price
+        case changePct = "change_pct"
+        case marketCap = "market_cap"
+        case fundamentals
+        case week52High = "week52_high"
+        case week52Low = "week52_low"
+        case prices
+    }
+
+    func toStockQuote() -> StockQuote {
+        let pct = changePct ?? 0.0
+        let chg = price * (pct / 100.0)
+        let prev = price - chg
+        return StockQuote(
+            ticker: ticker,
+            name: name,
+            price: price,
+            change: chg,
+            changePercent: pct,
+            previousClose: prev,
+            currency: "IDR"
+        )
+    }
+
+    func toStockFundamentals() -> StockFundamentals {
+        StockFundamentals(
+            ticker: ticker,
+            pe: fundamentals.pe,
+            pb: fundamentals.pb,
+            roe: fundamentals.roePct,
+            der: fundamentals.der,
+            dividendYield: fundamentals.dividendYieldPct,
+            week52High: week52High,
+            week52Low: week52Low,
+            sector: sector
+        )
+    }
+
+    func toHistoryPoints() -> [StockHistoryPoint] {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+
+        return prices.compactMap { p in
+            let d = dateFormatter.date(from: p.date) ?? Date()
+            return StockHistoryPoint(
+                date: d,
+                price: p.close,
+                volume: p.volume ?? 0
+            )
+        }
+    }
+}
+
+struct BackendMarketOverview: Codable, Sendable {
+    let ihsg: BackendIndexSummary
+    let foreignFlow: BackendForeignFlow?
+    let topGainers: [BackendMover]
+    let topLosers: [BackendMover]
+    let mostTraded: [BackendTradedStock]
+
+    enum CodingKeys: String, CodingKey {
+        case ihsg
+        case foreignFlow = "foreign_flow"
+        case topGainers = "top_gainers"
+        case topLosers = "top_losers"
+        case mostTraded = "most_traded"
+    }
+}
+
+struct BackendIndexSummary: Codable, Sendable {
+    let name: String
+    let value: Double
+    let changePct: Double?
+    let date: String
+    let series: [BackendIndexPoint]
+
+    enum CodingKeys: String, CodingKey {
+        case name, value
+        case changePct = "change_pct"
+        case date, series
+    }
+}
+
+struct BackendIndexPoint: Codable, Sendable {
+    let date: String
+    let value: Double
+}
+
+struct BackendForeignFlow: Codable, Sendable {
+    let date: String
+    let netForeignInflow: Double
+
+    enum CodingKeys: String, CodingKey {
+        case date
+        case netForeignInflow = "net_foreign_inflow"
+    }
+}
+
+struct BackendMover: Codable, Identifiable, Sendable {
+    var id: String { ticker }
+    let ticker: String
+    let name: String
+    let price: Double
+    let changePct: Double
+
+    enum CodingKeys: String, CodingKey {
+        case ticker, name, price
+        case changePct = "change_pct"
+    }
+}
+
+struct BackendTradedStock: Codable, Identifiable, Sendable {
+    var id: String { ticker }
+    let ticker: String
+    let name: String
+    let volume: Int
+    let price: Double
+}
+
