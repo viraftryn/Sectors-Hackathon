@@ -9,7 +9,6 @@ import pytest
 
 from app.agents.chatbot import ChatbotAgent, ChatState, _build_tools, _truncate
 
-
 # -- Unit: _truncate ---------------------------------------------------------
 
 
@@ -37,9 +36,7 @@ async def test_classify_single_stock():
     agent = ChatbotAgent(db)
 
     mock_response = MagicMock()
-    mock_response.content = json.dumps(
-        {"question_type": "single_stock", "entities": ["BBCA"]}
-    )
+    mock_response.content = json.dumps({"question_type": "single_stock", "entities": ["BBCA"]})
 
     with patch("app.agents.chatbot._get_llm") as mock_llm:
         llm_instance = AsyncMock()

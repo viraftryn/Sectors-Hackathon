@@ -99,6 +99,8 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     session_id: uuid.UUID
     response: str
+
+
 class ScoreBreakdown(BaseModel):
     fundamental: float
     macro: float
