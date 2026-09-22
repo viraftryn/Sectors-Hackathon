@@ -12,25 +12,34 @@ jobs:
   deploy:
     name: Push Migrations to Supabase
     runs-on: ubuntu-latest
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Supabase CLI
+      - name: Deploy with Direct DB URL (psql)
+        if: env.SUPABASE_DB_URL != ''
+        run: |
+          echo "Connecting and applying migrations to Supabase..."
+          for file in supabase/migrations/*.sql; do
+            if [ -f "$file" ]; then
+              echo "==> Executing $file..."
+              psql -v ON_ERROR_STOP=1 "$SUPABASE_DB_URL" -f "$file"
+            fi
+          done
+          echo "Migrations successfully applied to Supabase!"
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+
+      - name: Deploy with Supabase CLI (Fallback)
+        if: env.SUPABASE_DB_URL == '' && env.SUPABASE_PROJECT_ID != ''
         uses: supabase/setup-cli@v1
         with:
           version: latest
 
-      - name: Deploy with Direct DB URL
-        if: env.SUPABASE_DB_URL != ''
-        run: |
-          echo "Deploying migrations via direct database URL..."
-          supabase db push --db-url "$SUPABASE_DB_URL"
-        env:
-          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
-
-      - name: Deploy with Supabase Project Link
+      - name: Link and Push via Supabase CLI
         if: env.SUPABASE_DB_URL == '' && env.SUPABASE_PROJECT_ID != ''
         run: |
           echo "Linking to Supabase project $SUPABASE_PROJECT_ID..."
