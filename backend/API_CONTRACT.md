@@ -81,6 +81,36 @@ Home screen market header.
 `foreign_flow` can be null. `net_foreign_inflow` is IDR, positive means foreign investors were net buyers.
 `top_gainers` and `top_losers` are market-wide and can include tickers outside the tracked list.
 
+## GET /recommendations
+
+AI stock scores from the Scoring Agent, best first. Empty list until the first scoring run.
+Each component is 0-100 (higher is better; a high `risk` score means low risk).
+`overall_score` weights: fundamental 30%, macro 15%, sector 20%, risk 15%, sentiment 20%.
+
+```json
+{
+  "scored_at": "2026-09-22T03:15:00Z",
+  "recommendations": [
+    {
+      "ticker": "BMRI",
+      "name": "PT Bank Mandiri (Persero) Tbk",
+      "overall_score": 70.5,
+      "recommendation": "BUY",
+      "reasoning": "BMRI presents a strong overall score of 70.5 supported by an excellent fundamental score of 97.6 ...",
+      "scores": {"fundamental": 97.6, "macro": 40.8, "sector": 70.2, "risk": 74.0, "sentiment": 50.0},
+      "scored_at": "2026-09-22T03:15:00Z"
+    }
+  ]
+}
+```
+
+`recommendation` is one of `BUY`, `HOLD`, `SELL`. `scored_at` is UTC.
+
+## POST /scoring/run
+
+Runs the Scoring Agent and returns the same shape as `GET /recommendations`. If the last run is
+less than an hour old it returns the stored results instead of running again. Takes a few seconds.
+
 ## Errors
 
 - `404` `{"detail": "..."}`: unknown or untracked ticker.

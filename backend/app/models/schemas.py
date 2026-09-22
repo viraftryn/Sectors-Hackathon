@@ -83,3 +83,26 @@ class MarketOverview(BaseModel):
     top_gainers: list[Mover]
     top_losers: list[Mover]
     most_traded: list[TradedStock]
+
+
+class ScoreBreakdown(BaseModel):
+    fundamental: float
+    macro: float
+    sector: float
+    risk: float
+    sentiment: float
+
+
+class Recommendation(BaseModel):
+    ticker: str
+    name: str
+    overall_score: float
+    recommendation: str
+    reasoning: str
+    scores: ScoreBreakdown
+    scored_at: str
+
+
+class RecommendationList(BaseModel):
+    scored_at: str | None
+    recommendations: list[Recommendation]
