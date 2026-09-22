@@ -100,21 +100,22 @@ struct PortfolioView: View {
                 Color.DarkPurpleAppBackground
                     .ignoresSafeArea()
 
-                if positions.isEmpty {
-                    emptyStateView
-                } else {
-                    ScrollView {
-                        VStack(spacing: 16) {
-                            summaryCard
+                ScrollView {
+                    VStack(spacing: 16) {
+                        summaryCard
+
+                        if positions.isEmpty {
+                            emptyHoldingsView
+                        } else {
                             positionsList
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.top, 12)
-                        .padding(.bottom, 32)
                     }
-                    .refreshable {
-                        await loadPortfolioData()
-                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+                    .padding(.bottom, 32)
+                }
+                .refreshable {
+                    await loadPortfolioData()
                 }
             }
             .task {
@@ -246,23 +247,28 @@ struct PortfolioView: View {
     }
 
     // MARK: - Empty State
-    private var emptyStateView: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "chart.pie")
-                .font(.system(size: 54))
-                .foregroundStyle(Color.PrimaryYellow.opacity(0.8))
+    private var emptyHoldingsView: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "briefcase")
+                .font(.system(size: 38))
+                .foregroundStyle(Color.PrimaryYellow.opacity(0.85))
+                .padding(.top, 8)
 
             Text("No Stock Holdings Yet")
-                .font(.title3.bold())
+                .font(.headline.bold())
                 .foregroundStyle(Color.white)
 
             Text("Select any stock from the Home tab and add your purchase lots to start tracking your portfolio.")
                 .font(.subheadline)
                 .foregroundStyle(Color.white.opacity(0.6))
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 8)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 24)
+        .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 16))
+        .padding(.top, 4)
     }
 
     private func loadPortfolioData() async {
