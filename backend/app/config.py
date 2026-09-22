@@ -26,7 +26,7 @@ class Settings(BaseSettings):
         "ANTM",
     ]
 
-    chatbot_model: str = "gemini-3.5-flash"
+    chatbot_model: str = "gemini-3.5-flash-lite"
     chatbot_provider: str = "gemini"
 
     # Zero-credit development mode: serve saved fixtures instead of calling the Sectors API.

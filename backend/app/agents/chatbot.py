@@ -130,6 +130,7 @@ def _get_llm(temperature: float = 0.0, streaming: bool = False) -> BaseChatModel
             temperature=temperature,
             google_api_key=settings.gemini_api_key,
             streaming=streaming,
+            max_retries=1,
         )
     from langchain_openai import ChatOpenAI
 
