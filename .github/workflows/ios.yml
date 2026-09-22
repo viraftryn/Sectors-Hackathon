@@ -32,15 +32,17 @@ jobs:
           xcodebuild build \
             -project Invelio.xcodeproj \
             -scheme Invelio \
-            -destination "platform=iOS Simulator,name=iPhone 16,OS=latest" \
+            -destination "generic/platform=iOS Simulator" \
             -skipPackagePluginValidation \
             CODE_SIGNING_ALLOWED=NO
 
       - name: Test
         run: |
+          SIM_NAME=$(xcrun simctl list devices available -j | jq -r '.devices[] | select(length > 0) | .[] | select(.isAvailable and (.name | contains("iPhone"))) | .name' | head -n 1)
+          echo "Testing on simulator: $SIM_NAME"
           xcodebuild test \
             -project Invelio.xcodeproj \
             -scheme InvelioTests \
-            -destination "platform=iOS Simulator,name=iPhone 16,OS=latest" \
+            -destination "platform=iOS Simulator,name=${SIM_NAME:-iPhone 16}" \
             -skipPackagePluginValidation \
             CODE_SIGNING_ALLOWED=NO

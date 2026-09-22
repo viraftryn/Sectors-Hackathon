@@ -98,6 +98,18 @@ actor APIClient {
             }
             continuation.onTermination = { _ in task.cancel() }
         }
+    func fetchStocks() async throws -> [BackendStockSummary] {
+        let response: BackendStockListResponse = try await get("stocks")
+        return response.stocks
+    }
+
+    func fetchStockDetail(ticker: String) async throws -> BackendStockDetail {
+        let clean = ticker.components(separatedBy: ".").first ?? ticker
+        return try await get("stock/\(clean)")
+    }
+
+    func fetchMarketOverview() async throws -> BackendMarketOverview {
+        return try await get("market-overview")
     }
 }
 

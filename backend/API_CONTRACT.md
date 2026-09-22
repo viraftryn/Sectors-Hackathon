@@ -81,7 +81,126 @@ Home screen market header.
 `foreign_flow` can be null. `net_foreign_inflow` is IDR, positive means foreign investors were net buyers.
 `top_gainers` and `top_losers` are market-wide and can include tickers outside the tracked list.
 
+## GET /recommendations
+
+AI stock scores from the Scoring Agent, best first. Empty list until the first scoring run.
+Each component is 0-100 (higher is better; a high `risk` score means low risk).
+`overall_score` weights: fundamental 30%, macro 15%, sector 20%, risk 15%, sentiment 20%.
+
+```json
+{
+  "scored_at": "2026-09-22T03:15:00Z",
+  "recommendations": [
+    {
+      "ticker": "BMRI",
+      "name": "PT Bank Mandiri (Persero) Tbk",
+      "overall_score": 70.5,
+      "recommendation": "BUY",
+      "reasoning": "BMRI presents a strong overall score of 70.5 supported by an excellent fundamental score of 97.6 ...",
+      "scores": {"fundamental": 97.6, "macro": 40.8, "sector": 70.2, "risk": 74.0, "sentiment": 50.0},
+      "scored_at": "2026-09-22T03:15:00Z"
+    }
+  ]
+}
+```
+
+`recommendation` is one of `BUY`, `HOLD`, `SELL`. `scored_at` is UTC.
+
+## POST /scoring/run
+
+Runs the Scoring Agent and returns the same shape as `GET /recommendations`. If the last run is
+less than an hour old it returns the stored results instead of running again. Takes a few seconds.
+
+## GET /alerts
+
+Alerts from the Alert Agent, newest first. Send the device id in the `X-Device-Id` header (the same
+`device_id` stored in `user_installations`). Market-wide alerts (no device) are returned to every
+device; device-specific alerts only to their owner. Without the header, only market-wide alerts.
+
+Query params: `unread_only` (default `false`), `limit` (default 50, max 200).
+
+```json
+{
+  "unread_count": 2,
+  "alerts": [
+    {
+      "id": 1,
+      "ticker": "BBCA",
+      "alert_type": "price_spike",
+      "severity": "high",
+      "message": "BBCA jumped 6%",
+      "is_read": false,
+      "created_at": "2026-09-22T03:00:00Z"
+    }
+  ]
+}
+```
+
+`alert_type`: `price_spike`, `volume_surge`, `sentiment_shift`. `severity`: `high`, `medium`, `low`.
+
+## POST /alerts/{id}/read
+
+Marks one alert as read and returns it (same shape as one item above). Send `X-Device-Id`.
+Returns 404 if the alert does not exist or belongs to another device.
+
+## Portfolio
+
+All portfolio endpoints require the `X-Device-Id` header (400 without it). Holdings are stored per
+device in Supabase `user_holdings`. Fields match the iOS `HoldingLot` model. Only tracked tickers.
+
+### POST /portfolio/lots
+
+Add one buy lot. Send `shares` or `total_invested` (the other is computed). `id` is optional: pass
+the SwiftData `HoldingLot.id` to keep both sides in sync. `buy_date` defaults to now (ISO 8601).
+
+```json
+{"id": "3f2b8c1e-5d4a-4b7e-9c1a-2e6f8d0a1b2c", "ticker": "BBCA", "price_per_share": 6000, "total_invested": 600000, "buy_date": "2026-09-01T00:00:00Z"}
+```
+
+Returns 201:
+
+```json
+{"id": "3f2b8c1e-5d4a-4b7e-9c1a-2e6f8d0a1b2c", "ticker": "BBCA", "stock_name": "PT Bank Central Asia Tbk.", "shares": 100.0, "price_per_share": 6000.0, "total_invested": 600000.0, "buy_date": "2026-09-01T00:00:00Z"}
+```
+
+422 for an untracked ticker or when neither `shares` nor `total_invested` is sent.
+
+### GET /portfolio/lots
+
+`{"lots": [ ...same shape as above... ]}`, newest `buy_date` first.
+
+### DELETE /portfolio/lots/{id}
+
+204 on success, 404 if the lot does not exist or belongs to another device.
+
+### GET /portfolio
+
+Positions grouped by ticker, valued at the latest close.
+
+```json
+{
+  "total_cost": 1300000.0,
+  "current_value": 1260000.0,
+  "pnl": -40000.0,
+  "pnl_pct": -3.08,
+  "positions": [
+    {
+      "ticker": "BBCA",
+      "name": "PT Bank Central Asia Tbk.",
+      "shares": 200.0,
+      "avg_buy_price": 6500.0,
+      "total_cost": 1300000.0,
+      "current_price": 6300.0,
+      "current_value": 1260000.0,
+      "pnl": -40000.0,
+      "pnl_pct": -3.08
+    }
+  ]
+}
+```
+
 ## Errors
 
-- `404` `{"detail": "..."}`: unknown or untracked ticker.
+- `400` `{"detail": "X-Device-Id header is required"}`: portfolio call without the header.
+- `404` `{"detail": "..."}`: unknown or untracked ticker, or a lot/alert not owned by the device.
 - `502` `{"detail": "Market data unavailable", "upstream_status": 429}`: the market data provider failed.

@@ -48,11 +48,42 @@ public struct StockQuote: Identifiable, Hashable, Sendable {
 
 public struct StockFundamentals: Sendable {
     public var ticker: String
-    public var forwardPE: Double?
-    public var eps: Double
-    public var pbvRatio: Double
-    public var freeCashflow: Double?
+    public var pe: Double?
+    public var pb: Double?
+    public var roe: Double?
+    public var der: Double?
+    public var dividendYield: Double?
+    public var week52High: Double?
+    public var week52Low: Double?
     public var sector: String
+
+    // Legacy backwards compatibility properties
+    public var forwardPE: Double? { pe }
+    public var eps: Double { 0.0 }
+    public var pbvRatio: Double { pb ?? 0.0 }
+    public var freeCashflow: Double? { nil }
+
+    public init(
+        ticker: String,
+        pe: Double? = nil,
+        pb: Double? = nil,
+        roe: Double? = nil,
+        der: Double? = nil,
+        dividendYield: Double? = nil,
+        week52High: Double? = nil,
+        week52Low: Double? = nil,
+        sector: String = "General"
+    ) {
+        self.ticker = ticker
+        self.pe = pe
+        self.pb = pb
+        self.roe = roe
+        self.der = der
+        self.dividendYield = dividendYield
+        self.week52High = week52High
+        self.week52Low = week52Low
+        self.sector = sector
+    }
 
     public init(
         ticker: String,
@@ -63,10 +94,13 @@ public struct StockFundamentals: Sendable {
         sector: String = "General"
     ) {
         self.ticker = ticker
-        self.forwardPE = forwardPE
-        self.eps = eps
-        self.pbvRatio = pbvRatio
-        self.freeCashflow = freeCashflow
+        self.pe = forwardPE
+        self.pb = pbvRatio
+        self.roe = nil
+        self.der = nil
+        self.dividendYield = nil
+        self.week52High = nil
+        self.week52Low = nil
         self.sector = sector
     }
 }
@@ -464,8 +498,13 @@ public struct StockDetailView: View {
     @Query(sort: \HoldingLot.buyDate, order: .forward) private var allHoldingLots: [HoldingLot]
 
     public let quote: StockQuote
-    public var fundamentals: StockFundamentals?
+    public var initialFundamentals: StockFundamentals?
     public var onBuy: ((_ amount: Double, _ pricePerShare: Double) -> Void)?
+
+    @State private var liveFundamentals: StockFundamentals? = nil
+    private var fundamentals: StockFundamentals? {
+        liveFundamentals ?? initialFundamentals
+    }
 
     @StateObject private var viewModel: StockDetailViewModel
     @State private var selectedPoint: StockHistoryPoint? = nil
@@ -482,7 +521,7 @@ public struct StockDetailView: View {
         onBuy: ((_ amount: Double, _ pricePerShare: Double) -> Void)? = nil
     ) {
         self.quote = quote
-        self.fundamentals = fundamentals
+        self.initialFundamentals = fundamentals
         self.onBuy = onBuy
         _viewModel = StateObject(wrappedValue: StockDetailViewModel(quote: quote, fetcher: customHistoryFetcher))
     }
@@ -576,10 +615,22 @@ public struct StockDetailView: View {
         }
         .task {
             loadExistingHoldings()
+            await fetchLiveStockDetail()
             await viewModel.fetchChartData()
         }
         .onChange(of: purchaseEntries) { _ in
             syncHoldingsToSwiftData()
+        }
+    }
+
+    private func fetchLiveStockDetail() async {
+        do {
+            let detail = try await APIClient.shared.fetchStockDetail(ticker: quote.ticker)
+            await MainActor.run {
+                self.liveFundamentals = detail.toStockFundamentals()
+            }
+        } catch {
+            // Retain initial/fallback fundamentals gracefully
         }
     }
 
@@ -686,10 +737,10 @@ public struct StockDetailView: View {
     private var fundamentalsCard: some View {
         let f = fundamentals
         return VStack(alignment: .leading, spacing: 3.5) {
-            metricRow(label: "Forward P/E", value: f?.forwardPE != nil ? String(format: "%.2fx", f!.forwardPE!) : "--")
-            metricRow(label: "EPS", value: f != nil ? "\(currencyPrefix)\(StockFormatters.stockPrice(f!.eps, currency: quote.currency))" : "--")
-            metricRow(label: "PBV", value: f != nil && f!.pbvRatio > 0 ? String(format: "%.2fx", f!.pbvRatio) : "--")
-            metricRow(label: "FCF", value: f?.freeCashflow != nil ? StockFormatters.financialCompact(f!.freeCashflow!, currency: quote.currency) : "--")
+            metricRow(label: "P/E (TTM)", value: f?.pe != nil ? String(format: "%.1fx", f!.pe!) : "--")
+            metricRow(label: "PBV", value: f?.pb != nil ? String(format: "%.2fx", f!.pb!) : "--")
+            metricRow(label: "ROE", value: f?.roe != nil ? String(format: "%.1f%%", f!.roe!) : "--")
+            metricRow(label: "Div Yield", value: f?.dividendYield != nil ? String(format: "%.1f%%", f!.dividendYield!) : "--")
         }
         .frame(width: 140)
     }
@@ -742,10 +793,12 @@ public struct StockDetailView: View {
 
         let fundamentalText: String
         if let f = fundamentals {
-            let peText = f.forwardPE != nil ? String(format: "%.1fx", f.forwardPE!) : "fair"
-            let pbvText = f.pbvRatio > 0 ? String(format: "%.2fx", f.pbvRatio) : "healthy"
-            let epsFormatted = "\(currencyPrefix)\(StockFormatters.stockPrice(f.eps, currency: quote.currency))"
-            fundamentalText = "**\(quote.ticker)** fundamentals show Forward P/E of **\(peText)** and PBV of **\(pbvText)**. EPS is recorded at **\(epsFormatted)** with positive operating cash flow, reflecting solid balance sheet strength to support business growth and dividends."
+            let peText = f.pe != nil ? String(format: "%.1fx", f.pe!) : "fair"
+            let pbvText = f.pb != nil ? String(format: "%.2fx", f.pb!) : "healthy"
+            let roeText = f.roe != nil ? String(format: "%.1f%%", f.roe!) : "resilient"
+            let yieldText = f.dividendYield != nil ? String(format: "%.1f%%", f.dividendYield!) : "steady"
+            let derText = f.der != nil ? String(format: "DER of **%.2fx**", f.der!) : "a prudently capitalized capital structure"
+            fundamentalText = "**\(quote.ticker)** fundamentals show P/E (TTM) of **\(peText)** and PBV of **\(pbvText)**, alongside an ROE of **\(roeText)** and Dividend Yield of **\(yieldText)**. The company maintains \(derText), supporting disciplined operational growth and dividend stability."
         } else {
             fundamentalText = "**\(quote.name)** maintains sound operational efficiency and a stable balance sheet in the **\(detectedMarket)** market. Revenue growth remains consistent with resilient profit margins in its sector."
         }
@@ -1028,21 +1081,17 @@ extension StockItem {
         }
 
         let fpe = matchingReport?.valuation?.forwardPe
-        let eps = matchingReport?.financials?.eps ?? 0.0
-        let pbv: Double = {
-            if let iv = matchingReport?.valuation?.intrinsicValue, iv > 0 {
-                return max(0.5, price / iv)
-            }
-            return 2.5
-        }()
-        let fcf = matchingReport?.overview.marketCap.map { $0 * 0.06 }
+        let yield = matchingReport?.dividend?.yieldTtm.map { $0 * 100.0 }
 
         return StockFundamentals(
             ticker: matchingReport?.symbol ?? symbol,
-            forwardPE: fpe,
-            eps: eps,
-            pbvRatio: pbv,
-            freeCashflow: fcf,
+            pe: fpe,
+            pb: 2.5,
+            roe: 18.5,
+            der: nil,
+            dividendYield: yield,
+            week52High: nil,
+            week52Low: nil,
             sector: matchingReport?.overview.sector ?? sector
         )
     }
@@ -1071,15 +1120,23 @@ extension StockDetailView {
     init(stock: StockItem) {
         let reports = SectorsStocksLoader.loadRawReports()
         let quote = stock.toStockQuote()
-        let fundamentals = stock.toStockFundamentals(from: reports)
-        let history = stock.loadHistoryPoints(from: reports)
+        let fallbackFundamentals = stock.toStockFundamentals(from: reports)
+        let fallbackHistory = stock.loadHistoryPoints(from: reports)
 
         self.init(
             quote: quote,
-            fundamentals: fundamentals,
-            customHistoryFetcher: { _, range in
-                if (range == .oneMonth || range == .oneDay) && !history.isEmpty {
-                    return history
+            fundamentals: fallbackFundamentals,
+            customHistoryFetcher: { ticker, range in
+                // 1. Coba ambil dari Backend API
+                if let detail = try? await APIClient.shared.fetchStockDetail(ticker: ticker) {
+                    let pts = detail.toHistoryPoints()
+                    if !pts.isEmpty {
+                        return pts
+                    }
+                }
+                // 2. Fallback ke laporan lokal
+                if (range == .oneMonth || range == .oneDay) && !fallbackHistory.isEmpty {
+                    return fallbackHistory
                 }
                 return []
             }

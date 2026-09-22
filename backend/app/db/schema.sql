@@ -34,7 +34,33 @@ CREATE TABLE IF NOT EXISTS chat_history (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
--- User's stock holdings
+-- User & Device installations (Unique ID per app install)
+CREATE TABLE IF NOT EXISTS user_installations (
+    device_id VARCHAR(64) PRIMARY KEY,
+    device_name VARCHAR(100),
+    os_version VARCHAR(50),
+    app_version VARCHAR(20) DEFAULT '1.0.0',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    last_active_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- User's stock holdings (linked to unique device ID)
+CREATE TABLE IF NOT EXISTS user_holdings (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    device_id VARCHAR(64) NOT NULL REFERENCES user_installations(device_id) ON DELETE CASCADE,
+    ticker VARCHAR(10) NOT NULL REFERENCES stocks(ticker) ON DELETE RESTRICT,
+    stock_name VARCHAR(200),
+    market VARCHAR(20) NOT NULL DEFAULT 'IDX',
+    currency VARCHAR(10) NOT NULL DEFAULT 'IDR',
+    shares NUMERIC(15, 4) NOT NULL,
+    price_per_share NUMERIC(15, 2) NOT NULL,
+    total_invested NUMERIC(18, 2) NOT NULL,
+    buy_date TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Legacy portfolio table for backwards compatibility
 CREATE TABLE IF NOT EXISTS portfolio (
     id SERIAL PRIMARY KEY,
     ticker VARCHAR(10) NOT NULL REFERENCES stocks(ticker),

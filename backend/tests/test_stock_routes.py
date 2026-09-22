@@ -5,6 +5,8 @@ from fastapi.testclient import TestClient
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from app.clients.cached_sectors import CachedSectorsClient
+from app.clients.sectors import SectorsError
 from app.config import settings
 from app.db.database import get_db
 from app.main import app
@@ -74,3 +76,24 @@ def test_second_request_is_served_from_cache(client: TestClient) -> None:
     client.get("/api/stocks")
     client.get("/api/stocks")
     assert client.get("/api/cache/stats").json()["l1_hits"] >= 1
+
+
+def test_market_overview_survives_secondary_failures(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    async def down(self: CachedSectorsClient) -> None:
+        raise SectorsError(429, "rate limited")
+
+    monkeypatch.setattr(CachedSectorsClient, "get_top_companies", down)
+    monkeypatch.setattr(CachedSectorsClient, "get_most_traded", down)
+    response = client.get("/api/market-overview")
+    assert response.status_code == 200
+    assert response.json()["top_gainers"] == []
+    assert response.json()["most_traded"] == []
+    assert response.json()["ihsg"]["value"] > 0
+
+
+def test_status_reports_mock_mode(client: TestClient) -> None:
+    body = client.get("/api/status").json()
+    assert body["mock_data"] is True
+    assert isinstance(body["sectors_api_calls"], int)
