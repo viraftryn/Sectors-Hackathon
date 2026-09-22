@@ -1,0 +1,104 @@
+{
+ "results": [
+  {
+   "title": "PT Bank Central Asia Tbk. expands distribution network to eastern Indonesia",
+   "body": "Mock article body for development. PT Bank Central Asia Tbk. expands distribution network to eastern Indonesia.",
+   "source": "https://example.com/mock-news/10",
+   "thumbnail": null,
+   "timestamp": "2026-09-15T16:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Bullish",
+    "Expansion"
+   ],
+   "symbols": [
+    "BBCA.JK"
+   ]
+  },
+  {
+   "title": "PT Bank Central Asia Tbk. faces margin pressure from rising input costs",
+   "body": "Mock article body for development. PT Bank Central Asia Tbk. faces margin pressure from rising input costs.",
+   "source": "https://example.com/mock-news/13",
+   "thumbnail": null,
+   "timestamp": "2026-09-14T11:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Bearish",
+    "Earnings"
+   ],
+   "symbols": [
+    "BBCA.JK"
+   ]
+  },
+  {
+   "title": "PT Bank Central Asia Tbk. expands distribution network to eastern Indonesia",
+   "body": "Mock article body for development. PT Bank Central Asia Tbk. expands distribution network to eastern Indonesia.",
+   "source": "https://example.com/mock-news/9",
+   "thumbnail": null,
+   "timestamp": "2026-09-11T01:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Bullish",
+    "Expansion"
+   ],
+   "symbols": [
+    "BBCA.JK"
+   ]
+  },
+  {
+   "title": "PT Bank Central Asia Tbk. faces margin pressure from rising input costs",
+   "body": "Mock article body for development. PT Bank Central Asia Tbk. faces margin pressure from rising input costs.",
+   "source": "https://example.com/mock-news/30",
+   "thumbnail": null,
+   "timestamp": "2026-08-31T11:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Bearish",
+    "Earnings"
+   ],
+   "symbols": [
+    "BBCA.JK"
+   ]
+  },
+  {
+   "title": "Foreign investors trim holdings in PT Bank Central Asia Tbk.",
+   "body": "Mock article body for development. Foreign investors trim holdings in PT Bank Central Asia Tbk..",
+   "source": "https://example.com/mock-news/33",
+   "thumbnail": null,
+   "timestamp": "2026-08-31T02:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Bearish",
+    "Foreign Flow"
+   ],
+   "symbols": [
+    "BBCA.JK"
+   ]
+  }
+ ],
+ "pagination": {
+  "total_count": 5,
+  "showing": 5,
+  "limit": 30,
+  "offset": 0,
+  "has_next": false,
+  "has_previous": false,
+  "next_offset": null,
+  "previous_offset": null
+ }
+}

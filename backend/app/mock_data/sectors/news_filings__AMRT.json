@@ -1,0 +1,35 @@
+{
+ "results": [
+  {
+   "title": "Insider sells shares of PT Sumber Alfaria Trijaya Tbk.",
+   "body": "Mock filing for development.",
+   "source": "https://example.com/mock-filing/17",
+   "timestamp": "2026-09-02T08:00:00",
+   "sector": "consumer-non-cyclicals",
+   "sub_sector": "food-staples-retailing",
+   "tags": [
+    "insider-trading"
+   ],
+   "symbol": "AMRT.JK",
+   "transaction_type": "sell",
+   "holder_type": "insider",
+   "holder_name": "Mock Holder 17",
+   "amount_transaction": 3900000,
+   "price": 1280,
+   "transaction_value": 4992000000.0,
+   "share_percentage_before": 2.91,
+   "share_percentage_after": 2.79,
+   "share_percentage_transaction": 0.12
+  }
+ ],
+ "pagination": {
+  "total_count": 1,
+  "showing": 1,
+  "limit": 30,
+  "offset": 0,
+  "has_next": false,
+  "has_previous": false,
+  "next_offset": null,
+  "previous_offset": null
+ }
+}

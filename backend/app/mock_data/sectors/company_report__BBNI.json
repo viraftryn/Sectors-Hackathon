@@ -1,0 +1,36 @@
+{
+ "symbol": "BBNI.JK",
+ "company_name": "PT Bank Negara Indonesia (Persero) Tbk",
+ "overview": {
+  "sector": "Financials",
+  "sub_sector": "Banks",
+  "market_cap": 134773840218900,
+  "last_close_price": 3650,
+  "latest_close_date": "2026-09-18",
+  "daily_close_change": -0.0240641711229947,
+  "all_time_price": {
+   "52_w_high": {
+    "2026-01-05": 4730.0
+   },
+   "52_w_low": {
+    "2026-06-09": 2990.0
+   }
+  },
+  "tags": [],
+  "indices": [
+   "LQ45"
+  ]
+ },
+ "valuation": {
+  "last_close_price": 3650,
+  "latest_close_date": "2026-09-18",
+  "forward_pe": 5.83,
+  "historical_valuation": [
+   {
+    "year": 2025,
+    "pe": 6.47742880649241,
+    "pb": 0.82247599363324
+   }
+  ]
+ }
+}

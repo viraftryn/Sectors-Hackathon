@@ -1,0 +1,36 @@
+{
+ "symbol": "BBRI.JK",
+ "company_name": "PT Bank Rakyat Indonesia (Persero) Tbk",
+ "overview": {
+  "sector": "Financials",
+  "sub_sector": "Banks",
+  "market_cap": 496643692352970,
+  "last_close_price": 3310,
+  "latest_close_date": "2026-09-18",
+  "daily_close_change": -0.00600600600600601,
+  "all_time_price": {
+   "52_w_high": {
+    "2026-01-05": 4250.0
+   },
+   "52_w_low": {
+    "2026-06-09": 2540.0
+   }
+  },
+  "tags": [],
+  "indices": [
+   "LQ45"
+  ]
+ },
+ "valuation": {
+  "last_close_price": 3310,
+  "latest_close_date": "2026-09-18",
+  "forward_pe": 7.17,
+  "historical_valuation": [
+   {
+    "year": 2025,
+    "pe": 7.96892790031896,
+    "pb": 1.54273973546668
+   }
+  ]
+ }
+}

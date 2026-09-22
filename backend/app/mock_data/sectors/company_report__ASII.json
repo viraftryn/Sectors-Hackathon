@@ -1,0 +1,36 @@
+{
+ "symbol": "ASII.JK",
+ "company_name": "Astra International Tbk",
+ "overview": {
+  "sector": "Industrials",
+  "sub_sector": "Multi-sector Holdings",
+  "market_cap": 195130726134800,
+  "last_close_price": 4820,
+  "latest_close_date": "2026-09-18",
+  "daily_close_change": -0.0163265306122449,
+  "all_time_price": {
+   "52_w_high": {
+    "2026-01-05": 7475.0
+   },
+   "52_w_low": {
+    "2026-06-09": 4350.0
+   }
+  },
+  "tags": [],
+  "indices": [
+   "LQ45"
+  ]
+ },
+ "valuation": {
+  "last_close_price": 4820,
+  "latest_close_date": "2026-09-18",
+  "forward_pe": 5.9,
+  "historical_valuation": [
+   {
+    "year": 2025,
+    "pe": 6.55086870563669,
+    "pb": 0.848143705925205
+   }
+  ]
+ }
+}

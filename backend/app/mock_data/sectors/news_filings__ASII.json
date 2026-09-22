@@ -1,0 +1,77 @@
+{
+ "results": [
+  {
+   "title": "Insider sells shares of Astra International Tbk",
+   "body": "Mock filing for development.",
+   "source": "https://example.com/mock-filing/1",
+   "timestamp": "2026-09-17T01:00:00",
+   "sector": "industrials",
+   "sub_sector": "multi-sector-holdings",
+   "tags": [
+    "insider-trading"
+   ],
+   "symbol": "ASII.JK",
+   "transaction_type": "sell",
+   "holder_type": "insider",
+   "holder_name": "Mock Holder 1",
+   "amount_transaction": 4100000,
+   "price": 4325,
+   "transaction_value": 17732500000.0,
+   "share_percentage_before": 4.61,
+   "share_percentage_after": 4.43,
+   "share_percentage_transaction": 0.18
+  },
+  {
+   "title": "Insider buys shares of Astra International Tbk",
+   "body": "Mock filing for development.",
+   "source": "https://example.com/mock-filing/7",
+   "timestamp": "2026-09-10T01:00:00",
+   "sector": "industrials",
+   "sub_sector": "multi-sector-holdings",
+   "tags": [
+    "insider-trading"
+   ],
+   "symbol": "ASII.JK",
+   "transaction_type": "buy",
+   "holder_type": "institution",
+   "holder_name": "Mock Holder 7",
+   "amount_transaction": 800000,
+   "price": 4825,
+   "transaction_value": 3860000000.0,
+   "share_percentage_before": 0.45,
+   "share_percentage_after": 0.47,
+   "share_percentage_transaction": 0.02
+  },
+  {
+   "title": "Insider buys shares of Astra International Tbk",
+   "body": "Mock filing for development.",
+   "source": "https://example.com/mock-filing/19",
+   "timestamp": "2026-08-20T05:00:00",
+   "sector": "industrials",
+   "sub_sector": "multi-sector-holdings",
+   "tags": [
+    "insider-trading"
+   ],
+   "symbol": "ASII.JK",
+   "transaction_type": "buy",
+   "holder_type": "institution",
+   "holder_name": "Mock Holder 19",
+   "amount_transaction": 700000,
+   "price": 4900,
+   "transaction_value": 3430000000.0,
+   "share_percentage_before": 3.41,
+   "share_percentage_after": 3.47,
+   "share_percentage_transaction": 0.06
+  }
+ ],
+ "pagination": {
+  "total_count": 3,
+  "showing": 3,
+  "limit": 30,
+  "offset": 0,
+  "has_next": false,
+  "has_previous": false,
+  "next_offset": null,
+  "previous_offset": null
+ }
+}

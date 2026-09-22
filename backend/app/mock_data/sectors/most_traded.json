@@ -1,0 +1,962 @@
+{
+ "2026-08-10": [
+  {
+   "symbol": "BBNI.JK",
+   "company_name": "PT Bank Negara Indonesia (Persero) Tbk",
+   "volume": 213445627,
+   "price": 3600
+  },
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 180638382,
+   "price": 3400
+  },
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 113496430,
+   "price": 1585
+  },
+  {
+   "symbol": "BBCA.JK",
+   "company_name": "PT Bank Central Asia Tbk.",
+   "volume": 109315035,
+   "price": 6450
+  },
+  {
+   "symbol": "TLKM.JK",
+   "company_name": "PT Telkom Indonesia (Persero) Tbk",
+   "volume": 105189371,
+   "price": 2750
+  }
+ ],
+ "2026-08-11": [
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 281571194,
+   "price": 1140
+  },
+  {
+   "symbol": "BBNI.JK",
+   "company_name": "PT Bank Negara Indonesia (Persero) Tbk",
+   "volume": 200438351,
+   "price": 3500
+  },
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 191648582,
+   "price": 3400
+  },
+  {
+   "symbol": "ICBP.JK",
+   "company_name": "Indofood CBP Sukses Makmur Tbk",
+   "volume": 155241239,
+   "price": 6825
+  },
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 144641980,
+   "price": 1585
+  }
+ ],
+ "2026-08-12": [
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 250523125,
+   "price": 1610
+  },
+  {
+   "symbol": "BBNI.JK",
+   "company_name": "PT Bank Negara Indonesia (Persero) Tbk",
+   "volume": 197431987,
+   "price": 3400
+  },
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 166364022,
+   "price": 1160
+  },
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 141194844,
+   "price": 3325
+  },
+  {
+   "symbol": "ICBP.JK",
+   "company_name": "Indofood CBP Sukses Makmur Tbk",
+   "volume": 122396701,
+   "price": 6900
+  }
+ ],
+ "2026-08-13": [
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 286578337,
+   "price": 1165
+  },
+  {
+   "symbol": "TLKM.JK",
+   "company_name": "PT Telkom Indonesia (Persero) Tbk",
+   "volume": 254875841,
+   "price": 2725
+  },
+  {
+   "symbol": "BBNI.JK",
+   "company_name": "PT Bank Negara Indonesia (Persero) Tbk",
+   "volume": 216303759,
+   "price": 3350
+  },
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 200564872,
+   "price": 3275
+  },
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 162875965,
+   "price": 1620
+  }
+ ],
+ "2026-08-14": [
+  {
+   "symbol": "TLKM.JK",
+   "company_name": "PT Telkom Indonesia (Persero) Tbk",
+   "volume": 269078688,
+   "price": 2775
+  },
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 232501454,
+   "price": 1630
+  },
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 230566588,
+   "price": 1150
+  },
+  {
+   "symbol": "BMRI.JK",
+   "company_name": "PT Bank Mandiri (Persero) Tbk",
+   "volume": 154678433,
+   "price": 4050
+  },
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 148692870,
+   "price": 3325
+  }
+ ],
+ "2026-08-17": [
+  {
+   "symbol": "TLKM.JK",
+   "company_name": "PT Telkom Indonesia (Persero) Tbk",
+   "volume": 234253072,
+   "price": 2750
+  },
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 228473389,
+   "price": 1190
+  },
+  {
+   "symbol": "BBNI.JK",
+   "company_name": "PT Bank Negara Indonesia (Persero) Tbk",
+   "volume": 187549754,
+   "price": 3425
+  },
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 185968469,
+   "price": 3300
+  },
+  {
+   "symbol": "ASII.JK",
+   "company_name": "Astra International Tbk",
+   "volume": 99988710,
+   "price": 4300
+  }
+ ],
+ "2026-08-18": [
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 238821461,
+   "price": 1585
+  },
+  {
+   "symbol": "TLKM.JK",
+   "company_name": "PT Telkom Indonesia (Persero) Tbk",
+   "volume": 180013272,
+   "price": 2800
+  },
+  {
+   "symbol": "BBNI.JK",
+   "company_name": "PT Bank Negara Indonesia (Persero) Tbk",
+   "volume": 161626105,
+   "price": 3425
+  },
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 123187669,
+   "price": 3300
+  },
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 122933685,
+   "price": 1195
+  }
+ ],
+ "2026-08-19": [
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 246187736,
+   "price": 1550
+  },
+  {
+   "symbol": "TLKM.JK",
+   "company_name": "PT Telkom Indonesia (Persero) Tbk",
+   "volume": 181661214,
+   "price": 2725
+  },
+  {
+   "symbol": "BMRI.JK",
+   "company_name": "PT Bank Mandiri (Persero) Tbk",
+   "volume": 158443414,
+   "price": 4100
+  },
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 157765916,
+   "price": 1230
+  },
+  {
+   "symbol": "ICBP.JK",
+   "company_name": "Indofood CBP Sukses Makmur Tbk",
+   "volume": 155780453,
+   "price": 6425
+  }
+ ],
+ "2026-08-20": [
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 286141887,
+   "price": 1260
+  },
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 200854424,
+   "price": 3350
+  },
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 182576006,
+   "price": 1590
+  },
+  {
+   "symbol": "ICBP.JK",
+   "company_name": "Indofood CBP Sukses Makmur Tbk",
+   "volume": 164642919,
+   "price": 6400
+  },
+  {
+   "symbol": "BBRI.JK",
+   "company_name": "PT Bank Rakyat Indonesia (Persero) Tbk",
+   "volume": 127750897,
+   "price": 3275
+  }
+ ],
+ "2026-08-21": [
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 239149634,
+   "price": 1590
+  },
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 179606139,
+   "price": 1225
+  },
+  {
+   "symbol": "ICBP.JK",
+   "company_name": "Indofood CBP Sukses Makmur Tbk",
+   "volume": 166616330,
+   "price": 6525
+  },
+  {
+   "symbol": "TLKM.JK",
+   "company_name": "PT Telkom Indonesia (Persero) Tbk",
+   "volume": 136821244,
+   "price": 2700
+  },
+  {
+   "symbol": "BMRI.JK",
+   "company_name": "PT Bank Mandiri (Persero) Tbk",
+   "volume": 115011141,
+   "price": 4050
+  }
+ ],
+ "2026-08-24": [
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 298004357,
+   "price": 1280
+  },
+  {
+   "symbol": "TLKM.JK",
+   "company_name": "PT Telkom Indonesia (Persero) Tbk",
+   "volume": 226984395,
+   "price": 2700
+  },
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 218041200,
+   "price": 1630
+  },
+  {
+   "symbol": "ICBP.JK",
+   "company_name": "Indofood CBP Sukses Makmur Tbk",
+   "volume": 172378074,
+   "price": 6600
+  },
+  {
+   "symbol": "BBCA.JK",
+   "company_name": "PT Bank Central Asia Tbk.",
+   "volume": 125201711,
+   "price": 6400
+  }
+ ],
+ "2026-08-25": [
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 248960511,
+   "price": 1610
+  },
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 238410056,
+   "price": 3525
+  },
+  {
+   "symbol": "ICBP.JK",
+   "company_name": "Indofood CBP Sukses Makmur Tbk",
+   "volume": 152111553,
+   "price": 6550
+  },
+  {
+   "symbol": "BBNI.JK",
+   "company_name": "PT Bank Negara Indonesia (Persero) Tbk",
+   "volume": 124875016,
+   "price": 3400
+  },
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 124038163,
+   "price": 1290
+  }
+ ],
+ "2026-08-26": [
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 251729197,
+   "price": 1620
+  },
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 214900540,
+   "price": 3525
+  },
+  {
+   "symbol": "BBNI.JK",
+   "company_name": "PT Bank Negara Indonesia (Persero) Tbk",
+   "volume": 166312088,
+   "price": 3400
+  },
+  {
+   "symbol": "BMRI.JK",
+   "company_name": "PT Bank Mandiri (Persero) Tbk",
+   "volume": 139047666,
+   "price": 4250
+  },
+  {
+   "symbol": "BBRI.JK",
+   "company_name": "PT Bank Rakyat Indonesia (Persero) Tbk",
+   "volume": 114387746,
+   "price": 3150
+  }
+ ],
+ "2026-08-27": [
+  {
+   "symbol": "TLKM.JK",
+   "company_name": "PT Telkom Indonesia (Persero) Tbk",
+   "volume": 246946039,
+   "price": 2675
+  },
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 238022274,
+   "price": 3550
+  },
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 202512087,
+   "price": 1645
+  },
+  {
+   "symbol": "ICBP.JK",
+   "company_name": "Indofood CBP Sukses Makmur Tbk",
+   "volume": 135909503,
+   "price": 6875
+  },
+  {
+   "symbol": "BMRI.JK",
+   "company_name": "PT Bank Mandiri (Persero) Tbk",
+   "volume": 134223820,
+   "price": 4225
+  }
+ ],
+ "2026-08-28": [
+  {
+   "symbol": "BMRI.JK",
+   "company_name": "PT Bank Mandiri (Persero) Tbk",
+   "volume": 179948848,
+   "price": 4300
+  },
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 165616722,
+   "price": 1645
+  },
+  {
+   "symbol": "TLKM.JK",
+   "company_name": "PT Telkom Indonesia (Persero) Tbk",
+   "volume": 158895747,
+   "price": 2650
+  },
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 156705600,
+   "price": 3575
+  },
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 138082154,
+   "price": 1245
+  }
+ ],
+ "2026-08-31": [
+  {
+   "symbol": "TLKM.JK",
+   "company_name": "PT Telkom Indonesia (Persero) Tbk",
+   "volume": 232588391,
+   "price": 2725
+  },
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 232366326,
+   "price": 3450
+  },
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 227395505,
+   "price": 1250
+  },
+  {
+   "symbol": "BBNI.JK",
+   "company_name": "PT Bank Negara Indonesia (Persero) Tbk",
+   "volume": 219505970,
+   "price": 3450
+  },
+  {
+   "symbol": "ICBP.JK",
+   "company_name": "Indofood CBP Sukses Makmur Tbk",
+   "volume": 160042006,
+   "price": 6850
+  }
+ ],
+ "2026-09-01": [
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 235732200,
+   "price": 1300
+  },
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 207334520,
+   "price": 3475
+  },
+  {
+   "symbol": "BMRI.JK",
+   "company_name": "PT Bank Mandiri (Persero) Tbk",
+   "volume": 166305483,
+   "price": 4350
+  },
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 162012986,
+   "price": 1660
+  },
+  {
+   "symbol": "ICBP.JK",
+   "company_name": "Indofood CBP Sukses Makmur Tbk",
+   "volume": 153012559,
+   "price": 6950
+  }
+ ],
+ "2026-09-02": [
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 218504362,
+   "price": 1665
+  },
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 191571812,
+   "price": 1305
+  },
+  {
+   "symbol": "TLKM.JK",
+   "company_name": "PT Telkom Indonesia (Persero) Tbk",
+   "volume": 184495806,
+   "price": 2650
+  },
+  {
+   "symbol": "BBRI.JK",
+   "company_name": "PT Bank Rakyat Indonesia (Persero) Tbk",
+   "volume": 128515550,
+   "price": 3200
+  },
+  {
+   "symbol": "BMRI.JK",
+   "company_name": "PT Bank Mandiri (Persero) Tbk",
+   "volume": 123682766,
+   "price": 4525
+  }
+ ],
+ "2026-09-03": [
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 304550055,
+   "price": 1320
+  },
+  {
+   "symbol": "TLKM.JK",
+   "company_name": "PT Telkom Indonesia (Persero) Tbk",
+   "volume": 268592358,
+   "price": 2600
+  },
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 236129798,
+   "price": 3400
+  },
+  {
+   "symbol": "BMRI.JK",
+   "company_name": "PT Bank Mandiri (Persero) Tbk",
+   "volume": 126397935,
+   "price": 4450
+  },
+  {
+   "symbol": "BBRI.JK",
+   "company_name": "PT Bank Rakyat Indonesia (Persero) Tbk",
+   "volume": 126307567,
+   "price": 3200
+  }
+ ],
+ "2026-09-04": [
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 228422587,
+   "price": 1305
+  },
+  {
+   "symbol": "TLKM.JK",
+   "company_name": "PT Telkom Indonesia (Persero) Tbk",
+   "volume": 158702031,
+   "price": 2575
+  },
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 139786049,
+   "price": 3375
+  },
+  {
+   "symbol": "BBNI.JK",
+   "company_name": "PT Bank Negara Indonesia (Persero) Tbk",
+   "volume": 131871897,
+   "price": 3450
+  },
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 120633640,
+   "price": 1695
+  }
+ ],
+ "2026-09-07": [
+  {
+   "symbol": "TLKM.JK",
+   "company_name": "PT Telkom Indonesia (Persero) Tbk",
+   "volume": 223153794,
+   "price": 2525
+  },
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 194823463,
+   "price": 1305
+  },
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 166586474,
+   "price": 1625
+  },
+  {
+   "symbol": "BMRI.JK",
+   "company_name": "PT Bank Mandiri (Persero) Tbk",
+   "volume": 163281466,
+   "price": 4450
+  },
+  {
+   "symbol": "BBNI.JK",
+   "company_name": "PT Bank Negara Indonesia (Persero) Tbk",
+   "volume": 160010554,
+   "price": 3450
+  }
+ ],
+ "2026-09-08": [
+  {
+   "symbol": "TLKM.JK",
+   "company_name": "PT Telkom Indonesia (Persero) Tbk",
+   "volume": 244994336,
+   "price": 2475
+  },
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 218661373,
+   "price": 3350
+  },
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 185874382,
+   "price": 1325
+  },
+  {
+   "symbol": "BBCA.JK",
+   "company_name": "PT Bank Central Asia Tbk.",
+   "volume": 117296287,
+   "price": 6225
+  },
+  {
+   "symbol": "ASII.JK",
+   "company_name": "Astra International Tbk",
+   "volume": 107128225,
+   "price": 4675
+  }
+ ],
+ "2026-09-09": [
+  {
+   "symbol": "TLKM.JK",
+   "company_name": "PT Telkom Indonesia (Persero) Tbk",
+   "volume": 241117657,
+   "price": 2500
+  },
+  {
+   "symbol": "BBNI.JK",
+   "company_name": "PT Bank Negara Indonesia (Persero) Tbk",
+   "volume": 215523468,
+   "price": 3400
+  },
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 199512958,
+   "price": 3400
+  },
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 187833129,
+   "price": 1620
+  },
+  {
+   "symbol": "BBRI.JK",
+   "company_name": "PT Bank Rakyat Indonesia (Persero) Tbk",
+   "volume": 115725231,
+   "price": 3225
+  }
+ ],
+ "2026-09-10": [
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 202466686,
+   "price": 1575
+  },
+  {
+   "symbol": "ICBP.JK",
+   "company_name": "Indofood CBP Sukses Makmur Tbk",
+   "volume": 171371640,
+   "price": 6450
+  },
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 150992829,
+   "price": 1335
+  },
+  {
+   "symbol": "BBCA.JK",
+   "company_name": "PT Bank Central Asia Tbk.",
+   "volume": 133433762,
+   "price": 6375
+  },
+  {
+   "symbol": "TLKM.JK",
+   "company_name": "PT Telkom Indonesia (Persero) Tbk",
+   "volume": 132694762,
+   "price": 2525
+  }
+ ],
+ "2026-09-11": [
+  {
+   "symbol": "TLKM.JK",
+   "company_name": "PT Telkom Indonesia (Persero) Tbk",
+   "volume": 197597100,
+   "price": 2500
+  },
+  {
+   "symbol": "BBNI.JK",
+   "company_name": "PT Bank Negara Indonesia (Persero) Tbk",
+   "volume": 197077947,
+   "price": 3650
+  },
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 183850255,
+   "price": 3325
+  },
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 153882405,
+   "price": 1370
+  },
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 148384112,
+   "price": 1545
+  }
+ ],
+ "2026-09-14": [
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 230231487,
+   "price": 3300
+  },
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 220766143,
+   "price": 1345
+  },
+  {
+   "symbol": "BMRI.JK",
+   "company_name": "PT Bank Mandiri (Persero) Tbk",
+   "volume": 166614003,
+   "price": 4525
+  },
+  {
+   "symbol": "BBNI.JK",
+   "company_name": "PT Bank Negara Indonesia (Persero) Tbk",
+   "volume": 144288085,
+   "price": 3700
+  },
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 143815111,
+   "price": 1580
+  }
+ ],
+ "2026-09-15": [
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 284898249,
+   "price": 1315
+  },
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 240905468,
+   "price": 3425
+  },
+  {
+   "symbol": "BBNI.JK",
+   "company_name": "PT Bank Negara Indonesia (Persero) Tbk",
+   "volume": 186829875,
+   "price": 3775
+  },
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 172858211,
+   "price": 1600
+  },
+  {
+   "symbol": "BMRI.JK",
+   "company_name": "PT Bank Mandiri (Persero) Tbk",
+   "volume": 124230748,
+   "price": 4575
+  }
+ ],
+ "2026-09-16": [
+  {
+   "symbol": "ICBP.JK",
+   "company_name": "Indofood CBP Sukses Makmur Tbk",
+   "volume": 152393450,
+   "price": 7025
+  },
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 152350982,
+   "price": 3350
+  },
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 142701636,
+   "price": 1305
+  },
+  {
+   "symbol": "BBNI.JK",
+   "company_name": "PT Bank Negara Indonesia (Persero) Tbk",
+   "volume": 123203103,
+   "price": 3750
+  },
+  {
+   "symbol": "BBCA.JK",
+   "company_name": "PT Bank Central Asia Tbk.",
+   "volume": 115900710,
+   "price": 6325
+  }
+ ],
+ "2026-09-17": [
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 251519519,
+   "price": 3275
+  },
+  {
+   "symbol": "TLKM.JK",
+   "company_name": "PT Telkom Indonesia (Persero) Tbk",
+   "volume": 222548724,
+   "price": 2600
+  },
+  {
+   "symbol": "BBNI.JK",
+   "company_name": "PT Bank Negara Indonesia (Persero) Tbk",
+   "volume": 219302517,
+   "price": 3750
+  },
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 145644263,
+   "price": 1325
+  },
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 111446606,
+   "price": 1640
+  }
+ ],
+ "2026-09-18": [
+  {
+   "symbol": "TLKM.JK",
+   "company_name": "PT Telkom Indonesia (Persero) Tbk",
+   "volume": 282216877,
+   "price": 2560
+  },
+  {
+   "symbol": "UNVR.JK",
+   "company_name": "Unilever Indonesia Tbk",
+   "volume": 203916380,
+   "price": 1650
+  },
+  {
+   "symbol": "AMRT.JK",
+   "company_name": "PT Sumber Alfaria Trijaya Tbk.",
+   "volume": 202685602,
+   "price": 1300
+  },
+  {
+   "symbol": "ANTM.JK",
+   "company_name": "Aneka Tambang Tbk.",
+   "volume": 150903723,
+   "price": 3340
+  },
+  {
+   "symbol": "BBCA.JK",
+   "company_name": "PT Bank Central Asia Tbk.",
+   "volume": 130128861,
+   "price": 6300
+  }
+ ]
+}

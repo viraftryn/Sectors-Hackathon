@@ -1,0 +1,103 @@
+{
+ "results": [
+  {
+   "title": "PT Bank Mandiri (Persero) Tbk faces margin pressure from rising input costs",
+   "body": "Mock article body for development. PT Bank Mandiri (Persero) Tbk faces margin pressure from rising input costs.",
+   "source": "https://example.com/mock-news/26",
+   "thumbnail": null,
+   "timestamp": "2026-09-14T14:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Bearish",
+    "Earnings"
+   ],
+   "symbols": [
+    "BMRI.JK"
+   ]
+  },
+  {
+   "title": "Regulator reviews compliance at PT Bank Mandiri (Persero) Tbk",
+   "body": "Mock article body for development. Regulator reviews compliance at PT Bank Mandiri (Persero) Tbk.",
+   "source": "https://example.com/mock-news/34",
+   "thumbnail": null,
+   "timestamp": "2026-09-14T05:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Bearish",
+    "Risk & Compliance"
+   ],
+   "symbols": [
+    "BMRI.JK"
+   ]
+  },
+  {
+   "title": "PT Bank Mandiri (Persero) Tbk schedules annual shareholder meeting",
+   "body": "Mock article body for development. PT Bank Mandiri (Persero) Tbk schedules annual shareholder meeting.",
+   "source": "https://example.com/mock-news/32",
+   "thumbnail": null,
+   "timestamp": "2026-09-13T10:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Corporate Action"
+   ],
+   "symbols": [
+    "BMRI.JK"
+   ]
+  },
+  {
+   "title": "PT Bank Mandiri (Persero) Tbk posts higher quarterly net profit",
+   "body": "Mock article body for development. PT Bank Mandiri (Persero) Tbk posts higher quarterly net profit.",
+   "source": "https://example.com/mock-news/8",
+   "thumbnail": null,
+   "timestamp": "2026-09-10T23:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Bullish",
+    "Earnings"
+   ],
+   "symbols": [
+    "BMRI.JK"
+   ]
+  },
+  {
+   "title": "PT Bank Mandiri (Persero) Tbk announces interim dividend",
+   "body": "Mock article body for development. PT Bank Mandiri (Persero) Tbk announces interim dividend.",
+   "source": "https://example.com/mock-news/19",
+   "thumbnail": null,
+   "timestamp": "2026-09-04T17:00:00",
+   "sector": "financials",
+   "sub_sector": [
+    "banks"
+   ],
+   "tags": [
+    "Bullish",
+    "Dividend"
+   ],
+   "symbols": [
+    "BMRI.JK"
+   ]
+  }
+ ],
+ "pagination": {
+  "total_count": 5,
+  "showing": 5,
+  "limit": 30,
+  "offset": 0,
+  "has_next": false,
+  "has_previous": false,
+  "next_offset": null,
+  "previous_offset": null
+ }
+}

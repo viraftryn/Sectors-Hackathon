@@ -1,0 +1,49 @@
+{
+ "results": [
+  {
+   "title": "Aneka Tambang Tbk. posts higher quarterly net profit",
+   "body": "Mock article body for development. Aneka Tambang Tbk. posts higher quarterly net profit.",
+   "source": "https://example.com/mock-news/2",
+   "thumbnail": null,
+   "timestamp": "2026-09-08T03:00:00",
+   "sector": "basic-materials",
+   "sub_sector": [
+    "basic-materials"
+   ],
+   "tags": [
+    "Bullish",
+    "Earnings"
+   ],
+   "symbols": [
+    "ANTM.JK"
+   ]
+  },
+  {
+   "title": "Aneka Tambang Tbk. schedules annual shareholder meeting",
+   "body": "Mock article body for development. Aneka Tambang Tbk. schedules annual shareholder meeting.",
+   "source": "https://example.com/mock-news/6",
+   "thumbnail": null,
+   "timestamp": "2026-09-01T11:00:00",
+   "sector": "basic-materials",
+   "sub_sector": [
+    "basic-materials"
+   ],
+   "tags": [
+    "Corporate Action"
+   ],
+   "symbols": [
+    "ANTM.JK"
+   ]
+  }
+ ],
+ "pagination": {
+  "total_count": 2,
+  "showing": 2,
+  "limit": 30,
+  "offset": 0,
+  "has_next": false,
+  "has_previous": false,
+  "next_offset": null,
+  "previous_offset": null
+ }
+}
