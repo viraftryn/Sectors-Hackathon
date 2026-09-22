@@ -358,6 +358,11 @@ public struct StockInteractiveChartView: View {
                         chartArea(size: size)
                         chartLine(size: size)
 
+                        // Max (top-right) & Min (bottom-right) Price Overlay
+                        maxMinOverlay(size: size)
+                            .opacity(isDragging ? 0.35 : 1.0)
+                            .animation(.easeInOut(duration: 0.2), value: isDragging)
+
                         // Drag scrubbing line & indicator
                         if isDragging, let pt = selectedPoint {
                             scrubberOverlay(pt: pt, size: size)
@@ -502,6 +507,50 @@ public struct StockInteractiveChartView: View {
                 .shadow(color: .black.opacity(0.8), radius: 3, x: 0, y: 1)
                 .position(x: labelX, y: labelY)
         }
+    }
+
+    @ViewBuilder
+    private func maxMinOverlay(size: CGSize) -> some View {
+        if !viewModel.dataPoints.isEmpty {
+            VStack {
+                // Top Right: Max Price
+                HStack {
+                    Spacer()
+                    HStack(spacing: 4) {
+                        Text("Max")
+                            .font(.system(size: 10, weight: .regular))
+                        Text(formatPrice(viewModel.maxPrice))
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                    }
+                    .foregroundColor(Color.gray)
+                }
+                .padding(.top, 4)
+                .padding(.trailing, 6)
+
+                Spacer()
+
+                // Bottom Right: Min Price
+                HStack {
+                    Spacer()
+                    HStack(spacing: 4) {
+                        Text("Min")
+                            .font(.system(size: 10, weight: .regular))
+                        Text(formatPrice(viewModel.minPrice))
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                    }
+                    .foregroundColor(Color.gray)
+                }
+                .padding(.bottom, 4)
+                .padding(.trailing, 6)
+            }
+            .frame(width: size.width, height: size.height)
+            .allowsHitTesting(false)
+        }
+    }
+
+    private func formatPrice(_ price: Double) -> String {
+        let prefix = StockFormatters.currencyPrefix(for: viewModel.quote.currency)
+        return "\(prefix)\(StockFormatters.stockPrice(price, currency: viewModel.quote.currency))"
     }
 }
 
