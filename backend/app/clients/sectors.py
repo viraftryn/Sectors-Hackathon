@@ -24,7 +24,7 @@ SCREENER_FIELDS = (
     "52_w_high_price",
     "52_w_low_price",
 )
-SUBSECTOR_SECTIONS = ("statistics", "market_cap", "stability", "growth")
+SUBSECTOR_SECTIONS = ("statistics", "market_cap")
 REPORT_SECTIONS = ("overview", "valuation")
 HISTORY_DAYS = 90
 LIST_LIMIT = 30
