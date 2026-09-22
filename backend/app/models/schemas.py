@@ -106,3 +106,18 @@ class Recommendation(BaseModel):
 class RecommendationList(BaseModel):
     scored_at: str | None
     recommendations: list[Recommendation]
+
+
+class Alert(BaseModel):
+    id: int
+    ticker: str | None
+    alert_type: str
+    severity: str
+    message: str
+    is_read: bool
+    created_at: str
+
+
+class AlertList(BaseModel):
+    unread_count: int
+    alerts: list[Alert]

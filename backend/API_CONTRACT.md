@@ -111,6 +111,38 @@ Each component is 0-100 (higher is better; a high `risk` score means low risk).
 Runs the Scoring Agent and returns the same shape as `GET /recommendations`. If the last run is
 less than an hour old it returns the stored results instead of running again. Takes a few seconds.
 
+## GET /alerts
+
+Alerts from the Alert Agent, newest first. Send the device id in the `X-Device-Id` header (the same
+`device_id` stored in `user_installations`). Market-wide alerts (no device) are returned to every
+device; device-specific alerts only to their owner. Without the header, only market-wide alerts.
+
+Query params: `unread_only` (default `false`), `limit` (default 50, max 200).
+
+```json
+{
+  "unread_count": 2,
+  "alerts": [
+    {
+      "id": 1,
+      "ticker": "BBCA",
+      "alert_type": "price_spike",
+      "severity": "high",
+      "message": "BBCA jumped 6%",
+      "is_read": false,
+      "created_at": "2026-09-22T03:00:00Z"
+    }
+  ]
+}
+```
+
+`alert_type`: `price_spike`, `volume_surge`, `sentiment_shift`. `severity`: `high`, `medium`, `low`.
+
+## POST /alerts/{id}/read
+
+Marks one alert as read and returns it (same shape as one item above). Send `X-Device-Id`.
+Returns 404 if the alert does not exist or belongs to another device.
+
 ## Errors
 
 - `404` `{"detail": "..."}`: unknown or untracked ticker.

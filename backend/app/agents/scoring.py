@@ -220,6 +220,7 @@ def build_scoring_graph(sectors: CachedSectorsClient, reason: ReasonFn | None = 
                     "name": data["name"],
                     "sector": q["sector"],
                     "sub_sector": q["sub_sector"],
+                    "quote": q,
                     "components": components,
                     "overall_score": overall,
                     "recommendation": recommend(overall),
