@@ -155,6 +155,19 @@ class HoldingLotIn(BaseModel):
     buy_date: datetime | None = None
 
 
+class SellIn(BaseModel):
+    ticker: str
+    shares: float = Field(gt=0)
+    sell_price: float = Field(gt=0)
+
+
+class SellResult(BaseModel):
+    ticker: str
+    sold_shares: float
+    realized_pnl: float
+    remaining_shares: float
+
+
 class HoldingLot(BaseModel):
     id: str
     ticker: str

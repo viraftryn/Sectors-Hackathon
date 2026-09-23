@@ -209,25 +209,9 @@ ALTER TABLE alerts ENABLE ROW LEVEL SECURITY;
 
 DO $$ 
 BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_policies 
-        WHERE tablename = 'user_installations' AND policyname = 'Allow device full access on user_installations'
-    ) THEN
-        CREATE POLICY "Allow device full access on user_installations"
-        ON user_installations FOR ALL
-        USING (true)
-        WITH CHECK (true);
-    END IF;
-
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_policies 
-        WHERE tablename = 'user_holdings' AND policyname = 'Allow device full access on user_holdings'
-    ) THEN
-        CREATE POLICY "Allow device full access on user_holdings"
-        ON user_holdings FOR ALL
-        USING (true)
-        WITH CHECK (true);
-    END IF;
+    -- Note: user_holdings, user_installations, chat_history, and alerts
+    -- are private to the backend service and not exposed to public PostgREST anon role.
+    -- Table RLS is enabled; direct PostgREST anon access is restricted.
 
     IF NOT EXISTS (
         SELECT 1 FROM pg_policies 

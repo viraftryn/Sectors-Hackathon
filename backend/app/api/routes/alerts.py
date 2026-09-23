@@ -1,12 +1,16 @@
+import logging
 from typing import Any
 
 from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.agents.alert import AlertAgent
 from app.cache import _coerce_dt
 from app.db.database import get_db
 from app.models.schemas import Alert, AlertList, utc_iso
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -23,6 +27,18 @@ def to_alert(row: Any) -> Alert:
         is_read=bool(row.is_read),
         created_at=utc_iso(_coerce_dt(row.created_at)),
     )
+
+
+@router.post("/alerts/scan")
+async def scan_alerts(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
+    """Trigger the Alert Agent to scan for market anomalies."""
+    agent = AlertAgent(db)
+    try:
+        result = await agent.run()
+    except Exception as exc:
+        logger.error("Alert agent scan failed: %s", exc)
+        raise HTTPException(status_code=502, detail="Alert scan failed") from exc
+    return result
 
 
 @router.get("/alerts", response_model=AlertList)
@@ -49,6 +65,7 @@ async def list_alerts(
 
 
 @router.post("/alerts/{alert_id}/read", response_model=Alert)
+@router.patch("/alerts/{alert_id}/read", response_model=Alert)
 async def mark_alert_read(
     alert_id: int,
     x_device_id: str | None = Header(default=None),

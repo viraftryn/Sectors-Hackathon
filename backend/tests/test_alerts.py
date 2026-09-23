@@ -106,3 +106,9 @@ def test_timestamps_are_valid_iso_utc(client: TestClient) -> None:
     created = client.get("/api/alerts").json()["alerts"][0]["created_at"]
     assert created.endswith("Z") and "+" not in created
     datetime.fromisoformat(created.replace("Z", "+00:00"))
+
+
+def test_mark_read_accepts_patch(client: TestClient) -> None:
+    headers = {"X-Device-Id": "device-a"}
+    alert_id = client.get("/api/alerts", headers=headers).json()["alerts"][0]["id"]
+    assert client.patch(f"/api/alerts/{alert_id}/read", headers=headers).json()["is_read"] is True

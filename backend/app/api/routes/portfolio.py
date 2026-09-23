@@ -20,6 +20,8 @@ from app.models.schemas import (
     HoldingLotList,
     PortfolioSummary,
     Position,
+    SellIn,
+    SellResult,
     utc_iso,
 )
 
@@ -65,6 +67,7 @@ async def list_lots(
 
 
 @router.post("/portfolio/lots", response_model=HoldingLot, status_code=201)
+@router.post("/portfolio/buy", response_model=HoldingLot, status_code=201)
 async def add_lot(
     lot: HoldingLotIn, device: str = Depends(device_id), db: AsyncSession = Depends(get_db)
 ) -> HoldingLot:
@@ -122,6 +125,45 @@ async def add_lot(
         price_per_share=lot.price_per_share,
         total_invested=total,
         buy_date=utc_iso(buy_date),
+    )
+
+
+@router.post("/portfolio/sell", response_model=SellResult)
+async def sell(
+    order: SellIn, device: str = Depends(device_id), db: AsyncSession = Depends(get_db)
+) -> SellResult:
+    """Sell shares first-in-first-out: oldest lots are reduced or removed first."""
+    ticker = bare_symbol(order.ticker)
+    lots = [lot for lot in reversed(await fetch_lots(db, device)) if lot.ticker == ticker]
+    held = sum(float(lot.shares) for lot in lots)
+    if order.shares > held + 1e-9:
+        raise HTTPException(status_code=422, detail=f"Only {held:g} {ticker} shares held")
+
+    remaining_to_sell, realized, now = order.shares, 0.0, datetime.now(UTC)
+    for lot in lots:
+        if remaining_to_sell <= 1e-9:
+            break
+        lot_shares, lot_price = float(lot.shares), float(lot.price_per_share)
+        sold = min(lot_shares, remaining_to_sell)
+        realized += sold * (order.sell_price - lot_price)
+        remaining_to_sell -= sold
+        left = lot_shares - sold
+        if left <= 1e-9:
+            await db.execute(text("DELETE FROM user_holdings WHERE id = :id"), {"id": str(lot.id)})
+        else:
+            await db.execute(
+                text(
+                    "UPDATE user_holdings SET shares = :shares, total_invested = :total, "
+                    "updated_at = :now WHERE id = :id"
+                ),
+                {"shares": left, "total": left * lot_price, "now": now, "id": str(lot.id)},
+            )
+    await db.commit()
+    return SellResult(
+        ticker=ticker,
+        sold_shares=order.shares,
+        realized_pnl=round(realized, 2),
+        remaining_shares=round(held - order.shares, 4),
     )
 
 

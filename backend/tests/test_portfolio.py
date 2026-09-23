@@ -131,3 +131,54 @@ def test_client_generated_id_is_kept(client: TestClient) -> None:
     body = {"id": lot_id, "ticker": "UNVR", "price_per_share": 1600, "shares": 50}
     assert client.post("/api/portfolio/lots", json=body, headers=A).json()["id"] == lot_id
     assert client.get("/api/portfolio/lots", headers=A).json()["lots"][0]["id"] == lot_id
+
+
+def test_buy_alias_adds_a_lot(client: TestClient) -> None:
+    body = {"ticker": "TLKM", "price_per_share": 2500, "shares": 100}
+    assert client.post("/api/portfolio/buy", json=body, headers=A).status_code == 201
+    assert client.get("/api/portfolio/lots", headers=A).json()["lots"][0]["ticker"] == "TLKM"
+
+
+def test_sell_is_fifo_and_reports_realized_pnl(client: TestClient) -> None:
+    buy = "/api/portfolio/lots"
+    old = {
+        "ticker": "BBCA",
+        "price_per_share": 6000,
+        "shares": 100,
+        "buy_date": "2026-01-01T00:00:00Z",
+    }
+    new = {
+        "ticker": "BBCA",
+        "price_per_share": 7000,
+        "shares": 100,
+        "buy_date": "2026-06-01T00:00:00Z",
+    }
+    client.post(buy, json=old, headers=A)
+    client.post(buy, json=new, headers=A)
+
+    sold = client.post(
+        "/api/portfolio/sell", json={"ticker": "BBCA", "shares": 150, "sell_price": 6500}, headers=A
+    )
+
+    assert sold.status_code == 200
+    assert sold.json() == {
+        "ticker": "BBCA",
+        "sold_shares": 150,
+        "realized_pnl": 100 * 500 + 50 * -500,
+        "remaining_shares": 50,
+    }
+    lots = client.get("/api/portfolio/lots", headers=A).json()["lots"]
+    assert [(lot["price_per_share"], lot["shares"], lot["total_invested"]) for lot in lots] == [
+        (7000, 50, 350000)
+    ]
+
+
+def test_cannot_sell_more_than_held(client: TestClient) -> None:
+    client.post(
+        "/api/portfolio/lots",
+        json={"ticker": "ASII", "price_per_share": 5000, "shares": 10},
+        headers=A,
+    )
+    order = {"ticker": "ASII", "shares": 11, "sell_price": 5200}
+    assert client.post("/api/portfolio/sell", json=order, headers=A).status_code == 422
+    assert client.post("/api/portfolio/sell", json=order, headers=B).status_code == 422

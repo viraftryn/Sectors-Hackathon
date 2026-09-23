@@ -117,7 +117,9 @@ Alerts from the Alert Agent, newest first. Send the device id in the `X-Device-I
 `device_id` stored in `user_installations`). Market-wide alerts (no device) are returned to every
 device; device-specific alerts only to their owner. Without the header, only market-wide alerts.
 
-Query params: `unread_only` (default `false`), `limit` (default 50, max 200).
+Query params: `unread_only` (default `false`), `limit` (default 50, max 200). Build the URL with
+`URLComponents`/`URLQueryItem`: `appendingPathComponent("alerts?unread_only=true")` encodes `?` as
+`%3F` and returns 404.
 
 ```json
 {
@@ -138,7 +140,7 @@ Query params: `unread_only` (default `false`), `limit` (default 50, max 200).
 
 `alert_type`: `price_spike`, `volume_surge`, `sentiment_shift`. `severity`: `high`, `medium`, `low`.
 
-## POST /alerts/{id}/read
+## POST /alerts/{id}/read (PATCH also accepted)
 
 Marks one alert as read and returns it (same shape as one item above). Send `X-Device-Id`.
 Returns 404 if the alert does not exist or belongs to another device.
@@ -148,7 +150,7 @@ Returns 404 if the alert does not exist or belongs to another device.
 All portfolio endpoints require the `X-Device-Id` header (400 without it). Holdings are stored per
 device in Supabase `user_holdings`. Fields match the iOS `HoldingLot` model. Only tracked tickers.
 
-### POST /portfolio/lots
+### POST /portfolio/lots (alias: POST /portfolio/buy)
 
 Add one buy lot. Send `shares` or `total_invested` (the other is computed). `id` is optional: pass
 the SwiftData `HoldingLot.id` to keep both sides in sync. `buy_date` defaults to now (ISO 8601).
@@ -164,6 +166,21 @@ Returns 201:
 ```
 
 422 for an untracked ticker or when neither `shares` nor `total_invested` is sent.
+
+### POST /portfolio/sell
+
+Sell shares of one ticker, oldest lots first (FIFO). Fully sold lots are removed; a partly sold lot
+keeps its buy price with fewer shares. 422 if selling more than the device holds.
+
+```json
+{"ticker": "BBCA", "shares": 150, "sell_price": 6500}
+```
+
+Returns:
+
+```json
+{"ticker": "BBCA", "sold_shares": 150.0, "realized_pnl": 25000.0, "remaining_shares": 50.0}
+```
 
 ### GET /portfolio/lots
 
