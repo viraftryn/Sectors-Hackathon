@@ -24,13 +24,14 @@ SCREENER_FIELDS = (
     "52_w_high_price",
     "52_w_low_price",
 )
-SUBSECTOR_SECTIONS = ("statistics", "market_cap", "stability", "growth")
+SUBSECTOR_SECTIONS = ("statistics", "market_cap")
 REPORT_SECTIONS = ("overview", "valuation")
 HISTORY_DAYS = 90
 LIST_LIMIT = 30
 TOP_N = 5
 
 _MAX_CONCURRENT = 4
+_DATE_PARAMS = ("start", "end")
 
 
 class SectorsError(Exception):
@@ -59,6 +60,8 @@ class SectorsClient:
 
     request_count = 0
     _semaphore = asyncio.Semaphore(_MAX_CONCURRENT)
+    # Last successful response per resource; served when the API fails (outage, 429, no credits).
+    _last_good: dict[str, Any] = {}
 
     def __init__(self, transport: httpx.AsyncBaseTransport | None = None) -> None:
         self._base_url = settings.sectors_base_url
@@ -67,20 +70,40 @@ class SectorsClient:
 
     async def _get(self, path: str, params: dict[str, Any] | None = None) -> Any:
         params = {k: v for k, v in (params or {}).items() if v is not None}
-        async with self._semaphore, httpx.AsyncClient(transport=self._transport) as client:
-            for attempt in range(2):
-                response = await client.get(
-                    f"{self._base_url}{path}", headers=self._headers, params=params, timeout=30.0
-                )
-                if response.status_code == 429 and attempt == 0:
-                    await asyncio.sleep(float(response.headers.get("Retry-After", 2)))
-                    continue
-                break
+        # Date windows move daily; they do not change which resource this is.
+        resource = path + str(sorted((k, v) for k, v in params.items() if k not in _DATE_PARAMS))
+        try:
+            async with self._semaphore, httpx.AsyncClient(transport=self._transport) as client:
+                for attempt in range(2):
+                    response = await client.get(
+                        f"{self._base_url}{path}",
+                        headers=self._headers,
+                        params=params,
+                        timeout=30.0,
+                    )
+                    if response.status_code == 429 and attempt == 0:
+                        await asyncio.sleep(float(response.headers.get("Retry-After", 2)))
+                        continue
+                    break
+        except httpx.HTTPError as exc:
+            return self._stale_or_raise(resource, SectorsError(503, str(exc)))
         SectorsClient.request_count += 1
         logger.info("Sectors %s %s -> %s", path, params, response.status_code)
-        if response.status_code >= 400:
+        if response.status_code in (400, 404):
             raise SectorsError(response.status_code, response.text[:200])
-        return response.json()
+        if response.status_code >= 400:
+            return self._stale_or_raise(
+                resource, SectorsError(response.status_code, response.text[:200])
+            )
+        data = response.json()
+        self._last_good[resource] = data
+        return data
+
+    def _stale_or_raise(self, resource: str, error: SectorsError) -> Any:
+        if resource not in self._last_good:
+            raise error
+        logger.warning("Sectors %s failed (%s), serving last good response", resource, error)
+        return self._last_good[resource]
 
     # --- Fundamental / Company data ---
 

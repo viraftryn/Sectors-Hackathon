@@ -749,13 +749,18 @@ struct InvelioLogoView: View {
 
 struct HomeView: View {
     @Query private var holdingLots: [HoldingLot]
+    @State private var liveStocks: [StockItem] = []
+
+    private var displayedStocks: [StockItem] {
+        liveStocks.isEmpty ? dummyStocks : liveStocks
+    }
 
     private var dynamicSummary: PortfolioSummaryData {
         guard !holdingLots.isEmpty else {
             return dummySummary
         }
 
-        let allStockItems = SectorsStocksLoader.loadStockItems()
+        let allStockItems = displayedStocks
         var totalVal: Double = 0
         var totalCost: Double = 0
         var dailyProfit: Double = 0
@@ -802,7 +807,7 @@ struct HomeView: View {
                         .padding(.bottom, 6)
 
                     // 4) Stock List
-                    StockListView(items: dummyStocks)
+                    StockListView(items: displayedStocks)
 
                     // 6) Search Hint
                     searchHint
@@ -813,6 +818,18 @@ struct HomeView: View {
             .preferredColorScheme(.dark)
             .toolbar(.hidden, for: .navigationBar)
             .safeAreaInset(edge: .top) { topBar }
+            .task {
+                do {
+                    let fetched = try await APIClient.shared.fetchStocks()
+                    if !fetched.isEmpty {
+                        await MainActor.run {
+                            self.liveStocks = fetched.map { $0.toStockItem() }
+                        }
+                    }
+                } catch {
+                    // Fallback to dummyStocks if backend is offline
+                }
+            }
         }
     }
 
