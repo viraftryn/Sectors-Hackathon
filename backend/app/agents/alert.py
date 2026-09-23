@@ -37,6 +37,7 @@ NEGATIVE_SENTIMENT_TAGS = {"Bearish", "Lawsuit", "Scandal", "Fraud", "Default", 
 
 class AlertState(TypedDict):
     top_movers: list[dict[str, Any]]
+    most_traded: list[dict[str, Any]]
     news_articles: list[dict[str, Any]]
     anomalies: list[dict[str, Any]]
     alerts_created: int
@@ -80,6 +81,17 @@ class AlertAgent:
         except Exception as exc:
             logger.warning("Failed to fetch top companies: %s", exc)
 
+        traded: list[dict[str, Any]] = []
+        try:
+            traded_data = await self._client.get_most_traded()
+            if isinstance(traded_data, dict):
+                latest_date = max(traded_data.keys()) if traded_data else ""
+                entries = traded_data.get(latest_date, [])
+                if isinstance(entries, list):
+                    traded = entries
+        except Exception as exc:
+            logger.warning("Failed to fetch most traded: %s", exc)
+
         articles: list[dict[str, Any]] = []
         try:
             news_data = await self._client.get_news()
@@ -89,8 +101,13 @@ class AlertAgent:
         except Exception as exc:
             logger.warning("Failed to fetch news: %s", exc)
 
-        logger.info("Fetched %d movers, %d news articles", len(movers), len(articles))
-        return {"top_movers": movers, "news_articles": articles}
+        logger.info(
+            "Fetched %d movers, %d most-traded, %d news articles",
+            len(movers),
+            len(traded),
+            len(articles),
+        )
+        return {"top_movers": movers, "most_traded": traded, "news_articles": articles}
 
     # -- Node 2: detect_anomalies --------------------------------------------
 
@@ -123,6 +140,27 @@ class AlertAgent:
                     "alert_type": "price_spike",
                     "severity": severity,
                     "message": (f"{name} ({ticker}) {direction} {change:.1%} ke Rp {price:,.0f}."),
+                }
+            )
+
+        for entry in state["most_traded"]:
+            symbol = entry.get("symbol", "")
+            ticker = bare_symbol(symbol)
+            if not ticker or ticker not in settings.tracked_tickers or ticker in seen_tickers:
+                continue
+            volume = entry.get("volume", 0)
+            price = entry.get("price", 0)
+            name = entry.get("company_name", ticker)
+            seen_tickers.add(ticker)
+            anomalies.append(
+                {
+                    "ticker": ticker,
+                    "alert_type": "volume_surge",
+                    "severity": "medium",
+                    "message": (
+                        f"{name} ({ticker}) masuk daftar most-traded "
+                        f"dengan volume {volume:,.0f} lot di Rp {price:,.0f}."
+                    ),
                 }
             )
 
@@ -227,6 +265,7 @@ class AlertAgent:
         graph = self._build_graph()
         initial: AlertState = {
             "top_movers": [],
+            "most_traded": [],
             "news_articles": [],
             "anomalies": [],
             "alerts_created": 0,
