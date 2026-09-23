@@ -28,6 +28,10 @@ class Settings(BaseSettings):
 
     chatbot_model: str = "gemini-3.5-flash-lite"
     chatbot_provider: str = "gemini"
+    sectors_mcp_url: str = "https://sectors-mcp.supertype.ai/mcp"
+
+    # MCP vs REST toggle: True = live Sectors MCP (demo), False = REST + cache (development).
+    use_mcp: bool = False
 
     # Zero-credit development mode: serve saved fixtures instead of calling the Sectors API.
     # Defaults ON so we never burn credits by accident (plan Section 5.4). Set to false for
