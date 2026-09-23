@@ -818,14 +818,18 @@ struct HomeView: View {
             }
         }
 
-        // 1. Direct from Supabase PostgreSQL (0 Credit cost!)
-        let pgStocks = await SupabaseService.shared.fetchStocks()
-        if !pgStocks.isEmpty {
-            await MainActor.run {
-                self.liveStocks = pgStocks.map { $0.toStockItem() }
-                self.isLoading = false
+        // 1. Fetch from FastAPI Backend
+        do {
+            let backendStocks = try await APIClient.shared.fetchStocks()
+            if !backendStocks.isEmpty {
+                await MainActor.run {
+                    self.liveStocks = backendStocks.map { $0.toStockItem() }
+                    self.isLoading = false
+                }
+                return
             }
-            return
+        } catch {
+            // Fallback to local seeds if backend unavailable
         }
 
         // 2. Offline / local fallback from seeded sectors_stocks.json

@@ -41,7 +41,7 @@ def to_lot(row: Any) -> HoldingLot:
         shares=float(row.shares),
         price_per_share=float(row.price_per_share),
         total_invested=float(row.total_invested),
-        buy_date=_coerce_dt(row.buy_date).isoformat() + "Z",
+        buy_date=_coerce_dt(row.buy_date).astimezone(UTC).replace(tzinfo=None).isoformat() + "Z",
     )
 
 

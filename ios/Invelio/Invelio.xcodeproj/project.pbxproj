@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1BC12EFB7A675618F165C9AA /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A396EE7CA1108341935EDAA /* SupabaseService.swift */; };
 		1BC12EFB7A675618F165C9E0 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A396EE7CA1108341935EDA4 /* APIClient.swift */; };
 		2EF97AE706E0E9FE27007F96 /* PortfolioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36CFED0BAC1FE8FE171ABEA8 /* PortfolioView.swift */; };
 		3B9C4D5E6F7A8B9C0D1E2F3A /* HoldingLot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A8B3C4D5E6F7A8B9C0D1E2F /* HoldingLot.swift */; };
@@ -33,7 +32,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0A396EE7CA1108341935EDAA /* SupabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseService.swift; sourceTree = "<group>"; };
 		0A396EE7CA1108341935EDA4 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		0D4DAFBEBB482239402E8E37 /* ChatbotView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatbotView.swift; sourceTree = "<group>"; };
 		2A8B3C4D5E6F7A8B9C0D1E2F /* HoldingLot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoldingLot.swift; sourceTree = "<group>"; };
@@ -113,7 +111,6 @@
 			isa = PBXGroup;
 			children = (
 				0A396EE7CA1108341935EDA4 /* APIClient.swift */,
-				0A396EE7CA1108341935EDAA /* SupabaseService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -223,7 +220,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				1BC12EFB7A675618F165C9E0 /* APIClient.swift in Sources */,
-				1BC12EFB7A675618F165C9AA /* SupabaseService.swift in Sources */,
 				8E916646E6DD046618D989E9 /* ChatbotView.swift in Sources */,
 				76BC79C9C796F4A3EED1E951 /* ContentView.swift in Sources */,
 				80733EC71CF633E11F48E069 /* HomeView.swift in Sources */,

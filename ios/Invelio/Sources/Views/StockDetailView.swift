@@ -261,11 +261,16 @@ public final class StockDetailViewModel: ObservableObject {
     public func fetchChartData() async {
         isLoading = true
 
-        // 1. Direct from Supabase PostgreSQL (0 Credit!)
+        // 1. Fetch from FastAPI Backend
         if allHistoricalPoints.isEmpty {
-            let dbPoints = await SupabaseService.shared.fetchDailyPrices(ticker: quote.ticker)
-            if !dbPoints.isEmpty {
-                self.allHistoricalPoints = dbPoints
+            do {
+                let detail = try await APIClient.shared.fetchStockDetail(ticker: quote.ticker)
+                let pts = detail.toHistoryPoints()
+                if !pts.isEmpty {
+                    self.allHistoricalPoints = pts
+                }
+            } catch {
+                // Fallback to customHistoryFetcher or synthetic
             }
         }
 
@@ -914,18 +919,6 @@ public struct StockDetailView: View {
     }
 
     private func fetchLiveStockDetail() async {
-        // 1. Direct from Supabase PostgreSQL (0 Credit!)
-        if let pgStock = await SupabaseService.shared.fetchStockDetail(ticker: quote.ticker) {
-            await MainActor.run {
-                self.liveFundamentals = pgStock.toStockFundamentals()
-                if self.cachedAnalysisChips.isEmpty {
-                    self.cachedAnalysisChips = self.stockAnalysisChips
-                }
-            }
-            return
-        }
-
-        // 2. Fallback to APIClient
         do {
             let detail = try await APIClient.shared.fetchStockDetail(ticker: quote.ticker)
             await MainActor.run {
@@ -971,7 +964,7 @@ public struct StockDetailView: View {
                 let deletedId = lot.id
                 modelContext.delete(lot)
                 Task {
-                    await SupabaseService.shared.deleteHolding(id: deletedId)
+                    try? await APIClient.shared.deleteLot(id: deletedId)
                 }
             }
         }
@@ -999,25 +992,17 @@ public struct StockDetailView: View {
                 modelContext.insert(newLot)
             }
 
-            let entryId = entry.id
             let ticker = quote.ticker
-            let name = quote.name
-            let mkt = detectedMarket
-            let curr = quote.currency
             let shares = entry.shares
             let price = entry.price
             let total = entry.total
             let date = entry.date
 
             Task {
-                await SupabaseService.shared.upsertHolding(
-                    id: entryId,
+                _ = try? await APIClient.shared.buyStock(
                     ticker: ticker,
-                    stockName: name,
-                    market: mkt,
-                    currency: curr,
-                    shares: shares,
                     pricePerShare: price,
+                    shares: shares,
                     totalInvested: total,
                     buyDate: date
                 )
@@ -1272,7 +1257,7 @@ public struct StockDetailView: View {
                                             modelContext.delete(existing)
                                             try? modelContext.save()
                                             Task {
-                                                await SupabaseService.shared.deleteHolding(id: idToDelete)
+                                                try? await APIClient.shared.deleteLot(id: idToDelete)
                                             }
                                         }
                                         if purchaseEntries.isEmpty {
