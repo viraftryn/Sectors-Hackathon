@@ -6,8 +6,6 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     gemini_api_key: str = ""
     gemini_model: str = "gemini-3.5-flash-lite"
-    chatbot_model: str = "gemini-3.5-flash-lite"
-    chatbot_provider: str = "gemini"
     database_url: str = "postgresql+asyncpg://postgres:password@localhost:5432/invelio"
     supabase_url: str = ""
     supabase_key: str = ""
