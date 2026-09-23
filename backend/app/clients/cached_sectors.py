@@ -25,7 +25,7 @@ class CachedSectorsClient:
         data = await client.get_daily_prices("BBCA")
     """
 
-    def __init__(self, db: AsyncSession) -> None:
+    def __init__(self, db: AsyncSession | None) -> None:
         self._raw = SectorsClient()
         self._db = db
 

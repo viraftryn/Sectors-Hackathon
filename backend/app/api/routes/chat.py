@@ -1,166 +1,150 @@
+"""Chat endpoint — streams Chatbot Agent responses via SSE."""
+
+from __future__ import annotations
+
 import json
-import re
-from typing import Any, AsyncGenerator
+import logging
+import uuid
+from collections.abc import AsyncGenerator
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
-from google import genai
-from google.genai import types
-from pydantic import BaseModel
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_sectors
-from app.clients.cached_sectors import CachedSectorsClient
-from app.clients.sectors import bare_symbol
+from app.agents.chatbot import ChatbotAgent
 from app.config import settings
+from app.models.schemas import ChatRequest, ChatResponse
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
 
-class ChatRequest(BaseModel):
-    message: str
-    session_id: str | None = None
-    holdings: list[dict[str, Any]] | None = None
+# ---------------------------------------------------------------------------
+# Optional DB dependency — chatbot works without PostgreSQL
+# ---------------------------------------------------------------------------
 
 
-class ChatResponse(BaseModel):
-    response: str
-    ticker: str | None = None
-
-
-SYSTEM_PROMPT = """You are Invelio AI, an expert Indonesian Stock Exchange (IDX / Bursa Efek Indonesia) equity research analyst.
-Your mission is to provide accurate, insightful, and professional stock and portfolio analysis for Indonesian retail and institutional investors.
-
-Guidelines:
-1. Always analyze in the context of Indonesian equities (IDX).
-2. Answer the user's specific question directly (e.g. why price moved, macro factors, valuation, dividend sustainability, risks, or portfolio recommendations).
-3. If stock fundamental data or portfolio holdings are provided in the prompt context, use those numbers to support your analysis.
-4. Format your response cleanly using Markdown with concise bullet points and bold highlights.
-5. Respond in the same language as the user (English or Indonesian).
-"""
-
-
-async def get_stock_context(query: str, sectors: CachedSectorsClient) -> str:
-    known_tickers = [
-        "BBCA", "BBRI", "BMRI", "BBNI", "TLKM", "ASII", "GOTO", "AMMN", "BREN",
-        "ADRO", "ICBP", "INDF", "UNVR", "KLBF", "CPIN", "SMGR", "BRPT", "PTBA",
-        "ITMG", "PGAS", "MDKA", "TPIA", "MEDC", "INKP", "ANTM", "ISAT", "EXCL"
-    ]
-    
-    upper_query = query.upper()
-    detected = None
-    for t in known_tickers:
-        if re.search(rf"\b{t}\b", upper_query):
-            detected = t
-            break
-            
-    if not detected:
-        words = re.findall(r"\b[A-Z]{4}\b", upper_query)
-        if words:
-            detected = words[0]
-
-    if not detected:
-        return ""
-
+async def _get_optional_db() -> AsyncGenerator[AsyncSession | None, None]:
     try:
-        screener = await sectors.list_companies()
-        results = screener.get("results", []) if isinstance(screener, dict) else []
-        row = next((r for r in results if bare_symbol(r.get("symbol", "")) == detected), None)
-        if row:
-            q = row.get("query_values", {})
-            return (
-                f"\n[Stock Context for {detected} - {row.get('company_name')}]:\n"
-                f"Sector: {q.get('sector')} | Sub-sector: {q.get('sub_sector')}\n"
-                f"Latest Close Price: Rp {q.get('last_close_price', 'N/A')}\n"
-                f"Daily Change: {round(q.get('daily_close_change', 0) * 100, 2) if q.get('daily_close_change') is not None else 'N/A'}%\n"
-                f"P/E TTM: {q.get('pe_ttm', 'N/A')}x | PBV MRQ: {q.get('pb_mrq', 'N/A')}x\n"
-                f"ROE TTM: {round(q.get('roe_ttm', 0) * 100, 2) if q.get('roe_ttm') is not None else 'N/A'}%\n"
-                f"Dividend Yield: {round(q.get('yield_ttm', 0) * 100, 2) if q.get('yield_ttm') is not None else 'N/A'}%\n"
-                f"52-Week High/Low: Rp {q.get('52_w_high_price', 'N/A')} - Rp {q.get('52_w_low_price', 'N/A')}\n"
-            )
+        from app.db.database import get_db
+
+        gen = get_db()
+        session = await anext(gen)
+        await session.execute(text("SELECT 1"))
     except Exception:
-        pass
-    return ""
+        logger.debug("DB unavailable — chat runs without history persistence")
+        yield None
+        return
+    try:
+        yield session
+    finally:
+        await gen.aclose()
+
+
+async def _load_history(db: AsyncSession | None, session_id: uuid.UUID) -> list[dict[str, str]]:
+    if db is None:
+        return []
+    try:
+        result = await db.execute(
+            text(
+                "SELECT role, content FROM chat_history "
+                "WHERE session_id = :sid ORDER BY created_at DESC LIMIT 20"
+            ),
+            {"sid": str(session_id)},
+        )
+        rows = result.fetchall()
+        return [{"role": r.role, "content": r.content} for r in reversed(rows)]
+    except Exception:
+        logger.debug("Could not load chat history")
+        return []
+
+
+async def _save_message(
+    db: AsyncSession | None,
+    session_id: uuid.UUID,
+    role: str,
+    content: str,
+) -> None:
+    if db is None:
+        return
+    try:
+        await db.execute(
+            text(
+                "INSERT INTO chat_history (session_id, role, content) "
+                "VALUES (:sid, :role, :content)"
+            ),
+            {"sid": str(session_id), "role": role, "content": content},
+        )
+        await db.commit()
+    except Exception:
+        logger.debug("Could not save chat message")
+
+
+def _require_llm_key() -> None:
+    if settings.chatbot_provider == "gemini" and not settings.gemini_api_key:
+        raise HTTPException(
+            status_code=503,
+            detail="Gemini API key not configured — set GEMINI_API_KEY in .env",
+        )
+    if settings.chatbot_provider != "gemini" and not settings.openai_api_key:
+        raise HTTPException(
+            status_code=503,
+            detail="OpenAI API key not configured — set OPENAI_API_KEY in .env",
+        )
 
 
 @router.post("/chat", response_model=ChatResponse)
-async def chat_endpoint(
-    req: ChatRequest,
-    sectors: CachedSectorsClient = Depends(get_sectors),
+async def chat(
+    request: ChatRequest,
+    db: AsyncSession | None = Depends(_get_optional_db),
 ) -> ChatResponse:
-    stock_ctx = await get_stock_context(req.message, sectors)
-    prompt = req.message
-    if stock_ctx:
-        prompt = f"{stock_ctx}\nUser Question: {req.message}"
-    if req.holdings:
-        prompt = f"[User Portfolio Holdings]: {json.dumps(req.holdings)}\n" + prompt
-
-    if not settings.gemini_api_key:
-        return ChatResponse(
-            response="⚠️ GEMINI_API_KEY is not configured in backend/.env. Please set a valid Gemini API key."
-        )
+    """Send a message and receive a complete JSON response."""
+    _require_llm_key()
+    agent = ChatbotAgent(db)
+    history = await _load_history(db, request.session_id)
+    await _save_message(db, request.session_id, "user", request.message)
 
     try:
-        client = genai.Client(api_key=settings.gemini_api_key)
-        response = await client.aio.models.generate_content(
-            model=settings.chatbot_model,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT,
-                temperature=0.3,
-                automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
-            ),
-        )
-        return ChatResponse(response=response.text or "No response generated.")
+        response_text = await agent.run(request.message, history)
     except Exception as exc:
-        return ChatResponse(response=f"⚠️ Gemini request error: {str(exc)}")
+        logger.error("Chatbot agent error: %s", exc)
+        msg = str(exc)
+        if "429" in msg or "RESOURCE_EXHAUSTED" in msg:
+            raise HTTPException(
+                status_code=429,
+                detail="LLM rate limit exceeded — retry shortly",
+            ) from exc
+        raise HTTPException(status_code=502, detail="LLM service error") from exc
+    await _save_message(db, request.session_id, "assistant", response_text)
+
+    return ChatResponse(session_id=request.session_id, response=response_text)
 
 
 @router.post("/chat/stream")
-async def chat_stream_endpoint(
-    req: ChatRequest,
-    sectors: CachedSectorsClient = Depends(get_sectors),
+async def chat_stream(
+    request: ChatRequest,
+    db: AsyncSession | None = Depends(_get_optional_db),
 ) -> StreamingResponse:
-    stock_ctx = await get_stock_context(req.message, sectors)
-    prompt = req.message
-    if stock_ctx:
-        prompt = f"{stock_ctx}\nUser Question: {req.message}"
-    if req.holdings:
-        prompt = f"[User Portfolio Holdings]: {json.dumps(req.holdings)}\n" + prompt
+    """Send a message and receive a streaming SSE response."""
+    _require_llm_key()
+    agent = ChatbotAgent(db)
+    history = await _load_history(db, request.session_id)
+    await _save_message(db, request.session_id, "user", request.message)
 
     async def event_generator() -> AsyncGenerator[str, None]:
-        if not settings.gemini_api_key:
-            err_data = json.dumps({"error": "GEMINI_API_KEY is not configured in backend/.env."})
-            yield f"data: {err_data}\n\n"
-            yield "data: [DONE]\n\n"
-            return
-
+        full_response: list[str] = []
         try:
-            client = genai.Client(api_key=settings.gemini_api_key)
-            response = await client.aio.models.generate_content(
-                model=settings.chatbot_model,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    system_instruction=SYSTEM_PROMPT,
-                    temperature=0.3,
-                    automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
-                ),
-            )
-            text = response.text or ""
-            # Stream by sentences/paragraphs or full text for instant responsiveness
-            chunk_data = json.dumps({"content": text})
-            yield f"data: {chunk_data}\n\n"
-            yield "data: [DONE]\n\n"
+            async for chunk in agent.stream(request.message, history):
+                full_response.append(chunk)
+                yield f"data: {json.dumps({'content': chunk})}\n\n"
         except Exception as exc:
-            err_data = json.dumps({"error": f"AI service error: {str(exc)}"})
-            yield f"data: {err_data}\n\n"
-            yield "data: [DONE]\n\n"
+            logger.error("Chatbot stream error: %s", exc)
+            yield f"data: {json.dumps({'error': str(exc)})}\n\n"
 
-    return StreamingResponse(
-        event_generator(),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no",
-        },
-    )
+        response_text = "".join(full_response)
+        await _save_message(db, request.session_id, "assistant", response_text)
+        yield "data: [DONE]\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
