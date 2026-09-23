@@ -1,8 +1,14 @@
-"""Chatbot Agent — LangGraph workflow with LLM tool-calling over Sectors API.
+"""Chatbot Agent — LangGraph workflow with Sectors MCP / REST tool-calling.
 
 Three-node graph: classify_question -> retrieve_context -> generate_response.
-The LLM autonomously picks which Sectors endpoints to query based on the
-user's question — this is the agentic tool-use behavior.
+The LLM autonomously picks which Sectors tools to query based on the user's
+question — this is the agentic tool-use behavior.
+
+Two data modes controlled by ``settings.use_mcp``:
+  - **MCP** (demo): connects to the hosted Sectors MCP server — live data,
+    burns API credits per question.
+  - **REST** (development default): uses CachedSectorsClient with two-layer
+    cache (L1 memory + L2 PostgreSQL) — saves credits.
 """
 
 from __future__ import annotations
@@ -10,6 +16,7 @@ from __future__ import annotations
 import json
 import logging
 from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from typing import Any, TypedDict, cast
 
 from langchain_core.language_models.chat_models import BaseChatModel
@@ -31,6 +38,19 @@ logger = logging.getLogger(__name__)
 
 MAX_TOOL_RESULT_CHARS = 4000
 MAX_TOOL_ROUNDS = 3
+
+MCP_TOOL_WHITELIST = {
+    "fetch-company-report",
+    "fetch-daily-transaction",
+    "fetch-companies-by-subsector",
+    "fetch-most-traded-stocks",
+    "fetch-companies-top-changes",
+    "fetch-index-daily",
+    "fetch-subsector-report",
+    "fetch-news",
+    "fetch-filings",
+    "get-subsectors",
+}
 
 
 # ---------------------------------------------------------------------------
@@ -73,9 +93,10 @@ Use the available tools to fetch the Sectors data needed to answer the user's qu
 Rules:
 - For single stock questions, fetch the company report and optionally news.
 - For comparisons, fetch company reports for each ticker.
-- For sector questions, fetch the sector report.
-- For market questions, fetch market index and top movers.
+- For sector questions, fetch the sector/subsector report.
+- For market questions, fetch market index data and top movers.
 - Call multiple tools when comparing stocks.
+- IDX tickers do NOT include the .JK suffix (e.g. use BBCA, not BBCA.JK).
 - Do NOT fabricate data — only return what the tools provide.
 
 Question type: {question_type}
@@ -92,7 +113,7 @@ Guidelines:
 - Use actual numbers from the data (prices, ratios, percentages)
 - Format currency as Indonesian Rupiah (e.g. Rp 8,450)
 - Present data objectively — do not give explicit buy/sell financial advice
-- Reference the data source (e.g. "Based on the latest company report...")
+- Reference the data source (e.g. "Based on the latest Sectors data...")
 - For comparisons, use a structured format
 
 ## Retrieved Sectors Data
@@ -143,7 +164,7 @@ def _get_llm(temperature: float = 0.0, streaming: bool = False) -> BaseChatModel
 
 
 # ---------------------------------------------------------------------------
-# Tool factory — wraps CachedSectorsClient methods as LangChain tools
+# REST tools — wraps CachedSectorsClient (development mode)
 # ---------------------------------------------------------------------------
 
 
@@ -153,7 +174,7 @@ def _validate_ticker(ticker: str) -> str | None:
     return t if t in settings.tracked_tickers else None
 
 
-def _build_tools(client: CachedSectorsClient) -> list[Any]:
+def _build_rest_tools(client: CachedSectorsClient) -> list[Any]:
     @tool
     async def get_company_report(ticker: str) -> str:
         """Get a company's financial report: overview, valuation
@@ -260,12 +281,53 @@ def _build_tools(client: CachedSectorsClient) -> list[Any]:
 
 
 # ---------------------------------------------------------------------------
+# MCP tools — connects to hosted Sectors MCP server (demo mode)
+# ---------------------------------------------------------------------------
+
+
+@asynccontextmanager
+async def _mcp_tools() -> Any:
+    """Connect to Sectors MCP server and yield filtered LangChain tools."""
+    from langchain_mcp_adapters.tools import load_mcp_tools
+    from mcp import ClientSession
+    from mcp.client.streamable_http import streamablehttp_client
+
+    url = settings.sectors_mcp_url
+    headers = {"Authorization": f"Bearer {settings.sectors_api_key}"}
+    async with streamablehttp_client(url, headers=headers) as (read, write, _):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            all_tools = await load_mcp_tools(session)
+            tools = [t for t in all_tools if t.name in MCP_TOOL_WHITELIST]
+            logger.info("Loaded %d/%d MCP tools from Sectors", len(tools), len(all_tools))
+            yield tools
+
+
+# ---------------------------------------------------------------------------
+# Unified tool loader
+# ---------------------------------------------------------------------------
+
+
+@asynccontextmanager
+async def _get_tools(db: AsyncSession | None = None) -> Any:
+    """Yield tools from MCP (demo) or REST+cache (development)."""
+    if settings.use_mcp:
+        logger.info("Chatbot mode: MCP (live Sectors data)")
+        async with _mcp_tools() as tools:
+            yield tools
+    else:
+        logger.info("Chatbot mode: REST + cache")
+        client = CachedSectorsClient(db)
+        yield _build_rest_tools(client)
+
+
+# ---------------------------------------------------------------------------
 # Agent
 # ---------------------------------------------------------------------------
 
 
 class ChatbotAgent:
-    """LangGraph chatbot with LLM tool-calling over the Sectors API.
+    """LangGraph chatbot with Sectors tool-calling (MCP or REST).
 
     Nodes:
       1. classify_question  — categorize the question + extract tickers
@@ -273,10 +335,10 @@ class ChatbotAgent:
       3. generate_response  — produce a grounded answer from retrieved data
     """
 
-    def __init__(self, db: AsyncSession | None) -> None:
-        self._client = CachedSectorsClient(db)
-        self._tools = _build_tools(self._client)
-        self._tool_map: dict[str, Any] = {t.name: t for t in self._tools}
+    def __init__(self, db: AsyncSession | None = None) -> None:
+        self._db = db
+        self._tools: list[Any] = []
+        self._tool_map: dict[str, Any] = {}
 
     # -- Node implementations -----------------------------------------------
 
@@ -323,6 +385,7 @@ class ChatbotAgent:
                 else:
                     try:
                         tool_output = await fn.ainvoke(tc["args"])
+                        tool_output = _truncate(str(tool_output))
                     except Exception as exc:
                         logger.warning("Tool %s failed: %s", tc["name"], exc)
                         tool_output = f"Error fetching data: {exc}"
@@ -381,41 +444,48 @@ class ChatbotAgent:
 
     async def run(self, message: str, history: list[dict[str, str]] | None = None) -> str:
         """Execute the full pipeline and return the complete response."""
-        graph = self._build_graph()
-        initial: ChatState = {
-            "user_message": message,
-            "chat_history": history or [],
-            "question_type": "",
-            "entities": [],
-            "context": [],
-            "response": "",
-        }
-        result = await graph.ainvoke(initial)
-        return cast(str, result["response"])
+        async with _get_tools(self._db) as tools:
+            self._tools = tools
+            self._tool_map = {t.name: t for t in tools}
+            graph = self._build_graph()
+            initial: ChatState = {
+                "user_message": message,
+                "chat_history": history or [],
+                "question_type": "",
+                "entities": [],
+                "context": [],
+                "response": "",
+            }
+            result = await graph.ainvoke(initial)
+            return cast(str, result["response"])
 
     async def stream(
         self, message: str, history: list[dict[str, str]] | None = None
     ) -> AsyncIterator[str]:
         """Run classify + retrieve, then stream the final response tokens."""
-        state: ChatState = {
-            "user_message": message,
-            "chat_history": history or [],
-            "question_type": "",
-            "entities": [],
-            "context": [],
-            "response": "",
-        }
+        async with _get_tools(self._db) as tools:
+            self._tools = tools
+            self._tool_map = {t.name: t for t in tools}
 
-        classified = await self._classify_question(state)
-        state["question_type"] = classified["question_type"]
-        state["entities"] = classified["entities"]
+            state: ChatState = {
+                "user_message": message,
+                "chat_history": history or [],
+                "question_type": "",
+                "entities": [],
+                "context": [],
+                "response": "",
+            }
 
-        retrieved = await self._retrieve_context(state)
-        state["context"] = retrieved["context"]
+            classified = await self._classify_question(state)
+            state["question_type"] = classified["question_type"]
+            state["entities"] = classified["entities"]
 
-        messages = self._build_response_messages(state)
-        llm = _get_llm(temperature=0.3, streaming=True)
-        async for chunk in llm.astream(messages):
-            text = _extract_text(chunk.content) if chunk.content else ""
-            if text:
-                yield text
+            retrieved = await self._retrieve_context(state)
+            state["context"] = retrieved["context"]
+
+            messages = self._build_response_messages(state)
+            llm = _get_llm(temperature=0.3, streaming=True)
+            async for chunk in llm.astream(messages):
+                text = _extract_text(chunk.content) if chunk.content else ""
+                if text:
+                    yield text
