@@ -3,12 +3,24 @@ Sync 90-day daily price history from Sectors API v2 to Supabase PostgreSQL.
 Runs for 10 core stocks: BBCA, BBRI, BMRI, BBNI, TLKM, ASII, UNVR, ICBP, AMRT, ANTM.
 """
 
-import httpx
+import os
+import sys
 from datetime import date, timedelta
+from pathlib import Path
+import httpx
+from dotenv import load_dotenv
 
-SECTORS_KEY = "e94f68c02c4d6d8539dcb6748464c9a2f41a9fa9f6b41ae9e1e5aa5562902e2c"
-SUPABASE_URL = "https://zvtuvfamsbwgeawnkwpp.supabase.co"
-SUPABASE_KEY = "sb_publishable_jyOUKXnYdcLVHgGRpp7zCg_wMFxl9vW"
+# Load .env from backend/ or project root
+load_dotenv(Path(__file__).resolve().parent.parent / "backend" / ".env")
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+
+SECTORS_KEY = os.getenv("SECTORS_API_KEY", "")
+SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY", "") or os.getenv("SUPABASE_ANON_KEY", "")
+
+if not SECTORS_KEY or not SUPABASE_URL or not SUPABASE_KEY:
+    print("❌ Error: Missing SECTORS_API_KEY, SUPABASE_URL, or SUPABASE_KEY in environment/.env")
+    sys.exit(1)
 
 CORE_TICKERS = [
     "BBCA", "BBRI", "BMRI", "BBNI", "TLKM",

@@ -98,6 +98,8 @@ actor APIClient {
             }
             continuation.onTermination = { _ in task.cancel() }
         }
+    }
+
     func fetchStocks() async throws -> [BackendStockSummary] {
         let response: BackendStockListResponse = try await get("stocks")
         return response.stocks

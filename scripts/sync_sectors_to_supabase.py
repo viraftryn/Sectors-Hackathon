@@ -8,13 +8,24 @@ Sync Sectors API v2 data directly into Supabase PostgreSQL.
 - Zero subsequent credit cost for SwiftUI & AI Chatbot RAG.
 """
 
+import os
 import sys
 import time
+from pathlib import Path
 import httpx
+from dotenv import load_dotenv
 
-SECTORS_API_KEY = "e94f68c02c4d6d8539dcb6748464c9a2f41a9fa9f6b41ae9e1e5aa5562902e2c"
-SUPABASE_URL = "https://zvtuvfamsbwgeawnkwpp.supabase.co"
-SUPABASE_ANON_KEY = "sb_publishable_jyOUKXnYdcLVHgGRpp7zCg_wMFxl9vW"
+# Load .env from backend/ or project root
+load_dotenv(Path(__file__).resolve().parent.parent / "backend" / ".env")
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+
+SECTORS_API_KEY = os.getenv("SECTORS_API_KEY", "")
+SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+SUPABASE_ANON_KEY = os.getenv("SUPABASE_KEY", "") or os.getenv("SUPABASE_ANON_KEY", "")
+
+if not SECTORS_API_KEY or not SUPABASE_URL or not SUPABASE_ANON_KEY:
+    print("❌ Error: Missing SECTORS_API_KEY, SUPABASE_URL, or SUPABASE_KEY in environment/.env")
+    sys.exit(1)
 
 TRACKED_TICKERS = [
     "BBCA",
