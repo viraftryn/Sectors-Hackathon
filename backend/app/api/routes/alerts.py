@@ -1,3 +1,4 @@
+from datetime import UTC
 from typing import Any
 
 from fastapi import APIRouter, Depends, Header, HTTPException
@@ -21,7 +22,7 @@ def to_alert(row: Any) -> Alert:
         severity=row.severity,
         message=row.message,
         is_read=bool(row.is_read),
-        created_at=_coerce_dt(row.created_at).isoformat() + "Z",
+        created_at=_coerce_dt(row.created_at).astimezone(UTC).replace(tzinfo=None).isoformat() + "Z",
     )
 
 
