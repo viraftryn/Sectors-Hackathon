@@ -52,6 +52,13 @@ MCP_TOOL_WHITELIST = {
     "get-subsectors",
 }
 
+TICKER_PARAM_NAMES = {"symbol", "symbols", "ticker"}
+
+MCP_DEFAULT_ARGS: dict[str, dict[str, Any]] = {
+    "fetch-company-report": {"sections": "overview,valuation"},
+    "fetch-companies-top-changes": {"periods": "1d", "n_stock": 5},
+}
+
 
 # ---------------------------------------------------------------------------
 # State
@@ -285,9 +292,69 @@ def _build_rest_tools(client: CachedSectorsClient) -> list[Any]:
 # ---------------------------------------------------------------------------
 
 
+def _guard_mcp_args(tool_name: str, args: dict[str, Any]) -> dict[str, Any] | str:
+    """Validate ticker and inject cost-saving defaults for MCP tool calls.
+
+    Returns the cleaned args dict, or an error string if the ticker is rejected.
+    """
+    guarded = dict(args)
+
+    for param in TICKER_PARAM_NAMES:
+        if param not in guarded:
+            continue
+        raw = guarded[param]
+        if isinstance(raw, str):
+            tickers = [t.strip() for t in raw.split(",")]
+        elif isinstance(raw, list):
+            tickers = raw
+        else:
+            continue
+        cleaned = [t.upper().removesuffix(".JK") for t in tickers if t.strip()]
+        rejected = [t for t in cleaned if t not in settings.tracked_tickers]
+        if rejected:
+            allowed = ", ".join(settings.tracked_tickers)
+            return f"Ticker {', '.join(rejected)} not tracked. Use: {allowed}"
+        guarded[param] = ",".join(f"{t}.JK" for t in cleaned) if isinstance(raw, str) else cleaned
+
+    defaults = MCP_DEFAULT_ARGS.get(tool_name, {})
+    for key, value in defaults.items():
+        if key not in guarded:
+            guarded[key] = value
+
+    return guarded
+
+
+def _wrap_mcp_tool(original: Any) -> Any:
+    """Wrap an MCP tool with ticker validation and default-arg injection."""
+    real_ainvoke = original.ainvoke
+
+    async def guarded_ainvoke(input: Any, config: Any = None, **kwargs: Any) -> Any:  # noqa: A002
+        args = input if isinstance(input, dict) else {"input": input}
+        result = _guard_mcp_args(original.name, args)
+        if isinstance(result, str):
+            return result
+        return await real_ainvoke(result, config, **kwargs)
+
+    original.ainvoke = guarded_ainvoke
+
+    if hasattr(original, "invoke"):
+        real_invoke = original.invoke
+
+        def guarded_invoke(input: Any, config: Any = None, **kwargs: Any) -> Any:  # noqa: A002
+            args = input if isinstance(input, dict) else {"input": input}
+            result = _guard_mcp_args(original.name, args)
+            if isinstance(result, str):
+                return result
+            return real_invoke(result, config, **kwargs)
+
+        original.invoke = guarded_invoke
+
+    return original
+
+
 @asynccontextmanager
 async def _mcp_tools() -> Any:
-    """Connect to Sectors MCP server and yield filtered LangChain tools."""
+    """Connect to Sectors MCP server and yield guarded LangChain tools."""
     from langchain_mcp_adapters.tools import load_mcp_tools
     from mcp import ClientSession
     from mcp.client.streamable_http import streamablehttp_client
@@ -298,7 +365,7 @@ async def _mcp_tools() -> Any:
         async with ClientSession(read, write) as session:
             await session.initialize()
             all_tools = await load_mcp_tools(session)
-            tools = [t for t in all_tools if t.name in MCP_TOOL_WHITELIST]
+            tools = [_wrap_mcp_tool(t) for t in all_tools if t.name in MCP_TOOL_WHITELIST]
             logger.info("Loaded %d/%d MCP tools from Sectors", len(tools), len(all_tools))
             yield tools
 
