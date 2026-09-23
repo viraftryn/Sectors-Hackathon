@@ -20,6 +20,7 @@ from app.models.schemas import (
     HoldingLotList,
     PortfolioSummary,
     Position,
+    utc_iso,
 )
 
 router = APIRouter()
@@ -41,7 +42,7 @@ def to_lot(row: Any) -> HoldingLot:
         shares=float(row.shares),
         price_per_share=float(row.price_per_share),
         total_invested=float(row.total_invested),
-        buy_date=_coerce_dt(row.buy_date).isoformat() + "Z",
+        buy_date=utc_iso(_coerce_dt(row.buy_date)),
     )
 
 
@@ -120,7 +121,7 @@ async def add_lot(
         shares=shares,
         price_per_share=lot.price_per_share,
         total_invested=total,
-        buy_date=buy_date.astimezone(UTC).replace(tzinfo=None).isoformat() + "Z",
+        buy_date=utc_iso(buy_date),
     )
 
 

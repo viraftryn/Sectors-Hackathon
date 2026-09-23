@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.cache import _coerce_dt
 from app.db.database import get_db
-from app.models.schemas import Alert, AlertList
+from app.models.schemas import Alert, AlertList, utc_iso
 
 router = APIRouter()
 
@@ -21,7 +21,7 @@ def to_alert(row: Any) -> Alert:
         severity=row.severity,
         message=row.message,
         is_read=bool(row.is_read),
-        created_at=_coerce_dt(row.created_at).isoformat() + "Z",
+        created_at=utc_iso(_coerce_dt(row.created_at)),
     )
 
 

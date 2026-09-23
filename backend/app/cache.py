@@ -3,10 +3,9 @@
 Lookup order: L1 -> L2 -> Sectors API. Each cache hit avoids spending an API credit,
 which is the whole point on a 1,000-credit budget (see implementation plan Section 5).
 
-Timestamps are handled as naive UTC on the Python side and stored in the TIMESTAMP
-(without time zone) column, so TTL math is correct regardless of the DB server's
-time zone (Supabase runs UTC). We never rely on the DB's NOW(), which keeps the SQL
-portable enough to unit-test against SQLite.
+Timestamps are handled as timezone-aware UTC datetimes, compatible with both
+TIMESTAMP and TIMESTAMPTZ columns (Supabase uses TIMESTAMPTZ). We never rely
+on the DB's NOW(), which keeps the SQL portable enough to unit-test against SQLite.
 """
 
 from __future__ import annotations
@@ -21,19 +20,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 def _utcnow() -> datetime:
-    """Naive UTC 'now' — matches the TIMESTAMP (without tz) column and epoch math."""
-    return datetime.now(UTC).replace(tzinfo=None)
+    """Aware UTC 'now' — works with both TIMESTAMP and TIMESTAMPTZ columns."""
+    return datetime.now(UTC)
 
 
 def _coerce_dt(value: datetime | str) -> datetime:
-    """Normalize a cached_at value to a naive UTC datetime.
+    """Normalize a cached_at value to a UTC-aware datetime.
 
     Postgres/asyncpg returns a datetime; SQLite returns an ISO string. Handle both.
+    Naive datetimes are assumed UTC.
     """
     if isinstance(value, datetime):
-        return value.replace(tzinfo=None) if value.tzinfo else value
+        return value.astimezone(UTC) if value.tzinfo else value.replace(tzinfo=UTC)
     parsed = datetime.fromisoformat(value)
-    return parsed.replace(tzinfo=None) if parsed.tzinfo else parsed
+    return parsed.astimezone(UTC) if parsed.tzinfo else parsed.replace(tzinfo=UTC)
 
 
 class _CacheMetrics:

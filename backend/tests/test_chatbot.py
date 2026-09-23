@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from app.agents.chatbot import ChatbotAgent, ChatState, _build_tools, _truncate
+from app.agents.chatbot import ChatbotAgent, ChatState, _truncate
 
 # -- Unit: _truncate ---------------------------------------------------------
 
@@ -32,8 +32,7 @@ def test_truncate_exact_boundary():
 
 @pytest.mark.asyncio
 async def test_classify_single_stock():
-    db = MagicMock()
-    agent = ChatbotAgent(db)
+    agent = ChatbotAgent()
 
     mock_response = MagicMock()
     mock_response.content = json.dumps({"question_type": "single_stock", "entities": ["BBCA"]})
@@ -59,8 +58,7 @@ async def test_classify_single_stock():
 
 @pytest.mark.asyncio
 async def test_classify_comparison():
-    db = MagicMock()
-    agent = ChatbotAgent(db)
+    agent = ChatbotAgent()
 
     mock_response = MagicMock()
     mock_response.content = json.dumps(
@@ -88,8 +86,7 @@ async def test_classify_comparison():
 
 @pytest.mark.asyncio
 async def test_classify_handles_invalid_json():
-    db = MagicMock()
-    agent = ChatbotAgent(db)
+    agent = ChatbotAgent()
 
     mock_response = MagicMock()
     mock_response.content = "not valid json at all"
@@ -117,47 +114,25 @@ async def test_classify_handles_invalid_json():
 
 
 def test_format_context_empty():
-    db = MagicMock()
-    agent = ChatbotAgent(db)
+    agent = ChatbotAgent()
     assert agent._format_context([]) == "(no data retrieved)"
 
 
 def test_format_context_with_data():
-    db = MagicMock()
-    agent = ChatbotAgent(db)
+    agent = ChatbotAgent()
     ctx = [
-        {"tool": "get_company_report", "args": {"ticker": "BBCA"}, "data": '{"pe": 20}'},
+        {"tool": "fetch-company-report", "args": {"symbol": "BBCA"}, "data": '{"pe": 20}'},
     ]
     result = agent._format_context(ctx)
-    assert "get_company_report" in result
+    assert "fetch-company-report" in result
     assert "BBCA" in result
-
-
-# -- Unit: _build_tools ------------------------------------------------------
-
-
-def test_build_tools_count():
-    client = MagicMock()
-    tools = _build_tools(client)
-    assert len(tools) == 9
-
-
-def test_build_tools_names():
-    client = MagicMock()
-    tools = _build_tools(client)
-    names = {t.name for t in tools}
-    assert "get_company_report" in names
-    assert "get_daily_prices" in names
-    assert "get_market_index" in names
-    assert "get_news" in names
 
 
 # -- Unit: _build_response_messages ------------------------------------------
 
 
 def test_build_response_messages_includes_history():
-    db = MagicMock()
-    agent = ChatbotAgent(db)
+    agent = ChatbotAgent()
     state: ChatState = {
         "user_message": "What about BBCA?",
         "chat_history": [
@@ -175,8 +150,7 @@ def test_build_response_messages_includes_history():
 
 
 def test_build_response_messages_limits_history():
-    db = MagicMock()
-    agent = ChatbotAgent(db)
+    agent = ChatbotAgent()
     big_history = [{"role": "user", "content": f"msg{i}"} for i in range(20)]
     state: ChatState = {
         "user_message": "latest",

@@ -98,3 +98,11 @@ def test_cannot_mark_another_devices_alert(client: TestClient) -> None:
         client.post(f"/api/alerts/{asii_id}/read", headers={"X-Device-Id": "device-a"}).status_code
         == 404
     )
+
+
+def test_timestamps_are_valid_iso_utc(client: TestClient) -> None:
+    from datetime import datetime
+
+    created = client.get("/api/alerts").json()["alerts"][0]["created_at"]
+    assert created.endswith("Z") and "+" not in created
+    datetime.fromisoformat(created.replace("Z", "+00:00"))

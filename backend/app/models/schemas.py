@@ -1,7 +1,14 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
 from pydantic import BaseModel, Field
+
+
+def utc_iso(value: datetime) -> str:
+    """ISO 8601 in UTC with a Z suffix; naive datetimes are treated as UTC."""
+    if value.tzinfo is not None:
+        value = value.astimezone(UTC).replace(tzinfo=None)
+    return value.isoformat() + "Z"
 
 
 class StatusResponse(BaseModel):
