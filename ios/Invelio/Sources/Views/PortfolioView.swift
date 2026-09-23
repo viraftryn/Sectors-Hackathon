@@ -275,46 +275,44 @@ struct PortfolioView: View {
         isRefreshing = true
         defer { isRefreshing = false }
 
-        // 1. Fetch live stock prices from Supabase PostgreSQL (0 Credit!)
-        let pgStocks = await SupabaseService.shared.fetchStocks()
-        if !pgStocks.isEmpty {
-            self.liveStocks = pgStocks.map { $0.toStockItem() }
-        } else {
-            // Fallback to Backend API
-            do {
-                let backendSummaries = try await APIClient.shared.fetchStocks()
-                let mapped = backendSummaries.map { $0.toStockItem() }
-                if !mapped.isEmpty {
-                    self.liveStocks = mapped
-                }
-            } catch {
-                // Fallback to bundled data
+        // 1. Fetch live stock prices from FastAPI Backend
+        do {
+            let backendSummaries = try await APIClient.shared.fetchStocks()
+            let mapped = backendSummaries.map { $0.toStockItem() }
+            if !mapped.isEmpty {
+                self.liveStocks = mapped
             }
+        } catch {
+            // Fallback to bundled data if needed
         }
 
-        // 2. If local holding lots are empty, restore from Supabase remote records for this device
+        // 2. If local holding lots are empty, restore from backend portfolio lots for this device
         if holdingLots.isEmpty {
-            let remote = await SupabaseService.shared.fetchRemoteHoldings()
-            if !remote.isEmpty {
-                let isoFormatter = ISO8601DateFormatter()
-                for r in remote {
-                    guard let uuid = UUID(uuidString: r.id) else { continue }
-                    let buyDate = isoFormatter.date(from: r.buy_date) ?? Date()
-                    let restored = HoldingLot(
-                        id: uuid,
-                        ticker: r.ticker,
-                        symbol: r.ticker.components(separatedBy: ".").first ?? r.ticker,
-                        stockName: r.stock_name,
-                        market: r.market,
-                        currency: r.currency,
-                        buyDate: buyDate,
-                        pricePerShare: r.price_per_share,
-                        totalInvested: r.total_invested,
-                        shares: r.shares
-                    )
-                    modelContext.insert(restored)
+            do {
+                let remoteLots = try await APIClient.shared.fetchHoldingLots()
+                if !remoteLots.isEmpty {
+                    let isoFormatter = ISO8601DateFormatter()
+                    for r in remoteLots {
+                        let uuid = UUID(uuidString: r.id) ?? UUID()
+                        let buyDate = isoFormatter.date(from: r.buyDate) ?? Date()
+                        let restored = HoldingLot(
+                            id: uuid,
+                            ticker: r.ticker,
+                            symbol: r.ticker.components(separatedBy: ".").first ?? r.ticker,
+                            stockName: r.stockName ?? r.ticker,
+                            market: "IDX",
+                            currency: "IDR",
+                            buyDate: buyDate,
+                            pricePerShare: r.pricePerShare,
+                            totalInvested: r.totalInvested,
+                            shares: r.shares
+                        )
+                        modelContext.insert(restored)
+                    }
+                    try? modelContext.save()
                 }
-                try? modelContext.save()
+            } catch {
+                // Ignore network error on lot sync
             }
         }
     }
