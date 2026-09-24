@@ -27,6 +27,8 @@ SCREENER_FIELDS = (
 SUBSECTOR_SECTIONS = ("statistics", "market_cap")
 REPORT_SECTIONS = ("overview", "valuation")
 HISTORY_DAYS = 90
+NEWS_DAYS = 30
+FILINGS_DAYS = 90
 LIST_LIMIT = 30
 TOP_N = 5
 
@@ -51,8 +53,12 @@ def screener_where(symbols: list[str]) -> str:
     return f"symbol in [{listed}] and sector != '' and sub_sector != '' and ({any_value})"
 
 
+def _days_ago(days: int) -> str:
+    return (date.today() - timedelta(days=days)).isoformat()
+
+
 def _history_start() -> str:
-    return (date.today() - timedelta(days=HISTORY_DAYS)).isoformat()
+    return _days_ago(HISTORY_DAYS)
 
 
 class SectorsClient:
@@ -160,8 +166,13 @@ class SectorsClient:
 
     async def get_news(self, ticker: str | None = None) -> Any:
         symbols = bare_symbol(ticker) if ticker else None
-        return await self._get("/news/", {"symbols": symbols, "limit": LIST_LIMIT})
+        return await self._get(
+            "/news/", {"symbols": symbols, "limit": LIST_LIMIT, "start": _days_ago(NEWS_DAYS)}
+        )
 
     async def get_news_filings(self, ticker: str | None = None) -> Any:
         symbol = bare_symbol(ticker) if ticker else None
-        return await self._get("/filings/", {"symbol": symbol, "limit": LIST_LIMIT})
+        # Without a start date the feed reaches back years; old insider trades are not sentiment.
+        return await self._get(
+            "/filings/", {"symbol": symbol, "limit": LIST_LIMIT, "start": _days_ago(FILINGS_DAYS)}
+        )

@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from app.agents.chatbot import ChatbotAgent, ChatState, _truncate
+from app.agents.chatbot import ChatbotAgent, ChatState, _guard_mcp_args, _truncate
 
 # -- Unit: _truncate ---------------------------------------------------------
 
@@ -163,3 +163,45 @@ def test_build_response_messages_limits_history():
     msgs = agent._build_response_messages(state)
     # system + 6 history (capped) + 1 user = 8
     assert len(msgs) == 8
+
+
+# -- Unit: _guard_mcp_args ---------------------------------------------------
+
+
+def test_guard_passes_tracked_ticker():
+    result = _guard_mcp_args("fetch-company-report", {"symbol": "BBCA.JK"})
+    assert isinstance(result, dict)
+    assert result["symbol"] == "BBCA.JK"
+    assert result["sections"] == "overview,valuation"
+
+
+def test_guard_rejects_untracked_ticker():
+    result = _guard_mcp_args("fetch-company-report", {"symbol": "GOTO"})
+    assert isinstance(result, str)
+    assert "not tracked" in result
+
+
+def test_guard_injects_defaults():
+    result = _guard_mcp_args("fetch-companies-top-changes", {})
+    assert isinstance(result, dict)
+    assert result["periods"] == "1d"
+    assert result["n_stock"] == 5
+
+
+def test_guard_does_not_override_explicit_args():
+    result = _guard_mcp_args("fetch-companies-top-changes", {"periods": "7d", "n_stock": 3})
+    assert isinstance(result, dict)
+    assert result["periods"] == "7d"
+    assert result["n_stock"] == 3
+
+
+def test_guard_normalizes_ticker_case():
+    result = _guard_mcp_args("fetch-daily-transaction", {"symbol": "bbca"})
+    assert isinstance(result, dict)
+    assert result["symbol"] == "BBCA.JK"
+
+
+def test_guard_passes_tools_without_ticker():
+    result = _guard_mcp_args("get-subsectors", {"some_param": "value"})
+    assert isinstance(result, dict)
+    assert result["some_param"] == "value"

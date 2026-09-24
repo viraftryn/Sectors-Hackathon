@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.agents.alert import AlertAgent
 from app.cache import _coerce_dt
 from app.db.database import get_db
-from app.models.schemas import Alert, AlertList
+from app.models.schemas import Alert, AlertList, utc_iso
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +65,7 @@ async def list_alerts(
 
 
 @router.post("/alerts/{alert_id}/read", response_model=Alert)
+@router.patch("/alerts/{alert_id}/read", response_model=Alert)
 async def mark_alert_read(
     alert_id: int,
     x_device_id: str | None = Header(default=None),

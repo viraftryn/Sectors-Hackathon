@@ -11,7 +11,7 @@ from app.clients.cached_sectors import CachedSectorsClient
 from app.config import settings
 from app.db.database import get_db
 from app.db.scores import last_scored_at, latest_scores, save_scores
-from app.models.schemas import Recommendation, RecommendationList, ScoreBreakdown
+from app.models.schemas import Recommendation, RecommendationList, ScoreBreakdown, utc_iso
 
 router = APIRouter()
 _run_lock = asyncio.Lock()
@@ -31,7 +31,7 @@ def to_recommendation(row: dict[str, Any]) -> Recommendation:
             risk=row["risk_score"],
             sentiment=row["sentiment_score"],
         ),
-        scored_at=row["scored_at"].isoformat() + "Z",
+        scored_at=utc_iso(row["scored_at"]),
     )
 
 

@@ -1,7 +1,14 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
 from pydantic import BaseModel, Field
+
+
+def utc_iso(value: datetime) -> str:
+    """ISO 8601 in UTC with a Z suffix; naive datetimes are treated as UTC."""
+    if value.tzinfo is not None:
+        value = value.astimezone(UTC).replace(tzinfo=None)
+    return value.isoformat() + "Z"
 
 
 class StatusResponse(BaseModel):
@@ -99,6 +106,8 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     session_id: uuid.UUID
     response: str
+
+
 class ScoreBreakdown(BaseModel):
     fundamental: float
     macro: float
@@ -144,6 +153,19 @@ class HoldingLotIn(BaseModel):
     shares: float | None = Field(default=None, gt=0)
     total_invested: float | None = Field(default=None, gt=0)
     buy_date: datetime | None = None
+
+
+class SellIn(BaseModel):
+    ticker: str
+    shares: float = Field(gt=0)
+    sell_price: float = Field(gt=0)
+
+
+class SellResult(BaseModel):
+    ticker: str
+    sold_shares: float
+    realized_pnl: float
+    remaining_shares: float
 
 
 class HoldingLot(BaseModel):
