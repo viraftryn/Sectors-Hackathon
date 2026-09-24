@@ -73,7 +73,7 @@ def test_device_sees_market_and_own_alerts(client: TestClient) -> None:
     body = client.get("/api/alerts", headers={"X-Device-Id": "device-a"}).json()
     assert [a["ticker"] for a in body["alerts"]] == ["BBCA", "TLKM"]
     assert body["unread_count"] == 2
-    assert body["alerts"][0]["created_at"] == "2026-09-22T03:00:00+00:00Z"
+    assert body["alerts"][0]["created_at"] == "2026-09-22T03:00:00Z"
 
 
 def test_without_device_only_market_alerts(client: TestClient) -> None:
