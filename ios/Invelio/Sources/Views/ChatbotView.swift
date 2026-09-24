@@ -167,10 +167,11 @@ struct ChatBubbleRow: View {
                                 .font(.system(size: 11.5, weight: .regular))
                                 .foregroundStyle(Color.white.opacity(0.55))
 
-                            HStack(spacing: 4) {
-                                Image(systemName: "chart.line.uptrend.xyaxis")
-                                    .font(.system(size: 10, weight: .semibold))
-                                    .foregroundStyle(Color.PrimaryYellow)
+                            HStack(spacing: 4.5) {
+                                Image("sectors_logo")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 12, height: 12)
                                 Text("Sectors")
                                     .font(.system(size: 11.5, weight: .semibold))
                                     .foregroundStyle(Color.white.opacity(0.9))
