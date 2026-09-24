@@ -25,7 +25,7 @@ def to_alert(row: Any) -> Alert:
         severity=row.severity,
         message=row.message,
         is_read=bool(row.is_read),
-        created_at=utc_iso(_coerce_dt(row.created_at)),
+        created_at=_coerce_dt(row.created_at).strftime("%Y-%m-%dT%H:%M:%SZ"),
     )
 
 
