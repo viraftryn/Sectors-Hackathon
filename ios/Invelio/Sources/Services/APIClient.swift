@@ -5,7 +5,7 @@ actor APIClient {
     static let shared = APIClient()
 
     #if DEBUG
-    private let baseURL = URL(string: "http://10.67.50.19:8000/api")!
+    private let baseURL = URL(string: "http://10.67.50.36:8000/api")!
     #else
     private let baseURL = URL(string: "https://your-production-url.com/api")!
     #endif

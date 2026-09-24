@@ -5,17 +5,20 @@ struct ChatMessage: Identifiable, Equatable {
     let id: UUID
     let text: String
     let isUser: Bool
+    let isFinished: Bool
     let timestamp: Date
 
     init(
         id: UUID = UUID(),
         text: String,
         isUser: Bool,
+        isFinished: Bool = true,
         timestamp: Date = Date()
     ) {
         self.id = id
         self.text = text
         self.isUser = isUser
+        self.isFinished = isFinished
         self.timestamp = timestamp
     }
 }
@@ -34,13 +37,13 @@ final class ChatViewModel: ObservableObject {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, !isProcessing else { return }
 
-        let userMessage = ChatMessage(text: trimmed, isUser: true)
+        let userMessage = ChatMessage(text: trimmed, isUser: true, isFinished: true)
         messages.append(userMessage)
         inputText = ""
         isProcessing = true
 
         let botMessageId = UUID()
-        messages.append(ChatMessage(id: botMessageId, text: "", isUser: false))
+        messages.append(ChatMessage(id: botMessageId, text: "", isUser: false, isFinished: false))
 
         streamTask = Task {
             await streamFromAgent(query: trimmed, botMessageId: botMessageId)
@@ -57,21 +60,23 @@ final class ChatViewModel: ObservableObject {
         do {
             for try await chunk in stream {
                 accumulated += chunk
-                updateBotMessage(id: botMessageId, text: accumulated)
+                updateBotMessage(id: botMessageId, text: accumulated, isFinished: false)
             }
         } catch {
             print("[ChatBot] Stream error: \(error)")
             if accumulated.isEmpty {
                 accumulated = "Error: \(error.localizedDescription)"
             }
-            updateBotMessage(id: botMessageId, text: accumulated)
+        }
+        withAnimation(.easeOut(duration: 0.3)) {
+            updateBotMessage(id: botMessageId, text: accumulated, isFinished: true)
         }
         isProcessing = false
     }
 
-    private func updateBotMessage(id: UUID, text: String) {
+    private func updateBotMessage(id: UUID, text: String, isFinished: Bool) {
         guard let index = messages.firstIndex(where: { $0.id == id }) else { return }
-        messages[index] = ChatMessage(id: id, text: text, isUser: false)
+        messages[index] = ChatMessage(id: id, text: text, isUser: false, isFinished: isFinished)
     }
 
     func resetSession() {
@@ -148,21 +153,79 @@ struct ChatBubbleRow: View {
                 )
                 .shadow(color: Color.black.opacity(0.2), radius: 6, x: 0, y: 2)
             } else {
-                Text(LocalizedStringKey(message.text))
-                    .font(.system(size: 14.5, weight: .regular))
-                    .foregroundStyle(Color.white.opacity(0.92))
-                    .lineSpacing(4)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 14)
-                    .background(
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .fill(Color.AICardBg)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .stroke(Color.white.opacity(0.12), lineWidth: 1)
-                    )
-                    .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 2)
+                VStack(alignment: .leading, spacing: 10) {
+                    // Message Content
+                    Text(LocalizedStringKey(message.text))
+                        .font(.system(size: 14.5, weight: .regular))
+                        .foregroundStyle(Color.white.opacity(0.92))
+                        .lineSpacing(4)
+
+                    if message.isFinished {
+                        // Source Indicator
+                        HStack(spacing: 5) {
+                            Text("Source:")
+                                .font(.system(size: 11.5, weight: .regular))
+                                .foregroundStyle(Color.white.opacity(0.55))
+
+                            HStack(spacing: 4) {
+                                Image(systemName: "chart.line.uptrend.xyaxis")
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .foregroundStyle(Color.PrimaryYellow)
+                                Text("Sectors")
+                                    .font(.system(size: 11.5, weight: .semibold))
+                                    .foregroundStyle(Color.white.opacity(0.9))
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(
+                                Capsule()
+                                    .fill(Color.white.opacity(0.08))
+                            )
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.white.opacity(0.12), lineWidth: 0.5)
+                            )
+                        }
+                        .padding(.top, 2)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+
+                        // AI Disclaimer Banner (Under Source, Yellow with opacity, icon aligned with text start)
+                        HStack(alignment: .top, spacing: 6) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.system(size: 10.5))
+                                .foregroundStyle(Color.PrimaryYellow.opacity(0.9))
+                                .padding(.top, 1.5)
+                            Text("Disclaimer: AI-generated content. For informational purposes only. Not financial or investment advice.")
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundStyle(Color.PrimaryYellow.opacity(0.85))
+                                .lineSpacing(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 7)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(
+                            RoundedRectangle(cornerRadius: 9, style: .continuous)
+                                .fill(Color.PrimaryYellow.opacity(0.10))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 9, style: .continuous)
+                                .stroke(Color.PrimaryYellow.opacity(0.25), lineWidth: 0.8)
+                        )
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 14)
+                .background(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(Color.AICardBg)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                )
+                .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 2)
             }
         }
     }
@@ -185,6 +248,10 @@ struct ChatbotView: View {
             ZStack {
                 Color.DarkPurpleAppBackground
                     .ignoresSafeArea()
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        isInputFocused = false
+                    }
 
                 VStack(spacing: 0) {
                     if !isChatting {
@@ -197,14 +264,6 @@ struct ChatbotView: View {
                         suggestionPills
                             .padding(.bottom, 24)
                     } else {
-                        HStack(spacing: 0) {
-                            headerText(isChatting: true)
-                            Spacer(minLength: 0)
-                        }
-                        .padding(.leading, 20)
-                        .padding(.top, 12)
-                        .padding(.bottom, 8)
-
                         messageList
                             .transition(
                                 .asymmetric(
@@ -220,6 +279,11 @@ struct ChatbotView: View {
                 }
                 .animation(.spring(response: 0.85, dampingFraction: 0.88), value: viewModel.messages.isEmpty)
             }
+            .simultaneousGesture(
+                TapGesture().onEnded {
+                    isInputFocused = false
+                }
+            )
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarColorScheme(.dark, for: .navigationBar)
@@ -299,6 +363,14 @@ struct ChatbotView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
+                    HStack(spacing: 0) {
+                        headerText(isChatting: true)
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.leading, 4)
+                    .padding(.top, 8)
+                    .padding(.bottom, 4)
+
                     ForEach(viewModel.messages) { msg in
                         ChatBubbleRow(message: msg)
                             .id(msg.id)
@@ -308,6 +380,7 @@ struct ChatbotView: View {
                 .padding(.top, 4)
                 .padding(.bottom, 16)
             }
+            .scrollDismissesKeyboard(.interactively)
             .onChange(of: viewModel.messages.count) { _, _ in
                 if let last = viewModel.messages.last {
                     withAnimation(.easeOut(duration: 0.3)) {
