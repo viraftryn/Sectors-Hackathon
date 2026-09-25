@@ -20,7 +20,7 @@ struct NotificationView: View {
                         Text(error)
                             .font(.subheadline)
                             .foregroundColor(.white.opacity(0.7))
-                        Button("Coba Lagi") {
+                        Button("Try again") {
                             Task { await viewModel.loadAlerts() }
                         }
                         .font(.subheadline.weight(.semibold))
@@ -35,7 +35,7 @@ struct NotificationView: View {
                         Image(systemName: "bell.slash")
                             .font(.system(size: 36))
                             .foregroundColor(.white.opacity(0.5))
-                        Text("Belum ada notifikasi")
+                        Text("There's no notification yet")
                             .font(.subheadline)
                             .foregroundColor(.white.opacity(0.7))
                     }
@@ -54,7 +54,7 @@ struct NotificationView: View {
                     }
                 }
             }
-            .navigationTitle("Notifikasi")
+            .navigationTitle("Notification")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbarBackground(Color.DarkPurpleAppBackground, for: .navigationBar)

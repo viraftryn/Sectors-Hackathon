@@ -15,7 +15,7 @@ final class AlertViewModel: ObservableObject {
             alerts = result.alerts
             unreadCount = result.unreadCount
         } catch {
-            errorMessage = "Gagal memuat notifikasi."
+            errorMessage = "Failed to load the notifications."
         }
         isLoading = false
     }
