@@ -189,7 +189,7 @@ async def test_sentiment_enriches_existing_price_spike():
     result = await agent._detect_anomalies(state)
     assert len(result["anomalies"]) == 1
     assert result["anomalies"][0]["alert_type"] == "price_spike"
-    assert "berita negatif" in result["anomalies"][0]["message"]
+    assert "negative news" in result["anomalies"][0]["message"]
 
 
 @pytest.mark.asyncio
@@ -239,7 +239,22 @@ async def test_negative_change_detected():
     }
     result = await agent._detect_anomalies(state)
     assert len(result["anomalies"]) == 1
-    assert "turun" in result["anomalies"][0]["message"]
+    assert "down" in result["anomalies"][0]["message"]
+
+
+@pytest.mark.asyncio
+async def test_price_spike_skips_untracked_ticker():
+    """Untracked tickers from /top-companies/ must not produce alerts (FK violation)."""
+    agent = AlertAgent(db=AsyncMock())
+    state: AlertState = {
+        "top_movers": [_make_mover("JECX.JK", "JeCX Corp", 0.10)],
+        "most_traded": [],
+        "news_articles": [],
+        "anomalies": [],
+        "alerts_created": 0,
+    }
+    result = await agent._detect_anomalies(state)
+    assert len(result["anomalies"]) == 0
 
 
 # -- Unit: _fetch_market_data ------------------------------------------------

@@ -93,3 +93,21 @@ async def test_not_found_is_never_masked() -> None:
     await client.get_company_report("BBCA")
     with pytest.raises(SectorsError):
         await client.get_company_report("BBCA")
+
+
+async def test_news_and_filings_are_limited_to_recent_dates() -> None:
+    from datetime import date, timedelta
+
+    seen: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        return httpx.Response(200, json={"results": []})
+
+    client = SectorsClient(transport=httpx.MockTransport(handler))
+    await client.get_news("BBCA")
+    await client.get_news_filings("BBCA")
+
+    news_start, filings_start = (date.fromisoformat(r.url.params["start"]) for r in seen)
+    assert news_start == date.today() - timedelta(days=30)
+    assert filings_start == date.today() - timedelta(days=90)

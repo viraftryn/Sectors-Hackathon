@@ -118,13 +118,13 @@ class AlertAgent:
         for mover in state["top_movers"]:
             symbol = mover.get("symbol", "")
             ticker = bare_symbol(symbol)
-            if not ticker or ticker in seen_tickers:
+            if not ticker or ticker in seen_tickers or ticker not in settings.tracked_tickers:
                 continue
 
             change = abs(mover.get("price_change", 0.0))
             price = mover.get("last_close_price", 0)
             name = mover.get("name", ticker)
-            direction = "naik" if mover.get("price_change", 0) > 0 else "turun"
+            direction = "up" if mover.get("price_change", 0) > 0 else "down"
 
             if change >= PRICE_CHANGE_HIGH:
                 severity = "high"
@@ -139,7 +139,7 @@ class AlertAgent:
                     "ticker": ticker,
                     "alert_type": "price_spike",
                     "severity": severity,
-                    "message": (f"{name} ({ticker}) {direction} {change:.1%} ke Rp {price:,.0f}."),
+                    "message": (f"{name} ({ticker}) {direction} {change:.1%} to Rp {price:,.0f}."),
                 }
             )
 
@@ -158,8 +158,8 @@ class AlertAgent:
                     "alert_type": "volume_surge",
                     "severity": "medium",
                     "message": (
-                        f"{name} ({ticker}) masuk daftar most-traded "
-                        f"dengan volume {volume:,.0f} lot di Rp {price:,.0f}."
+                        f"{name} ({ticker}) appeared in most-traded list "
+                        f"with volume {volume:,.0f} lots at Rp {price:,.0f}."
                     ),
                 }
             )
@@ -178,7 +178,7 @@ class AlertAgent:
             if ticker in seen_tickers:
                 for a in anomalies:
                     if a["ticker"] == ticker:
-                        a["message"] += f" Didukung {len(articles)} berita negatif."
+                        a["message"] += f" Supported by {len(articles)} negative news article(s)."
                         break
                 continue
 
@@ -190,8 +190,8 @@ class AlertAgent:
                     "alert_type": "sentiment_shift",
                     "severity": severity,
                     "message": (
-                        f"{ticker}: {len(articles)} berita negatif terdeteksi. "
-                        f'Contoh: "{titles[0]}"'
+                        f"{ticker}: {len(articles)} negative news article(s) detected. "
+                        f'Example: "{titles[0]}"'
                     ),
                 }
             )
