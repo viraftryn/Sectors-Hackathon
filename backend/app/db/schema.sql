@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS stocks (
     name VARCHAR(200) NOT NULL,
     sector VARCHAR(100),
     subsector VARCHAR(100),
-    updated_at TIMESTAMP DEFAULT NOW()
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- AI-generated stock scores and recommendations
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS scores (
     overall_score FLOAT,
     recommendation VARCHAR(10),
     reasoning TEXT,
-    scored_at TIMESTAMP DEFAULT NOW()
+    scored_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Conversation logs for the chatbot
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS chat_history (
     session_id UUID NOT NULL,
     role VARCHAR(20) NOT NULL,
     content TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- User & Device installations (Unique ID per app install)
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS portfolio (
     ticker VARCHAR(10) NOT NULL REFERENCES stocks(ticker),
     shares INTEGER NOT NULL,
     buy_price FLOAT NOT NULL,
-    added_at TIMESTAMP DEFAULT NOW()
+    added_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Agent-generated notifications
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS alerts (
     severity VARCHAR(10) NOT NULL DEFAULT 'medium',
     message TEXT NOT NULL,
     is_read BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Cached Sectors API responses (credit-saving) — Owner: Person A (Vira)
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS sectors_cache (
     cache_key VARCHAR(200) PRIMARY KEY,
     data JSONB NOT NULL,
     ttl INTEGER NOT NULL,
-    cached_at TIMESTAMP DEFAULT NOW()
+    cached_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Indexes

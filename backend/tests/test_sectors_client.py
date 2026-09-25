@@ -4,6 +4,11 @@ import pytest
 from app.clients.sectors import SectorsClient, SectorsError, bare_symbol, screener_where
 
 
+@pytest.fixture(autouse=True)
+def _clear_last_good() -> None:
+    SectorsClient._last_good.clear()
+
+
 def test_bare_symbol() -> None:
     assert bare_symbol("bbca.jk") == "BBCA"
     assert bare_symbol("TLKM") == "TLKM"
@@ -61,3 +66,48 @@ async def test_real_client_raises_on_error() -> None:
     with pytest.raises(SectorsError) as exc:
         await client.get_most_traded()
     assert exc.value.status_code == 410
+
+
+async def test_serves_last_good_response_when_api_fails() -> None:
+    responses = iter([httpx.Response(200, json=[{"close": 1}]), httpx.Response(503)])
+    client = SectorsClient(transport=httpx.MockTransport(lambda r: next(responses)))
+
+    first = await client.get_daily_prices("BBCA")
+    second = await client.get_daily_prices("BBCA")
+
+    assert first == second == [{"close": 1}]
+
+
+async def test_network_error_without_history_raises_503() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        raise httpx.ConnectError("offline")
+
+    with pytest.raises(SectorsError) as exc:
+        await SectorsClient(transport=httpx.MockTransport(handler)).get_ihsg()
+    assert exc.value.status_code == 503
+
+
+async def test_not_found_is_never_masked() -> None:
+    responses = iter([httpx.Response(200, json={}), httpx.Response(404)])
+    client = SectorsClient(transport=httpx.MockTransport(lambda r: next(responses)))
+    await client.get_company_report("BBCA")
+    with pytest.raises(SectorsError):
+        await client.get_company_report("BBCA")
+
+
+async def test_news_and_filings_are_limited_to_recent_dates() -> None:
+    from datetime import date, timedelta
+
+    seen: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        return httpx.Response(200, json={"results": []})
+
+    client = SectorsClient(transport=httpx.MockTransport(handler))
+    await client.get_news("BBCA")
+    await client.get_news_filings("BBCA")
+
+    news_start, filings_start = (date.fromisoformat(r.url.params["start"]) for r in seen)
+    assert news_start == date.today() - timedelta(days=30)
+    assert filings_start == date.today() - timedelta(days=90)

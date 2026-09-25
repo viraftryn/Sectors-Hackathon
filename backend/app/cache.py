@@ -3,10 +3,9 @@
 Lookup order: L1 -> L2 -> Sectors API. Each cache hit avoids spending an API credit,
 which is the whole point on a 1,000-credit budget (see implementation plan Section 5).
 
-Timestamps are handled as naive UTC on the Python side and stored in the TIMESTAMP
-(without time zone) column, so TTL math is correct regardless of the DB server's
-time zone (Supabase runs UTC). We never rely on the DB's NOW(), which keeps the SQL
-portable enough to unit-test against SQLite.
+Timestamps are handled as timezone-aware UTC datetimes, compatible with both
+TIMESTAMP and TIMESTAMPTZ columns (Supabase uses TIMESTAMPTZ). We never rely
+on the DB's NOW(), which keeps the SQL portable enough to unit-test against SQLite.
 """
 
 from __future__ import annotations
@@ -21,19 +20,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 def _utcnow() -> datetime:
-    """Naive UTC 'now' — matches the TIMESTAMP (without tz) column and epoch math."""
-    return datetime.now(UTC).replace(tzinfo=None)
+    """Aware UTC 'now' — works with both TIMESTAMP and TIMESTAMPTZ columns."""
+    return datetime.now(UTC)
 
 
 def _coerce_dt(value: datetime | str) -> datetime:
-    """Normalize a cached_at value to a naive UTC datetime.
+    """Normalize a cached_at value to a UTC-aware datetime.
 
     Postgres/asyncpg returns a datetime; SQLite returns an ISO string. Handle both.
+    Naive datetimes are assumed UTC.
     """
     if isinstance(value, datetime):
-        return value.replace(tzinfo=None) if value.tzinfo else value
+        return value.astimezone(UTC) if value.tzinfo else value.replace(tzinfo=UTC)
     parsed = datetime.fromisoformat(value)
-    return parsed.replace(tzinfo=None) if parsed.tzinfo else parsed
+    return parsed.astimezone(UTC) if parsed.tzinfo else parsed.replace(tzinfo=UTC)
 
 
 class _CacheMetrics:
@@ -133,16 +133,21 @@ _memory = _MemoryStore()
 _metrics = _CacheMetrics()
 
 
-async def cache_get(key: str, db: AsyncSession) -> Any | None:
+async def cache_get(key: str, db: AsyncSession | None) -> Any | None:
     """Look up key in L1, then L2. Returns None on miss.
 
     Note: values are stored via ``cache_set``, which is never called with ``None``,
     so ``None`` unambiguously means "not cached".
+    When *db* is ``None`` L2 is skipped (L1-only mode).
     """
     hit = _memory.get(key)
     if hit is not None:
         _metrics.record_l1_hit()
         return hit
+
+    if db is None:
+        _metrics.record_miss()
+        return None
 
     row = (
         await db.execute(
@@ -178,9 +183,13 @@ async def cache_get(key: str, db: AsyncSession) -> Any | None:
     return data
 
 
-async def cache_set(key: str, data: Any, ttl: int, db: AsyncSession) -> None:
-    """Write to both L1 and L2."""
+async def cache_set(key: str, data: Any, ttl: int, db: AsyncSession | None) -> None:
+    """Write to both L1 and L2.  When *db* is ``None`` only L1 is written."""
     _memory.set(key, data, ttl)
+
+    if db is None:
+        _metrics.record_set()
+        return
 
     data_json = json.dumps(data)
     await db.execute(

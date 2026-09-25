@@ -12,9 +12,15 @@ struct PortfolioView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \HoldingLot.buyDate, order: .reverse) private var holdingLots: [HoldingLot]
 
-    // Stock items loaded from JSON to get real-time / latest closing prices
+    @State private var liveStocks: [StockItem] = []
+    @State private var isRefreshing: Bool = false
+
+    // Stock items loaded from Backend API or fallback to bundled JSON
     private var allStockItems: [StockItem] {
-        SectorsStocksLoader.loadStockItems()
+        if !liveStocks.isEmpty {
+            return liveStocks
+        }
+        return SectorsStocksLoader.loadStockItems()
     }
 
     private struct StockPosition: Identifiable {
@@ -94,19 +100,26 @@ struct PortfolioView: View {
                 Color.DarkPurpleAppBackground
                     .ignoresSafeArea()
 
-                if positions.isEmpty {
-                    emptyStateView
-                } else {
-                    ScrollView {
-                        VStack(spacing: 16) {
-                            summaryCard
+                ScrollView {
+                    VStack(spacing: 16) {
+                        summaryCard
+
+                        if positions.isEmpty {
+                            emptyHoldingsView
+                        } else {
                             positionsList
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.top, 12)
-                        .padding(.bottom, 32)
                     }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+                    .padding(.bottom, 32)
                 }
+                .refreshable {
+                    await loadPortfolioData()
+                }
+            }
+            .task {
+                await loadPortfolioData()
             }
             .navigationTitle("Portfolio")
             .navigationBarTitleDisplayMode(.inline)
@@ -234,23 +247,74 @@ struct PortfolioView: View {
     }
 
     // MARK: - Empty State
-    private var emptyStateView: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "chart.pie")
-                .font(.system(size: 54))
-                .foregroundStyle(Color.PrimaryYellow.opacity(0.8))
+    private var emptyHoldingsView: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "briefcase")
+                .font(.system(size: 38))
+                .foregroundStyle(Color.PrimaryYellow.opacity(0.85))
+                .padding(.top, 8)
 
             Text("No Stock Holdings Yet")
-                .font(.title3.bold())
+                .font(.headline.bold())
                 .foregroundStyle(Color.white)
 
             Text("Select any stock from the Home tab and add your purchase lots to start tracking your portfolio.")
                 .font(.subheadline)
                 .foregroundStyle(Color.white.opacity(0.6))
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 8)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 24)
+        .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 16))
+        .padding(.top, 4)
+    }
+
+    private func loadPortfolioData() async {
+        isRefreshing = true
+        defer { isRefreshing = false }
+
+        // 1. Fetch live stock prices from FastAPI Backend
+        do {
+            let backendSummaries = try await APIClient.shared.fetchStocks()
+            let mapped = backendSummaries.map { $0.toStockItem() }
+            if !mapped.isEmpty {
+                self.liveStocks = mapped
+            }
+        } catch {
+            // Fallback to bundled data if needed
+        }
+
+        // 2. If local holding lots are empty, restore from backend portfolio lots for this device
+        if holdingLots.isEmpty {
+            do {
+                let remoteLots = try await APIClient.shared.fetchHoldingLots()
+                if !remoteLots.isEmpty {
+                    let isoFormatter = ISO8601DateFormatter()
+                    for r in remoteLots {
+                        let uuid = UUID(uuidString: r.id) ?? UUID()
+                        let buyDate = isoFormatter.date(from: r.buyDate) ?? Date()
+                        let restored = HoldingLot(
+                            id: uuid,
+                            ticker: r.ticker,
+                            symbol: r.ticker.components(separatedBy: ".").first ?? r.ticker,
+                            stockName: r.stockName ?? r.ticker,
+                            market: "IDX",
+                            currency: "IDR",
+                            buyDate: buyDate,
+                            pricePerShare: r.pricePerShare,
+                            totalInvested: r.totalInvested,
+                            shares: r.shares
+                        )
+                        modelContext.insert(restored)
+                    }
+                    try? modelContext.save()
+                }
+            } catch {
+                // Ignore network error on lot sync
+            }
+        }
     }
 
     private func formatShares(_ val: Double) -> String {

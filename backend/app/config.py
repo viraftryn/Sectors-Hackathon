@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     sectors_api_key: str = ""
     openai_api_key: str = ""
     gemini_api_key: str = ""
+    gemini_model: str = "gemini-3.5-flash-lite"
     database_url: str = "postgresql+asyncpg://postgres:password@localhost:5432/invelio"
     supabase_url: str = ""
     supabase_key: str = ""
@@ -13,6 +14,7 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["*"]
 
     sectors_base_url: str = "https://api.sectors.app/v2"
+    scoring_min_interval_seconds: int = 3600
     tracked_tickers: list[str] = [
         "BBCA",
         "BBRI",
@@ -25,6 +27,13 @@ class Settings(BaseSettings):
         "AMRT",
         "ANTM",
     ]
+
+    chatbot_model: str = "gemini-3.5-flash-lite"
+    chatbot_provider: str = "gemini"
+    sectors_mcp_url: str = "https://sectors-mcp.supertype.ai/mcp"
+
+    # MCP vs REST toggle: True = live Sectors MCP (demo), False = REST + cache (development).
+    use_mcp: bool = False
 
     # Zero-credit development mode: serve saved fixtures instead of calling the Sectors API.
     # Defaults ON so we never burn credits by accident (plan Section 5.4). Set to false for
