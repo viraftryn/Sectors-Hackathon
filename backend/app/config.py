@@ -40,6 +40,11 @@ class Settings(BaseSettings):
     # integration testing and demo day.
     use_mock_data: bool = True
 
+    # Alert scheduler
+    alert_scan_interval_minutes: int = 30
+    alert_scan_market_open_hour: int = 9   # WIB (UTC+7)
+    alert_scan_market_close_hour: int = 16  # 16 WIB = covers post-close settlement
+
     # Cache TTLs (seconds) — matches implementation plan Section 5.2
     cache_ttl_prices: int = 300  # 5 min — /daily, /most-traded, /top-companies
     cache_ttl_market_index: int = 600  # 10 min — /idx-total

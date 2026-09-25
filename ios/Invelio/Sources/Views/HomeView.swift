@@ -915,7 +915,7 @@ struct HomeView: View {
     @State private var isLoading: Bool = true
     @State private var loadErrorMessage: String? = nil
     @State private var showNotifications: Bool = false
-    @State private var unreadAlertsCount: Int = 0
+    @StateObject private var alertViewModel = AlertViewModel()
 
     private var displayedStocks: [StockItem] {
         liveStocks
@@ -992,18 +992,18 @@ struct HomeView: View {
             .safeAreaInset(edge: .top) { topBar }
             .task {
                 await loadStocksFromPostgres()
-                await loadAlertsCount()
+                await alertViewModel.loadAlerts()
             }
             .refreshable {
                 await loadStocksFromPostgres()
-                await loadAlertsCount()
+                await alertViewModel.loadAlerts()
             }
-            .navigationDestination(isPresented: $showNotifications) {
+            .fullScreenCover(isPresented: $showNotifications) {
                 NotificationView()
             }
             .onChange(of: showNotifications) {
                 if !showNotifications {
-                    Task { await loadAlertsCount() }
+                    Task { await alertViewModel.loadAlerts() }
                 }
             }
         }
@@ -1041,17 +1041,6 @@ struct HomeView: View {
                 self.loadErrorMessage = "Belum dapat memuat data saham dari PostgreSQL."
             }
             self.isLoading = false
-        }
-    }
-
-    private func loadAlertsCount() async {
-        do {
-            let res = try await APIClient.shared.fetchAlerts(unreadOnly: true)
-            await MainActor.run {
-                self.unreadAlertsCount = res.unreadCount
-            }
-        } catch {
-            // Silently fallback if offline
         }
     }
 
@@ -1134,7 +1123,7 @@ struct HomeView: View {
                     .foregroundColor(.white)
             }
             Spacer()
-            NotificationButton(unreadCount: unreadAlertsCount) {
+            NotificationButton(unreadCount: alertViewModel.unreadCount) {
                 showNotifications = true
             }
         }
