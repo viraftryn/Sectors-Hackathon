@@ -21,7 +21,7 @@ remove Sectors and the scoring, the chatbot and the alerts all stop working.
 │  agents (LangGraph):                                         │
 │    Scoring   fetch_market_data → compute_scores → llm_reasoning │
 │    Chatbot   classify_question → retrieve_context → generate  │
-│    Alert     (in progress)                                   │
+│    Alert     fetch_market_data → detect_anomalies → generate  │
 │                                                              │
 │  CachedSectorsClient ──► cache: memory (L1) → PostgreSQL (L2) │
 │         │                                                     │
@@ -58,13 +58,24 @@ SELL ≤ 40) and a generated summary, so the endpoint never fails because of the
 ### Chatbot Agent (`backend/app/agents/chatbot.py`)
 
 `classify_question` labels the question and extracts tickers; `retrieve_context` lets the LLM pick
-from nine Sectors-backed tools (company report, prices, news, insider filings, sector report,
-index, movers, most traded, stock list) over up to three rounds; `generate_response` answers using
-only the retrieved data. Questions about untracked tickers are refused instead of guessed.
+Sectors tools (company report, prices, news, insider filings, sector report, index, movers, most
+traded, stock list) over up to three rounds; `generate_response` answers using only the retrieved
+data. Questions about untracked tickers are refused before any Sectors call.
 
-### Alert Agent
+The tools come from one of two sources, set by `USE_MCP`:
 
-In progress.
+- **Sectors MCP server** (`USE_MCP=true`, used for the demo): the LLM calls the hosted Sectors MCP
+  tools directly. A guard pins company-report sections and top-mover periods and rejects untracked
+  tickers, so a question cannot trigger an expensive call.
+- **REST + cache** (`USE_MCP=false`, development): the same tools wrap `CachedSectorsClient`, so
+  repeated questions cost nothing.
+
+### Alert Agent (`backend/app/agents/alert.py`)
+
+`fetch_market_data` reads top movers, most traded stocks and news; `detect_anomalies` flags tracked
+stocks that moved more than 3% (medium) or 5% (high), entered the most-traded list, or appear in
+news tagged Bearish, Downgrade, Lawsuit and similar; `generate_alerts` writes them to the `alerts`
+table, skipping duplicates from the same day. `POST /api/alerts/scan` runs it.
 
 ## Sectors API and the credit budget
 
@@ -80,7 +91,7 @@ around not spending them.
   tracked tickers in one call (1 credit) instead of one report per ticker (8 credits each).
   Sections and periods are always pinned, since Sectors bills per section and per period.
 - **Throttled scoring.** `POST /api/scoring/run` runs at most once an hour and is serialized, so
-  concurrent triggers cannot pay twice. One cold run costs about 47 credits.
+  concurrent triggers cannot pay twice. One cold run costs about 45 credits.
 - **Degrade, never fail.** If Sectors errors, the client serves the last good response for that
   resource; the market overview drops its secondary panels rather than the whole screen.
 
@@ -96,8 +107,9 @@ See [backend/API_CONTRACT.md](backend/API_CONTRACT.md) for request and response 
 | `GET /api/recommendations` | latest AI scores and reasoning |
 | `POST /api/scoring/run` | run the Scoring Agent (throttled) |
 | `POST /api/chat`, `POST /api/chat/stream` | chatbot, plain JSON or SSE |
-| `GET /api/alerts`, `POST /api/alerts/{id}/read` | alert feed, per device |
-| `GET/POST /api/portfolio/lots`, `DELETE /api/portfolio/lots/{id}`, `GET /api/portfolio` | holdings and P&L, per device |
+| `GET /api/alerts`, `POST/PATCH /api/alerts/{id}/read` | alert feed, per device |
+| `POST /api/alerts/scan` | run the Alert Agent |
+| `GET/POST /api/portfolio/lots` (`/portfolio/buy`), `POST /api/portfolio/sell`, `DELETE /api/portfolio/lots/{id}`, `GET /api/portfolio` | holdings, FIFO sells and P&L, per device |
 | `GET /api/status`, `GET /api/cache/stats` | health, mock mode, credit usage |
 
 Portfolio and alert endpoints identify the user with an `X-Device-Id` header.
@@ -147,7 +159,7 @@ offline; the database is still needed for the cache and for stored scores, portf
 Tests never call Sectors or Gemini:
 
 ```bash
-pytest            # 82 tests
+pytest            # 106 tests
 ruff check app tests && ruff format --check app tests && mypy app --ignore-missing-imports
 ```
 
@@ -158,6 +170,12 @@ python scripts/smoke_real.py stocks     # ~1 credit
 python scripts/smoke_real.py market     # ~6 credits
 python scripts/smoke_real.py scoring    # ~47 credits, writes to the database
 ```
+
+### Deploying
+
+`backend/Dockerfile` builds the API for any container host.
+[backend/DEPLOY_AND_DEMO.md](backend/DEPLOY_AND_DEMO.md) covers environment variables, the Supabase
+connection string, and the steps to run before recording the demo.
 
 ### iOS
 

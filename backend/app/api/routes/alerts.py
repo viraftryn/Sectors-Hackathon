@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.agents.alert import AlertAgent
 from app.cache import _coerce_dt
 from app.db.database import get_db
-from app.models.schemas import Alert, AlertList, utc_iso
+from app.models.schemas import Alert, AlertList
 
 logger = logging.getLogger(__name__)
 
