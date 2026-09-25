@@ -991,11 +991,8 @@ struct HomeView: View {
                     } else {
                         StockListView(items: displayedStocks)
                     }
-
-                    // 5) Search Hint
-                    searchHint
-                        .padding(.top, 8).padding(.bottom, 20)
                 }
+                .padding(.bottom, 24)
             }
             .background(Color.DarkPurpleAppBackground.ignoresSafeArea())
             .preferredColorScheme(.dark)
@@ -1249,23 +1246,6 @@ struct HomeView: View {
         }
         .padding(.horizontal, 16).padding(.vertical, 8)
         .background(Color.DarkPurpleAppBackground)
-    }
-
-    // MARK: - Search Hint
-
-    private var searchHint: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "magnifyingglass").foregroundColor(.PrimaryYellow)
-            Text("Search IDX stocks and more")
-                .font(.caption).foregroundColor(.white.opacity(0.7))
-            Spacer()
-            Image(systemName: "chevron.right")
-                .font(.caption2).foregroundColor(.white.opacity(0.7))
-        }
-        .padding(.horizontal, 16).padding(.vertical, 12)
-        .background(Color(.systemGray6).opacity(0.18))
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-        .padding(.horizontal, 16)
     }
 
     // MARK: - Section Header
