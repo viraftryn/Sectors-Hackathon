@@ -97,12 +97,25 @@ async def add_lot(
     name = (
         await db.execute(text("SELECT name FROM stocks WHERE ticker = :t"), {"t": ticker})
     ).scalar()
+    if not name:
+        name = ticker
+        await db.execute(
+            text("INSERT INTO stocks (ticker, name) VALUES (:t, :n) ON CONFLICT (ticker) DO NOTHING"),
+            {"t": ticker, "n": name},
+        )
+
     lot_id = str(lot.id or uuid.uuid4())
     await db.execute(
         text(
             "INSERT INTO user_holdings (id, device_id, ticker, stock_name, shares, "
             "price_per_share, total_invested, buy_date, created_at, updated_at) "
-            "VALUES (:id, :device, :ticker, :name, :shares, :price, :total, :buy_date, :now, :now)"
+            "VALUES (:id, :device, :ticker, :name, :shares, :price, :total, :buy_date, :now, :now) "
+            "ON CONFLICT (id) DO UPDATE SET "
+            "shares = EXCLUDED.shares, "
+            "price_per_share = EXCLUDED.price_per_share, "
+            "total_invested = EXCLUDED.total_invested, "
+            "buy_date = EXCLUDED.buy_date, "
+            "updated_at = :now"
         ),
         {
             "id": lot_id,
@@ -117,6 +130,7 @@ async def add_lot(
         },
     )
     await db.commit()
+
     return HoldingLot(
         id=lot_id,
         ticker=ticker,

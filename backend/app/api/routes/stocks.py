@@ -1,10 +1,13 @@
 from typing import Any, cast
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_sectors
 from app.clients.cached_sectors import CachedSectorsClient
 from app.clients.sectors import bare_symbol
+from app.db.database import get_db
 from app.models.schemas import (
     Fundamentals,
     PricePoint,
@@ -49,7 +52,9 @@ async def list_stocks(sectors: CachedSectorsClient = Depends(get_sectors)) -> St
 
 @router.get("/stock/{ticker}", response_model=StockDetail)
 async def get_stock(
-    ticker: str, sectors: CachedSectorsClient = Depends(get_sectors)
+    ticker: str,
+    db: AsyncSession = Depends(get_db),
+    sectors: CachedSectorsClient = Depends(get_sectors),
 ) -> StockDetail:
     ticker = bare_symbol(ticker)
     rows = await tracked_rows(sectors)
@@ -57,7 +62,29 @@ async def get_stock(
     if row is None:
         raise HTTPException(status_code=404, detail=f"{ticker} is not tracked")
 
-    daily = cast(list[dict[str, Any]], await sectors.get_daily_prices(ticker))
+    # Priority 1: Check PostgreSQL `stock_daily_prices` table in database
+    db_prices = await db.execute(
+        text(
+            "SELECT date, open, high, low, close, volume FROM stock_daily_prices "
+            "WHERE ticker = :t ORDER BY date ASC"
+        ),
+        {"t": ticker},
+    )
+    db_rows = db_prices.mappings().all()
+    if db_rows:
+        daily = [
+            {
+                "date": str(r["date"]),
+                "open": float(r["open"]) if r["open"] is not None else None,
+                "high": float(r["high"]) if r["high"] is not None else None,
+                "low": float(r["low"]) if r["low"] is not None else None,
+                "close": float(r["close"]),
+                "volume": int(r["volume"]) if r["volume"] is not None else None,
+            }
+            for r in db_rows
+        ]
+    else:
+        daily = cast(list[dict[str, Any]], await sectors.get_daily_prices(ticker))
 
     q = row["query_values"]
     return StockDetail(
