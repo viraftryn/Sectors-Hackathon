@@ -72,12 +72,13 @@ CREATE TABLE IF NOT EXISTS portfolio (
 -- Agent-generated notifications
 CREATE TABLE IF NOT EXISTS alerts (
     id SERIAL PRIMARY KEY,
+    device_id VARCHAR(64) REFERENCES user_installations(device_id) ON DELETE CASCADE,
     ticker VARCHAR(10) NOT NULL REFERENCES stocks(ticker),
-    alert_type VARCHAR(30) NOT NULL,
-    severity VARCHAR(10) NOT NULL DEFAULT 'medium',
+    alert_type VARCHAR(50) NOT NULL,
+    severity VARCHAR(20) NOT NULL DEFAULT 'medium',
     message TEXT NOT NULL,
-    is_read BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Cached Sectors API responses (credit-saving) — Owner: Person A (Vira)
@@ -93,5 +94,5 @@ CREATE INDEX IF NOT EXISTS idx_scores_ticker ON scores(ticker);
 CREATE INDEX IF NOT EXISTS idx_scores_scored_at ON scores(scored_at DESC);
 CREATE INDEX IF NOT EXISTS idx_chat_session ON chat_history(session_id);
 CREATE INDEX IF NOT EXISTS idx_alerts_ticker ON alerts(ticker);
-CREATE INDEX IF NOT EXISTS idx_alerts_unread ON alerts(is_read) WHERE is_read = FALSE;
+CREATE INDEX IF NOT EXISTS idx_alerts_device_unread ON alerts(device_id, is_read) WHERE is_read = FALSE;
 CREATE INDEX IF NOT EXISTS idx_cache_cached_at ON sectors_cache(cached_at);

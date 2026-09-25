@@ -57,8 +57,9 @@ class AlertAgent:
       3. generate_alerts    — persist alert rows to PostgreSQL
     """
 
-    def __init__(self, db: AsyncSession) -> None:
+    def __init__(self, db: AsyncSession, device_id: str | None = None) -> None:
         self._db = db
+        self._device_id = device_id
         self._client = CachedSectorsClient(db)
 
     # -- Node 1: fetch_market_data -------------------------------------------
@@ -205,17 +206,22 @@ class AlertAgent:
         created = 0
         now = datetime.now(UTC)
 
+        device_filter = (
+            "AND device_id = :device_id" if self._device_id else "AND device_id IS NULL"
+        )
+
         for anomaly in state["anomalies"]:
             existing = await self._db.execute(
                 text(
                     "SELECT id FROM alerts "
                     "WHERE ticker = :ticker AND alert_type = :alert_type "
-                    "AND created_at > :since"
+                    f"AND created_at > :since {device_filter}"
                 ),
                 {
                     "ticker": anomaly["ticker"],
                     "alert_type": anomaly["alert_type"],
                     "since": now.replace(hour=0, minute=0, second=0, microsecond=0),
+                    "device_id": self._device_id,
                 },
             )
             if existing.first() is not None:
@@ -226,10 +232,11 @@ class AlertAgent:
 
             await self._db.execute(
                 text(
-                    "INSERT INTO alerts (ticker, alert_type, severity, message, created_at) "
-                    "VALUES (:ticker, :alert_type, :severity, :message, :created_at)"
+                    "INSERT INTO alerts (device_id, ticker, alert_type, severity, message, created_at) "
+                    "VALUES (:device_id, :ticker, :alert_type, :severity, :message, :created_at)"
                 ),
                 {
+                    "device_id": self._device_id,
                     "ticker": anomaly["ticker"],
                     "alert_type": anomaly["alert_type"],
                     "severity": anomaly["severity"],
