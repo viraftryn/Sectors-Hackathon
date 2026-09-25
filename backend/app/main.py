@@ -28,7 +28,6 @@ app.include_router(chat.router, prefix="/api", tags=["chat"])
 app.include_router(scoring.router, prefix="/api", tags=["scoring"])
 app.include_router(alerts.router, prefix="/api", tags=["alerts"])
 app.include_router(portfolio.router, prefix="/api", tags=["portfolio"])
-app.include_router(chat.router, prefix="/api", tags=["chat"])
 
 
 @app.exception_handler(SectorsError)

@@ -88,6 +88,24 @@ CREATE TABLE IF NOT EXISTS sectors_cache (
     cached_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Stock News & Filings Feed
+CREATE TABLE IF NOT EXISTS stock_news (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title TEXT NOT NULL,
+    body TEXT,
+    source_url TEXT,
+    thumbnail_url TEXT,
+    publisher VARCHAR(100),
+    published_at TIMESTAMPTZ NOT NULL,
+    tickers TEXT[] NOT NULL DEFAULT '{}',
+    sector VARCHAR(100),
+    sentiment VARCHAR(20),
+    tags TEXT[] NOT NULL DEFAULT '{}',
+    is_filing BOOLEAN NOT NULL DEFAULT FALSE,
+    raw_payload JSONB,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_scores_ticker ON scores(ticker);
 CREATE INDEX IF NOT EXISTS idx_scores_scored_at ON scores(scored_at DESC);
@@ -95,3 +113,7 @@ CREATE INDEX IF NOT EXISTS idx_chat_session ON chat_history(session_id);
 CREATE INDEX IF NOT EXISTS idx_alerts_ticker ON alerts(ticker);
 CREATE INDEX IF NOT EXISTS idx_alerts_unread ON alerts(is_read) WHERE is_read = FALSE;
 CREATE INDEX IF NOT EXISTS idx_cache_cached_at ON sectors_cache(cached_at);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_stock_news_source_title ON stock_news (COALESCE(source_url, ''), title);
+CREATE INDEX IF NOT EXISTS idx_stock_news_published ON stock_news (published_at DESC);
+CREATE INDEX IF NOT EXISTS idx_stock_news_tickers ON stock_news USING GIN (tickers);
+

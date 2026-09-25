@@ -260,16 +260,67 @@ public enum StockFormatters {
 
     public static func formatScrubDate(_ date: Date) -> String {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US")
-        let calendar = Calendar.current
-        let hour = calendar.component(.hour, from: date)
-        let min = calendar.component(.minute, from: date)
-        if hour == 0 && min == 0 {
-            f.dateFormat = "d MMM yyyy"
-        } else {
-            f.dateFormat = "d MMM yyyy, HH:mm"
-        }
+        f.locale = Locale(identifier: "id_ID")
+        f.timeZone = IDXCalendar.timeZone
+        f.dateFormat = "E, d MMM yyyy"
         return f.string(from: date)
+    }
+}
+
+// MARK: - IDX Bursa Efek Indonesia Trading Calendar Helper
+public enum IDXCalendar {
+    public static var timeZone: TimeZone {
+        TimeZone(identifier: "Asia/Jakarta") ?? .current
+    }
+
+    public static var calendar: Calendar {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = timeZone
+        return cal
+    }
+
+    /// Cek apakah suatu tanggal adalah hari bursa aktif (Senin-Jumat, bukan hari libur bursa nasional)
+    public static func isTradingDay(_ date: Date) -> Bool {
+        let cal = calendar
+        let weekday = cal.component(.weekday, from: date)
+        // 1 = Minggu, 7 = Sabtu
+        if weekday == 1 || weekday == 7 { return false }
+
+        // Hari libur nasional tetap bursa Indonesia (BEI)
+        let month = cal.component(.month, from: date)
+        let day = cal.component(.day, from: date)
+        if month == 1 && day == 1 { return false }   // Tahun Baru
+        if month == 5 && day == 1 { return false }   // Hari Buruh
+        if month == 6 && day == 1 { return false }   // Hari Lahir Pancasila
+        if month == 8 && day == 17 { return false }  // HUT RI
+        if month == 12 && day == 25 { return false } // Hari Raya Natal
+
+        return true
+    }
+
+    /// Menghasilkan N hari perdagangan terakhir bursa (hanya hari Senin - Jumat / non-libur)
+    public static func previousTradingDays(count: Int, from referenceDate: Date = Date()) -> [Date] {
+        let cal = calendar
+        var comps = cal.dateComponents([.year, .month, .day], from: referenceDate)
+        comps.hour = 16
+        comps.minute = 0
+        comps.second = 0
+        var cursor = cal.date(from: comps) ?? referenceDate
+
+        // Jika hari referensi adalah libur/weekend, mundur ke hari bursa aktif sebelumnya
+        while !isTradingDay(cursor) {
+            cursor = cal.date(byAdding: .day, value: -1, to: cursor) ?? cursor
+        }
+
+        var result: [Date] = []
+        var d = cursor
+        while result.count < count {
+            if isTradingDay(d) {
+                result.append(d)
+            }
+            d = cal.date(byAdding: .day, value: -1, to: d) ?? d
+        }
+        return result.reversed()
     }
 }
 
@@ -352,36 +403,36 @@ public final class StockDetailViewModel: ObservableObject {
     }
 
     private func filterPoints(_ points: [StockHistoryPoint], for range: StockTimeRange) -> [StockHistoryPoint] {
+        let tradingPoints = points.filter { IDXCalendar.isTradingDay($0.date) }
         switch range {
         case .oneWeek:
-            return Array(points.suffix(5))
+            return Array(tradingPoints.suffix(5))
         case .oneMonth:
-            return Array(points.suffix(22))
+            return Array(tradingPoints.suffix(22))
         case .threeMonth:
-            return points
+            return tradingPoints
         }
     }
 
     private func generateMockPoints(for range: StockTimeRange) -> [StockHistoryPoint] {
-        let (count, interval): (Int, TimeInterval) = {
+        let count: Int = {
             switch range {
-            case .oneWeek:    return (5, 24 * 3600)
-            case .oneMonth:   return (22, 24 * 3600)
-            case .threeMonth: return (66, 24 * 3600)
+            case .oneWeek:    return 5
+            case .oneMonth:   return 22
+            case .threeMonth: return 66
             }
         }()
 
-        let now = Date()
+        let dates = IDXCalendar.previousTradingDays(count: count)
         var points: [StockHistoryPoint] = []
         var current = quote.previousClose > 0 ? quote.previousClose : quote.price * 0.98
         let step = max(quote.price * 0.006, 0.05)
 
-        for i in 0..<count {
-            let d = now.addingTimeInterval(-Double(count - 1 - i) * interval)
+        for (i, d) in dates.enumerated() {
             let delta = Double([-2, -1, 0, 1, 2].randomElement() ?? 0) * step
             current = max(quote.price * 0.5, current + delta)
 
-            if i == count - 1 {
+            if i == dates.count - 1 {
                 current = quote.price
             }
 
@@ -1496,11 +1547,6 @@ public struct StockDetailView: View {
         return f.string(from: date)
     }
 
-    private func formatScrubDate(_ date: Date) -> String {
-        let f = DateFormatter()
-        f.dateFormat = "d MMM, HH:mm"
-        return f.string(from: date)
-    }
 
     private func formatNumber(_ val: Double) -> String {
         guard val > 0 else { return "" }
