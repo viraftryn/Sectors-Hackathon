@@ -26,7 +26,7 @@ SCREENER_FIELDS = (
 )
 SUBSECTOR_SECTIONS = ("statistics", "market_cap")
 REPORT_SECTIONS = ("overview", "valuation")
-HISTORY_DAYS = 90
+HISTORY_DAYS = 365
 NEWS_DAYS = 30
 FILINGS_DAYS = 90
 LIST_LIMIT = 30
