@@ -143,13 +143,11 @@ public struct PurchaseFormEntry: Identifiable, Equatable {
     }
 
     public var price: Double {
-        let clean = priceInput.replacingOccurrences(of: ",", with: ".").trimmingCharacters(in: .whitespaces)
-        return Double(clean) ?? 0.0
+        StockFormatters.parseCurrencyInput(priceInput)
     }
 
     public var total: Double {
-        let clean = totalInput.replacingOccurrences(of: ",", with: ".").trimmingCharacters(in: .whitespaces)
-        return Double(clean) ?? 0.0
+        StockFormatters.parseCurrencyInput(totalInput)
     }
 
     public var shares: Double {
@@ -174,6 +172,61 @@ public struct PurchaseFormEntry: Identifiable, Equatable {
 // MARK: - ==========================================
 
 public enum StockFormatters {
+    public static func parseCurrencyInput(_ input: String) -> Double {
+        var s = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        s = s.replacingOccurrences(of: "Rp", with: "", options: .caseInsensitive)
+        s = s.replacingOccurrences(of: "IDR", with: "", options: .caseInsensitive)
+        s = s.replacingOccurrences(of: " ", with: "")
+        guard !s.isEmpty else { return 0.0 }
+
+        if s.contains(".") && s.contains(",") {
+            if let dotIdx = s.lastIndex(of: "."), let commaIdx = s.lastIndex(of: ",") {
+                if dotIdx > commaIdx {
+                    s = s.replacingOccurrences(of: ",", with: "")
+                } else {
+                    s = s.replacingOccurrences(of: ".", with: "")
+                    s = s.replacingOccurrences(of: ",", with: ".")
+                }
+            }
+            return Double(s) ?? 0.0
+        }
+
+        if s.contains(".") {
+            let components = s.split(separator: ".")
+            if components.count > 2 {
+                s = s.replacingOccurrences(of: ".", with: "")
+                return Double(s) ?? 0.0
+            } else if components.count == 2 {
+                let last = components[1]
+                if last.count == 3 {
+                    s = s.replacingOccurrences(of: ".", with: "")
+                    return Double(s) ?? 0.0
+                } else {
+                    return Double(s) ?? 0.0
+                }
+            }
+        }
+
+        if s.contains(",") {
+            let components = s.split(separator: ",")
+            if components.count > 2 {
+                s = s.replacingOccurrences(of: ",", with: "")
+                return Double(s) ?? 0.0
+            } else if components.count == 2 {
+                let last = components[1]
+                if last.count == 3 {
+                    s = s.replacingOccurrences(of: ",", with: "")
+                    return Double(s) ?? 0.0
+                } else {
+                    s = s.replacingOccurrences(of: ",", with: ".")
+                    return Double(s) ?? 0.0
+                }
+            }
+        }
+
+        return Double(s) ?? 0.0
+    }
+
     public static func currencyPrefix(for currency: String = "IDR") -> String {
         return "Rp "
     }
@@ -1017,7 +1070,12 @@ public struct StockDetailView: View {
                 let deletedId = lot.id
                 modelContext.delete(lot)
                 Task {
-                    try? await APIClient.shared.deleteLot(id: deletedId)
+                    do {
+                        try await APIClient.shared.deleteLot(id: deletedId)
+                        print("🗑️ Lot \(deletedId) successfully deleted from PostgreSQL/Supabase")
+                    } catch {
+                        print("⚠️ Note: Lot deleted locally. Server delete error: \(error.localizedDescription)")
+                    }
                 }
             }
         }
@@ -1050,19 +1108,26 @@ public struct StockDetailView: View {
             let price = entry.price
             let total = entry.total
             let date = entry.date
-
+            let lotId = entry.id
             Task {
-                _ = try? await APIClient.shared.buyStock(
-                    ticker: ticker,
-                    pricePerShare: price,
-                    shares: shares,
-                    totalInvested: total,
-                    buyDate: date
-                )
+                do {
+                    let res = try await APIClient.shared.buyStock(
+                        id: lotId,
+                        ticker: ticker,
+                        pricePerShare: price,
+                        shares: shares,
+                        totalInvested: total,
+                        buyDate: date
+                    )
+                    print("✅ Holding synced to PostgreSQL/Supabase: \(res.id) - \(res.ticker)")
+                } catch {
+                    print("⚠️ Note: Holding saved locally to SwiftData. Server sync: \(error.localizedDescription)")
+                }
             }
         }
         try? modelContext.save()
     }
+
 
     // MARK: - Header
     private var headerSection: some View {
@@ -1317,7 +1382,12 @@ public struct StockDetailView: View {
                                             modelContext.delete(existing)
                                             try? modelContext.save()
                                             Task {
-                                                try? await APIClient.shared.deleteLot(id: idToDelete)
+                                                do {
+                                                    try await APIClient.shared.deleteLot(id: idToDelete)
+                                                    print("🗑️ Lot \(idToDelete) successfully deleted from PostgreSQL/Supabase")
+                                                } catch {
+                                                    print("⚠️ Note: Lot deleted locally. Server delete error: \(error.localizedDescription)")
+                                                }
                                             }
                                         }
                                         if purchaseEntries.isEmpty {

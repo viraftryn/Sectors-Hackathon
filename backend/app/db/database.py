@@ -26,8 +26,14 @@ def get_engine() -> AsyncEngine:
     """Return the process-wide async engine, creating it on first call."""
     global _engine
     if _engine is None:
+        url = settings.database_url
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif url.startswith("postgresql://") and not url.startswith("postgresql+"):
+            url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
         _engine = create_async_engine(
-            settings.database_url,
+            url,
             echo=settings.environment == "development",
         )
     return _engine

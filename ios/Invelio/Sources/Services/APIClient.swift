@@ -5,7 +5,11 @@ actor APIClient {
     static let shared = APIClient()
 
     #if DEBUG
+    #if targetEnvironment(simulator)
     private let baseURL = URL(string: "http://10.67.50.36:8000/api")!
+    #else
+    private let baseURL = URL(string: "http://10.67.50.36:8000/api")!
+    #endif
     #else
     private let baseURL = URL(string: "https://your-production-url.com/api")!
     #endif
@@ -29,8 +33,23 @@ actor APIClient {
 
     // MARK: - Generic HTTP Methods
 
+    private func buildURL(for path: String) -> URL {
+        if path.contains("?") {
+            let parts = path.split(separator: "?", maxSplits: 1, omittingEmptySubsequences: false)
+            let basePath = String(parts[0])
+            let queryString = String(parts[1])
+            if var components = URLComponents(url: baseURL.appendingPathComponent(basePath), resolvingAgainstBaseURL: true) {
+                components.query = queryString
+                if let url = components.url {
+                    return url
+                }
+            }
+        }
+        return baseURL.appendingPathComponent(path)
+    }
+
     func get<T: Decodable>(_ path: String) async throws -> T {
-        let url = baseURL.appendingPathComponent(path)
+        let url = buildURL(for: path)
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue(deviceId, forHTTPHeaderField: "X-Device-Id")
@@ -39,7 +58,10 @@ actor APIClient {
 
         guard let httpResponse = response as? HTTPURLResponse,
               (200...299).contains(httpResponse.statusCode) else {
-            throw APIError.requestFailed
+            let errorBody = String(data: data, encoding: .utf8) ?? ""
+            let code = (response as? HTTPURLResponse)?.statusCode ?? 0
+            print("❌ [APIClient] GET \(path) failed (HTTP \(code)): \(errorBody)")
+            throw APIError.serverError(statusCode: code, detail: errorBody)
         }
 
         return try JSONDecoder().decode(T.self, from: data)
@@ -57,7 +79,10 @@ actor APIClient {
 
         guard let httpResponse = response as? HTTPURLResponse,
               (200...299).contains(httpResponse.statusCode) else {
-            throw APIError.requestFailed
+            let errorBody = String(data: data, encoding: .utf8) ?? ""
+            let code = (response as? HTTPURLResponse)?.statusCode ?? 0
+            print("❌ [APIClient] POST \(path) failed (HTTP \(code)): \(errorBody)")
+            throw APIError.serverError(statusCode: code, detail: errorBody)
         }
 
         return try JSONDecoder().decode(T.self, from: data)
@@ -69,11 +94,14 @@ actor APIClient {
         request.httpMethod = "PATCH"
         request.setValue(deviceId, forHTTPHeaderField: "X-Device-Id")
 
-        let (_, response) = try await session.data(for: request)
+        let (data, response) = try await session.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse,
               (200...299).contains(httpResponse.statusCode) else {
-            throw APIError.requestFailed
+            let errorBody = String(data: data, encoding: .utf8) ?? ""
+            let code = (response as? HTTPURLResponse)?.statusCode ?? 0
+            print("❌ [APIClient] PATCH \(path) failed (HTTP \(code)): \(errorBody)")
+            throw APIError.serverError(statusCode: code, detail: errorBody)
         }
     }
 
@@ -109,6 +137,7 @@ actor APIClient {
     }
 
     func buyStock(
+        id: UUID? = nil,
         ticker: String,
         pricePerShare: Double,
         shares: Double? = nil,
@@ -124,6 +153,7 @@ actor APIClient {
         }
 
         let payload = BackendHoldingLotIn(
+            id: id?.uuidString.lowercased(),
             ticker: ticker.components(separatedBy: ".").first?.uppercased() ?? ticker.uppercased(),
             pricePerShare: pricePerShare,
             shares: shares,
@@ -152,10 +182,13 @@ actor APIClient {
         request.httpMethod = "DELETE"
         request.setValue(deviceId, forHTTPHeaderField: "X-Device-Id")
 
-        let (_, response) = try await session.data(for: request)
+        let (data, response) = try await session.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse,
               (200...299).contains(httpResponse.statusCode) else {
-            throw APIError.requestFailed
+            let errorBody = String(data: data, encoding: .utf8) ?? ""
+            let code = (response as? HTTPURLResponse)?.statusCode ?? 0
+            print("❌ [APIClient] DELETE portfolio/lots failed (HTTP \(code)): \(errorBody)")
+            throw APIError.serverError(statusCode: code, detail: errorBody)
         }
     }
 
@@ -338,6 +371,7 @@ struct BackendHoldingLotList: Codable, Sendable {
 }
 
 struct BackendHoldingLotIn: Codable, Sendable {
+    let id: String?
     let ticker: String
     let pricePerShare: Double
     let shares: Double?
@@ -345,7 +379,7 @@ struct BackendHoldingLotIn: Codable, Sendable {
     let buyDate: String?
 
     enum CodingKeys: String, CodingKey {
-        case ticker
+        case id, ticker
         case pricePerShare = "price_per_share"
         case shares
         case totalInvested = "total_invested"
@@ -451,11 +485,13 @@ struct BackendAlertList: Codable, Sendable {
 enum APIError: Error, LocalizedError {
     case requestFailed
     case decodingFailed
+    case serverError(statusCode: Int, detail: String)
 
     var errorDescription: String? {
         switch self {
         case .requestFailed: "Request failed"
         case .decodingFailed: "Failed to decode response"
+        case .serverError(let code, let detail): "Server error (\(code)): \(detail)"
         }
     }
 }
