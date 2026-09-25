@@ -916,6 +916,9 @@ struct HomeView: View {
     @State private var loadErrorMessage: String? = nil
     @State private var showNotifications: Bool = false
     @StateObject private var alertViewModel = AlertViewModel()
+    @State private var insightChips: [InsightChip] = []
+    @State private var isLoadingInsights: Bool = true
+    @State private var insightLoadFailed: Bool = false
 
     private var displayedStocks: [StockItem] {
         liveStocks
@@ -964,8 +967,16 @@ struct HomeView: View {
                         .padding(.top, 0).padding(.bottom, 4)
 
                     // 2) Market Intelligence Card
-                    AIInsightCardView(chips: dummyInsightChips)
-                        .padding(.vertical, 4)
+                    if isLoadingInsights {
+                        insightLoadingPlaceholder
+                            .padding(.vertical, 4)
+                    } else if !insightChips.isEmpty {
+                        AIInsightCardView(chips: insightChips)
+                            .padding(.vertical, 4)
+                    } else if insightLoadFailed {
+                        insightErrorCard
+                            .padding(.vertical, 4)
+                    }
 
                     // 3) Watchlist Header
                     sectionHeader("Recommended Stocks")
@@ -993,10 +1004,12 @@ struct HomeView: View {
             .task {
                 await loadStocksFromPostgres()
                 await alertViewModel.loadAlerts()
+                await loadMarketIntelligence()
             }
             .refreshable {
                 await loadStocksFromPostgres()
                 await alertViewModel.loadAlerts()
+                await loadMarketIntelligence()
             }
             .fullScreenCover(isPresented: $showNotifications) {
                 NotificationView()
@@ -1042,6 +1055,113 @@ struct HomeView: View {
             }
             self.isLoading = false
         }
+    }
+
+    private func loadMarketIntelligence() async {
+        await MainActor.run {
+            self.isLoadingInsights = true
+            self.insightLoadFailed = false
+        }
+        do {
+            let response = try await APIClient.shared.fetchMarketIntelligence()
+            let chips = response.insights.map { InsightChip(label: $0.label, text: $0.text) }
+            await MainActor.run {
+                if !chips.isEmpty { self.insightChips = chips }
+                self.isLoadingInsights = false
+            }
+        } catch {
+            await MainActor.run {
+                self.isLoadingInsights = false
+                self.insightLoadFailed = true
+            }
+        }
+    }
+
+    private var insightLoadingPlaceholder: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Badge skeleton
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.PrimaryYellow.opacity(0.12))
+                .frame(width: 130, height: 22)
+
+            // Text line skeletons
+            VStack(alignment: .leading, spacing: 8) {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.white.opacity(0.12))
+                    .frame(height: 14)
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.white.opacity(0.10))
+                    .frame(height: 14)
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.white.opacity(0.08))
+                    .frame(width: 200, height: 14)
+            }
+            .frame(minHeight: 60)
+
+            // Chip skeletons
+            HStack(spacing: 6) {
+                ForEach(0..<3, id: \.self) { _ in
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.white.opacity(0.08))
+                        .frame(width: 100, height: 24)
+                }
+            }
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, minHeight: 150, alignment: .topLeading)
+        .background(Color.AICardBg)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.white.opacity(0.12), lineWidth: 1))
+        .padding(.horizontal, 16)
+    }
+
+    private var insightErrorCard: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 6) {
+                Circle().fill(Color.PrimaryYellow).frame(width: 7, height: 7)
+                Text("Market Intelligence")
+                    .font(.caption2).foregroundColor(.PrimaryYellow).kerning(0.8)
+            }
+            .padding(.horizontal, 10).padding(.vertical, 5)
+            .background(Color.PrimaryYellow.opacity(0.12)).clipShape(Capsule())
+            .overlay(Capsule().strokeBorder(Color.PrimaryYellow.opacity(0.35), lineWidth: 0.5))
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            VStack(spacing: 8) {
+                Image(systemName: "exclamationmark.triangle")
+                    .font(.title3).foregroundColor(.white.opacity(0.5))
+                Text("Unable to load market analysis. Pull down to refresh or try again later.")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.6))
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(2)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+
+            Button {
+                Task { await loadMarketIntelligence() }
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 11, weight: .semibold))
+                    Text("Retry")
+                        .font(.system(size: 12, weight: .semibold))
+                }
+                .foregroundColor(.PrimaryYellow)
+                .padding(.horizontal, 14).padding(.vertical, 6)
+                .background(Color.PrimaryYellow.opacity(0.12))
+                .clipShape(Capsule())
+                .overlay(Capsule().strokeBorder(Color.PrimaryYellow.opacity(0.35), lineWidth: 0.5))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, minHeight: 150)
+        .background(Color.AICardBg)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.white.opacity(0.12), lineWidth: 1))
+        .padding(.horizontal, 16)
     }
 
     // MARK: - Skeleton Shimmer Loading Placeholder

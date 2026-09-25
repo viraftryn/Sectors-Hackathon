@@ -123,6 +123,7 @@ public enum StockTimeRange: String, CaseIterable, Sendable {
     case oneWeek    = "1W"
     case oneMonth   = "1M"
     case threeMonth = "3M"
+    case oneYear    = "1Y"
 
     public var isIntraday: Bool {
         false
@@ -410,7 +411,9 @@ public final class StockDetailViewModel: ObservableObject {
         case .oneMonth:
             return Array(tradingPoints.suffix(22))
         case .threeMonth:
-            return tradingPoints
+            return Array(tradingPoints.suffix(66))
+        case .oneYear:
+            return Array(tradingPoints.suffix(250))
         }
     }
 
@@ -420,6 +423,7 @@ public final class StockDetailViewModel: ObservableObject {
             case .oneWeek:    return 5
             case .oneMonth:   return 22
             case .threeMonth: return 66
+            case .oneYear:    return 250
             }
         }()
 

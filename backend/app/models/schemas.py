@@ -200,3 +200,16 @@ class PortfolioSummary(BaseModel):
     pnl: float
     pnl_pct: float
     positions: list[Position]
+
+
+# -- Market Intelligence -----------------------------------------------------
+
+
+class InsightChip(BaseModel):
+    label: str
+    text: str
+
+
+class MarketIntelligenceResponse(BaseModel):
+    generated_date: str
+    insights: list[InsightChip]

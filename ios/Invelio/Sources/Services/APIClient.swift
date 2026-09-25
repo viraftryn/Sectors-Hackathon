@@ -125,6 +125,12 @@ actor APIClient {
         return try await get("recommendations")
     }
 
+    // MARK: - Market Intelligence
+
+    func fetchMarketIntelligence() async throws -> BackendMarketIntelligence {
+        return try await get("market-intelligence")
+    }
+
     // MARK: - Portfolio & Holdings
 
     func fetchPortfolio() async throws -> BackendPortfolioSummary {
@@ -477,6 +483,23 @@ struct BackendAlertList: Codable, Sendable {
     enum CodingKeys: String, CodingKey {
         case unreadCount = "unread_count"
         case alerts
+    }
+}
+
+// MARK: - Market Intelligence DTOs
+
+struct BackendInsightChip: Codable, Sendable {
+    let label: String
+    let text: String
+}
+
+struct BackendMarketIntelligence: Codable, Sendable {
+    let generatedDate: String
+    let insights: [BackendInsightChip]
+
+    enum CodingKeys: String, CodingKey {
+        case generatedDate = "generated_date"
+        case insights
     }
 }
 
