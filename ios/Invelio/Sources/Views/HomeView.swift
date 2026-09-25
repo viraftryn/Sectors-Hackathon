@@ -647,8 +647,9 @@ struct AIInsightCardView: View {
     @State private var targetWords:   [String] = []
     @State private var timer:         Timer?   = nil
     @State private var isExpanded:    Bool     = false
-    @State private var showReadMore:  Bool     = false
-    @State private var hasStarted:    Bool     = false
+    @State private var showReadMore:     Bool     = false
+    @State private var hasStarted:       Bool     = false
+    @State private var isFinishedTyping: Bool     = false
 
     private var selectedChip: InsightChip? { chips.indices.contains(selectedIndex) ? chips[selectedIndex] : nil }
     private var displayedText: String { targetWords.prefix(wordIndex).joined(separator: " ") }
@@ -669,8 +670,8 @@ struct AIInsightCardView: View {
                 .overlay(Capsule().strokeBorder(accent.opacity(0.35), lineWidth: 0.5))
 
                 // Animated text
-                let isLong = targetWords.count > 30
-                let lineLimit: Int? = (isLong && !isExpanded) ? 3 : nil
+                let isLong = targetWords.count > 50
+                let lineLimit: Int? = (isLong && !isExpanded) ? 6 : nil
                 VStack(alignment: .leading, spacing: 8) {
                     buildAttributedText(from: displayedText)
                         .font(.subheadline)
@@ -695,11 +696,12 @@ struct AIInsightCardView: View {
                             .frame(maxWidth: .infinity, alignment: .trailing)
                         }
                         .buttonStyle(.plain)
+                        .padding(.top, 2)
                     }
                 }
-                .frame(maxWidth: .infinity, minHeight: 80, alignment: .topLeading)
+                .frame(maxWidth: .infinity, minHeight: 130, alignment: .topLeading)
             }
-            .padding(12)
+            .padding(14)
 
             // Disclaimer Banner (above chips)
             Text("Based on available data and for informational purposes only, not financial advice to buy or sell. Always Do your own research before making investment decisions.")
@@ -744,7 +746,7 @@ struct AIInsightCardView: View {
             }
             .padding(.bottom, 12)
         }
-        .frame(minHeight: 150, alignment: .top)
+        .frame(minHeight: 310, alignment: .top)
         .background(Color.AICardBg)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.white.opacity(0.12), lineWidth: 1))
@@ -770,12 +772,13 @@ struct AIInsightCardView: View {
     private func startTyping(text: String) {
         timer?.invalidate(); timer = nil
         showReadMore = false; isExpanded = false
+        isFinishedTyping = false
         targetWords = text.components(separatedBy: " ")
         wordIndex = 0
         timer = Timer.scheduledTimer(withTimeInterval: 0.07, repeats: true) { t in
             if wordIndex < targetWords.count {
                 wordIndex += 1
-                if wordIndex == 30 && !showReadMore {
+                if wordIndex >= 50 && !showReadMore {
                     DispatchQueue.main.async {
                         withAnimation(.easeIn(duration: 0.3)) { showReadMore = true }
                     }
@@ -786,10 +789,74 @@ struct AIInsightCardView: View {
                         withAnimation(.easeIn(duration: 0.3)) { showReadMore = true }
                     }
                 }
+                DispatchQueue.main.async {
+                    withAnimation(.easeInOut(duration: 0.25)) { isFinishedTyping = true }
+                }
                 t.invalidate(); timer = nil
             }
         }
     }
+
+    private static let srcCapsuleBadge: UIImage = {
+        let fontRegular = UIFont.systemFont(ofSize: 9.0, weight: .regular)
+        let fontBold = UIFont.systemFont(ofSize: 9.0, weight: .semibold)
+
+        let srcText = "src:"
+        let brandText = "Sectors"
+
+        let srcAttrs: [NSAttributedString.Key: Any] = [
+            .font: fontRegular,
+            .foregroundColor: UIColor.white.withAlphaComponent(0.65)
+        ]
+        let brandAttrs: [NSAttributedString.Key: Any] = [
+            .font: fontBold,
+            .foregroundColor: UIColor.white.withAlphaComponent(0.95)
+        ]
+
+        let srcSize = (srcText as NSString).size(withAttributes: srcAttrs)
+        let brandSize = (brandText as NSString).size(withAttributes: brandAttrs)
+        let iconSize: CGFloat = 8.5
+        let padH: CGFloat = 5.5
+        let spacing: CGFloat = 3.0
+        let badgeHeight: CGFloat = 16.0
+
+        let totalWidth = padH + srcSize.width + spacing + iconSize + spacing + brandSize.width + padH
+        let badgeSize = CGSize(width: ceil(totalWidth), height: badgeHeight)
+
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = UIScreen.main.scale
+
+        return UIGraphicsImageRenderer(size: badgeSize, format: format).image { ctx in
+            let rect = CGRect(origin: .zero, size: badgeSize).insetBy(dx: 0.5, dy: 0.5)
+            let path = UIBezierPath(roundedRect: rect, cornerRadius: badgeHeight / 2)
+
+            // Capsule Background
+            UIColor.white.withAlphaComponent(0.09).setFill()
+            path.fill()
+
+            // Capsule Stroke Border
+            UIColor.white.withAlphaComponent(0.18).setStroke()
+            path.lineWidth = 0.6
+            path.stroke()
+
+            // Draw "src:"
+            var currentX = padH
+            let srcY = (badgeHeight - srcSize.height) / 2.0
+            (srcText as NSString).draw(at: CGPoint(x: currentX, y: srcY), withAttributes: srcAttrs)
+            currentX += srcSize.width + spacing
+
+            // Draw Sectors Logo
+            if let logo = UIImage(named: "sectors_logo") {
+                let iconY = (badgeHeight - iconSize) / 2.0
+                logo.draw(in: CGRect(x: currentX, y: iconY, width: iconSize, height: iconSize))
+            }
+            currentX += iconSize + spacing
+
+            // Draw "Sectors"
+            let brandY = (badgeHeight - brandSize.height) / 2.0
+            (brandText as NSString).draw(at: CGPoint(x: currentX, y: brandY), withAttributes: brandAttrs)
+        }
+    }()
 
     private func buildAttributedText(from raw: String) -> Text {
         var result = Text("")
@@ -801,6 +868,14 @@ struct AIInsightCardView: View {
                 result = result + Text(part).font(.system(size: 14)).foregroundColor(.white)
             }
         }
+
+        if isFinishedTyping {
+            result = result
+                + Text(" ")
+                + Text(Image(uiImage: Self.srcCapsuleBadge))
+                    .baselineOffset(-2.0)
+        }
+
         return result
     }
 }
@@ -991,8 +1066,10 @@ struct HomeView: View {
                     } else {
                         StockListView(items: displayedStocks)
                     }
+
+                    // 5) Coverage Disclaimer Card
+                    coverageDisclaimerCard
                 }
-                .padding(.bottom, 24)
             }
             .background(Color.DarkPurpleAppBackground.ignoresSafeArea())
             .preferredColorScheme(.dark)
@@ -1075,37 +1152,65 @@ struct HomeView: View {
     }
 
     private var insightLoadingPlaceholder: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Badge skeleton
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color.PrimaryYellow.opacity(0.12))
-                .frame(width: 130, height: 22)
+        VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 12) {
+                // Badge skeleton
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.PrimaryYellow.opacity(0.12))
+                    .frame(width: 130, height: 22)
 
-            // Text line skeletons
-            VStack(alignment: .leading, spacing: 8) {
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.white.opacity(0.12))
-                    .frame(height: 14)
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.white.opacity(0.10))
-                    .frame(height: 14)
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.white.opacity(0.08))
-                    .frame(width: 200, height: 14)
+                // Text line skeletons
+                VStack(alignment: .leading, spacing: 8) {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.white.opacity(0.12))
+                        .frame(height: 14)
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.white.opacity(0.10))
+                        .frame(height: 14)
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.white.opacity(0.09))
+                        .frame(height: 14)
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.white.opacity(0.08))
+                        .frame(height: 14)
+                    HStack(spacing: 6) {
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color.white.opacity(0.07))
+                            .frame(width: 140, height: 14)
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.white.opacity(0.08))
+                            .frame(width: 72, height: 16)
+                    }
+                }
+                .frame(maxWidth: .infinity, minHeight: 130, alignment: .topLeading)
             }
-            .frame(minHeight: 60)
+            .padding(14)
+
+            // Disclaimer Banner skeleton (matching real card)
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.PrimaryYellow.opacity(0.06))
+                .frame(maxWidth: .infinity)
+                .frame(height: 48)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .strokeBorder(Color.PrimaryYellow.opacity(0.18), lineWidth: 0.8)
+                )
+                .padding(.horizontal, 12)
+                .padding(.bottom, 10)
 
             // Chip skeletons
             HStack(spacing: 6) {
                 ForEach(0..<3, id: \.self) { _ in
                     RoundedRectangle(cornerRadius: 10)
                         .fill(Color.white.opacity(0.08))
-                        .frame(width: 100, height: 24)
+                        .frame(width: 95, height: 24)
                 }
+                Spacer(minLength: 0)
             }
+            .padding(.horizontal, 12)
+            .padding(.bottom, 12)
         }
-        .padding(12)
-        .frame(maxWidth: .infinity, minHeight: 150, alignment: .topLeading)
+        .frame(minHeight: 310, alignment: .top)
         .background(Color.AICardBg)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.white.opacity(0.12), lineWidth: 1))
@@ -1153,8 +1258,8 @@ struct HomeView: View {
             }
             .buttonStyle(.plain)
         }
-        .padding(12)
-        .frame(maxWidth: .infinity, minHeight: 150)
+        .padding(14)
+        .frame(maxWidth: .infinity, minHeight: 200)
         .background(Color.AICardBg)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.white.opacity(0.12), lineWidth: 1))
@@ -1246,6 +1351,39 @@ struct HomeView: View {
         }
         .padding(.horizontal, 16).padding(.vertical, 8)
         .background(Color.DarkPurpleAppBackground)
+    }
+
+    // MARK: - Coverage Disclaimer Card
+
+    private var coverageDisclaimerCard: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "info.circle.fill")
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.PrimaryYellow)
+                .padding(.top, 1)
+
+            (Text("Coverage Disclaimer: ")
+                .font(.system(size: 12, weight: .bold))
+                .foregroundColor(.PrimaryYellow)
+            + Text("This app currently covers only the Top 10 Indonesian stocks (IDX) to optimize API credit usage and maintain efficient data access.")
+                .font(.system(size: 12, weight: .regular))
+                .foregroundColor(.white.opacity(0.85)))
+            .lineSpacing(3)
+            .fixedSize(horizontal: false, vertical: true)
+
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(Color.PrimaryYellow.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.PrimaryYellow.opacity(0.25), lineWidth: 1)
+        )
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
+        .padding(.bottom, 24)
     }
 
     // MARK: - Section Header
