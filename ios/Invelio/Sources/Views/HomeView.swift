@@ -670,8 +670,9 @@ struct AIInsightCardView: View {
                 .overlay(Capsule().strokeBorder(accent.opacity(0.35), lineWidth: 0.5))
 
                 // Animated text
-                let isLong = targetWords.count > 50
+                let isLong = targetWords.count > 45
                 let lineLimit: Int? = (isLong && !isExpanded) ? 6 : nil
+                let shouldFadeBottom = isLong && !isExpanded && showReadMore
                 VStack(alignment: .leading, spacing: 8) {
                     buildAttributedText(from: displayedText)
                         .font(.subheadline)
@@ -681,6 +682,18 @@ struct AIInsightCardView: View {
                         .lineLimit(lineLimit)
                         .frame(maxWidth: .infinity, alignment: .topLeading)
                         .transaction { $0.animation = nil }
+                        .mask(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .black, location: 0.0),
+                                    .init(color: .black, location: shouldFadeBottom ? 0.50 : 1.0),
+                                    .init(color: .black.opacity(shouldFadeBottom ? 0.12 : 1.0), location: 1.0)
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            .animation(.easeInOut(duration: 0.35), value: shouldFadeBottom)
+                        )
 
                     if isLong && showReadMore {
                         Button {
@@ -778,7 +791,7 @@ struct AIInsightCardView: View {
         timer = Timer.scheduledTimer(withTimeInterval: 0.07, repeats: true) { t in
             if wordIndex < targetWords.count {
                 wordIndex += 1
-                if wordIndex >= 50 && !showReadMore {
+                if wordIndex >= 45 && !showReadMore {
                     DispatchQueue.main.async {
                         withAnimation(.easeIn(duration: 0.3)) { showReadMore = true }
                     }
