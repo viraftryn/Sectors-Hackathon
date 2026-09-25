@@ -805,6 +805,8 @@ public struct StockDetailView: View {
     // Purchase / Lots management state
     @State private var purchaseEntries: [PurchaseFormEntry] = []
     @State private var cachedAnalysisChips: [InsightChip] = []
+    @State private var activeDatePickerEntryID: UUID? = nil
+    @State private var tempSelectedDate: Date = Date()
 
     public init(
         quote: StockQuote,
@@ -913,9 +915,60 @@ public struct StockDetailView: View {
                 self.cachedAnalysisChips = stockAnalysisChips
             }
         }
-        .onChange(of: purchaseEntries) { _ in
+        .onChange(of: purchaseEntries) {
             syncHoldingsToSwiftData()
         }
+        .sheet(isPresented: Binding(
+            get: { activeDatePickerEntryID != nil },
+            set: { if !$0 { activeDatePickerEntryID = nil } }
+        )) {
+            datePickerSheet
+        }
+    }
+
+    private var datePickerSheet: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                DatePicker(
+                    "Purchase Date",
+                    selection: $tempSelectedDate,
+                    in: ...Date(),
+                    displayedComponents: .date
+                )
+                .datePickerStyle(.graphical)
+                .tint(Color.PrimaryYellow)
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+
+                Spacer()
+            }
+            .navigationTitle("Purchase Date")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        activeDatePickerEntryID = nil
+                    }
+                    .foregroundColor(.white.opacity(0.7))
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        if let id = activeDatePickerEntryID,
+                           let idx = purchaseEntries.firstIndex(where: { $0.id == id }) {
+                            purchaseEntries[idx].date = tempSelectedDate
+                            syncHoldingsToSwiftData()
+                        }
+                        activeDatePickerEntryID = nil
+                    }
+                    .fontWeight(.bold)
+                    .foregroundColor(Color.PrimaryYellow)
+                }
+            }
+            .background(Color.DarkPurpleAppBackground.ignoresSafeArea())
+            .preferredColorScheme(.dark)
+        }
+        .presentationDetents([.height(450)])
+        .presentationDragIndicator(.visible)
     }
 
     private func fetchLiveStockDetail() async {
@@ -1229,22 +1282,29 @@ public struct StockDetailView: View {
                 ForEach($purchaseEntries) { $entry in
                     VStack(spacing: 10) {
                         HStack {
-                            HStack(spacing: 4) {
-                                Image(systemName: "calendar")
-                                    .font(.system(size: 10, weight: .bold))
-                                Text(formatEntryDate(entry.date))
-                                    .font(.system(size: 10, weight: .semibold))
+                            Button {
+                                if let entryObj = purchaseEntries.first(where: { $0.id == entry.id }) {
+                                    tempSelectedDate = entryObj.date
+                                } else {
+                                    tempSelectedDate = entry.date
+                                }
+                                activeDatePickerEntryID = entry.id
+                            } label: {
+                                HStack(spacing: 5) {
+                                    Image(systemName: "calendar")
+                                        .font(.system(size: 11, weight: .bold))
+                                    Text(formatEntryDate(entry.date))
+                                        .font(.system(size: 11, weight: .semibold))
+                                    Image(systemName: "chevron.down")
+                                        .font(.system(size: 8, weight: .bold))
+                                        .opacity(0.75)
+                                }
+                                .foregroundStyle(Color(hex: "38BDF8"))
+                                .padding(.horizontal, 9)
+                                .padding(.vertical, 5)
+                                .background(Color(hex: "38BDF8").opacity(0.16), in: Capsule())
                             }
-                            .foregroundStyle(Color(hex: "38BDF8"))
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4.5)
-                            .background(Color(hex: "38BDF8").opacity(0.16), in: Capsule())
-                            .overlay {
-                                DatePicker("", selection: $entry.date, displayedComponents: .date)
-                                    .labelsHidden()
-                                    .blendMode(.destinationOver)
-                                    .opacity(0.015)
-                            }
+                            .buttonStyle(.plain)
 
                             Spacer()
 

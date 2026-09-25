@@ -158,6 +158,8 @@ struct PortfolioView: View {
     private var summaryCard: some View {
         PortfolioSummaryCardView(
             summary: dynamicSummary,
+            holdingLots: holdingLots,
+            stockItems: allStockItems,
             title: "Total Portfolio",
             horizontalPadding: 0,
             showChart: true

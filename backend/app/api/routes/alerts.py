@@ -64,6 +64,20 @@ async def list_alerts(
     return AlertList(unread_count=unread.scalar_one(), alerts=[to_alert(r) for r in rows])
 
 
+@router.post("/alerts/read-all")
+async def mark_all_alerts_read(
+    x_device_id: str | None = Header(default=None),
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, int]:
+    params = {"device": x_device_id}
+    res = await db.execute(
+        text(f"UPDATE alerts SET is_read = TRUE WHERE {VISIBLE_TO_DEVICE} AND is_read = FALSE"),
+        params,
+    )
+    await db.commit()
+    return {"updated": res.rowcount or 0}
+
+
 @router.post("/alerts/{alert_id}/read", response_model=Alert)
 @router.patch("/alerts/{alert_id}/read", response_model=Alert)
 async def mark_alert_read(
@@ -88,3 +102,4 @@ async def mark_alert_read(
     if row is None:
         raise HTTPException(status_code=404, detail="Alert not found")
     return to_alert(row)
+

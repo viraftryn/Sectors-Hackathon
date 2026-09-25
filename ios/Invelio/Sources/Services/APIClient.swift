@@ -170,6 +170,30 @@ actor APIClient {
         try await patchEmpty("alerts/\(alertId)/read")
     }
 
+    func markAllAlertsRead() async throws {
+        let url = baseURL.appendingPathComponent("alerts/read-all")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue(deviceId, forHTTPHeaderField: "X-Device-Id")
+        let (_, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.requestFailed
+        }
+    }
+
+    func triggerAlertScan() async throws {
+        let url = baseURL.appendingPathComponent("alerts/scan")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue(deviceId, forHTTPHeaderField: "X-Device-Id")
+        let (_, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.requestFailed
+        }
+    }
+
     // MARK: - SSE stream (POST /chat/stream)
 
     nonisolated func chatStream(

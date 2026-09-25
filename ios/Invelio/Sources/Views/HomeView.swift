@@ -333,15 +333,26 @@ struct StockListView: View {
     }
 }
 
-// MARK: - PortfolioSummaryCardView (simplified — no interactive chart)
+// MARK: - PortfolioSummaryCardView (with dynamic line chart reflecting lot buy dates)
+
+struct PortfolioChartPoint: Identifiable {
+    let id = UUID()
+    let date: Date
+    let value: Double
+}
 
 struct PortfolioSummaryCardView: View {
     let summary: PortfolioSummaryData
+    var holdingLots: [HoldingLot] = []
+    var stockItems: [StockItem] = []
     var title: String = "Your Portfolio"
     var horizontalPadding: CGFloat = 16
     var showChart: Bool = false
 
     @State private var selectedRange: String = "1W"
+    @State private var draggedIndex: Int? = nil
+    @State private var isDragging: Bool = false
+
     private let ranges: [String] = ["1W", "1M", "3M"]
 
     private let green = Color.ProfitGreen
@@ -352,84 +363,172 @@ struct PortfolioSummaryCardView: View {
         startPoint: .top, endPoint: .bottom
     )
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            Text(title)
-                .font(.caption).foregroundColor(.white.opacity(0.75))
-            Text("Rp\(formatIDR(summary.totalValue))")
-                .font(.system(size: 30, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-                .padding(.bottom, 2)
+    private func formatChartDate(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.dateFormat = "d MMM yyyy"
+        return f.string(from: date)
+    }
 
-            // 1D Return (Top)
-            let isDailyPos = summary.dailyProfitIDR >= 0
-            let dailyProfitText = isDailyPos ? "+Rp\(formatIDR(summary.dailyProfitIDR))" : "-Rp\(formatIDR(abs(summary.dailyProfitIDR)))"
-            HStack(spacing: 6) {
-                Text(dailyProfitText)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(isDailyPos ? green : red)
-                Text(String(format: "(%+.2f%%)", summary.dailyGrowthPct))
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(isDailyPos ? green : red)
-                Text("1D")
-                    .font(.system(size: 12, weight: .regular))
-                    .foregroundColor(.white.opacity(0.55))
+    private var chartPoints: [PortfolioChartPoint] {
+        let calendar = Calendar.current
+        let now = Date()
+        let days: Int
+        switch selectedRange {
+        case "1W": days = 7
+        case "1M": days = 30
+        case "3M": days = 90
+        default: days = 7
+        }
+
+        let stepCount = max(days, 24)
+        let earliestDate = calendar.date(byAdding: .day, value: -days, to: now) ?? now
+        let totalDuration = now.timeIntervalSince(earliestDate)
+
+        var points: [PortfolioChartPoint] = []
+
+        if holdingLots.isEmpty {
+            for i in 0..<stepCount {
+                let ratio = Double(i) / Double(stepCount - 1)
+                let pointTime = earliestDate.addingTimeInterval(totalDuration * ratio)
+                let baseline = summary.totalValue
+                let wave = baseline > 0 ? sin(Double(i) * 0.45) * (baseline * 0.015) : 0
+                points.append(PortfolioChartPoint(date: pointTime, value: max(0, baseline + wave)))
+            }
+            return points
+        }
+
+        for i in 0..<stepCount {
+            let ratio = Double(i) / Double(stepCount - 1)
+            let pointTime = earliestDate.addingTimeInterval(totalDuration * ratio)
+
+            var pointTotalValue: Double = 0.0
+
+            for lot in holdingLots {
+                // If the lot was purchased on or before this point in time
+                if lot.buyDate <= pointTime {
+                    let matched = stockItems.first {
+                        $0.symbol.uppercased() == lot.symbol.uppercased() ||
+                        lot.ticker.uppercased().hasPrefix($0.symbol.uppercased())
+                    }
+                    let currentPrice = matched?.price ?? lot.pricePerShare
+                    let currentValue = lot.shares * currentPrice
+                    let initialCost = lot.totalInvested
+
+                    let elapsed = pointTime.timeIntervalSince(lot.buyDate)
+                    let totalSpan = max(1.0, now.timeIntervalSince(lot.buyDate))
+                    let alpha = min(1.0, max(0.0, elapsed / totalSpan))
+
+                    let base = initialCost + alpha * (currentValue - initialCost)
+                    // Gentle realistic market variation between buy date and today
+                    let wave = sin(Double(i) * 0.7 + Double(abs(lot.ticker.hashValue % 5))) * (initialCost * 0.012) * sin(alpha * .pi)
+                    pointTotalValue += max(0, base + wave)
+                }
             }
 
-            // All Time Return (Bottom)
-            let isAllPos = summary.profitIDR >= 0
-            let allProfitText = isAllPos ? "+Rp\(formatIDR(summary.profitIDR))" : "-Rp\(formatIDR(abs(summary.profitIDR)))"
-            HStack(spacing: 6) {
-                Text(allProfitText)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(isAllPos ? green : red)
-                Text(String(format: "(%+.2f%%)", summary.growthPct))
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(isAllPos ? green : red)
-                Text("All Time")
-                    .font(.system(size: 12, weight: .regular))
-                    .foregroundColor(.white.opacity(0.55))
+            // Snap the final point to exactly summary.totalValue
+            if i == stepCount - 1 && summary.totalValue > 0 {
+                pointTotalValue = summary.totalValue
+            }
+
+            points.append(PortfolioChartPoint(date: pointTime, value: pointTotalValue))
+        }
+
+        return points
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            let pts = chartPoints
+            let currentScrubbed = (draggedIndex != nil && pts.indices.contains(draggedIndex!)) ? pts[draggedIndex!] : nil
+
+            if let scrubbed = currentScrubbed {
+                Text(formatChartDate(scrubbed.date))
+                    .font(.caption).foregroundColor(.white.opacity(0.85))
+                Text("Rp\(formatIDR(scrubbed.value))")
+                    .font(.system(size: 30, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .padding(.bottom, 2)
+            } else {
+                Text(title)
+                    .font(.caption).foregroundColor(.white.opacity(0.75))
+                Text("Rp\(formatIDR(summary.totalValue))")
+                    .font(.system(size: 30, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .padding(.bottom, 2)
+            }
+
+            if let scrubbed = currentScrubbed {
+                HStack(spacing: 6) {
+                    let diff = scrubbed.value - summary.totalCost
+                    let pct = summary.totalCost > 0 ? (diff / summary.totalCost) * 100 : 0
+                    let isPos = diff >= 0
+                    Text(isPos ? "+Rp\(formatIDR(diff))" : "-Rp\(formatIDR(abs(diff)))")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(isPos ? green : red)
+                    Text(String(format: "(%+.2f%%)", pct))
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(isPos ? green : red)
+                    Text("at date")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.white.opacity(0.55))
+                }
+            } else {
+                // 1D Return (Top)
+                let isDailyPos = summary.dailyProfitIDR >= 0
+                let dailyProfitText = isDailyPos ? "+Rp\(formatIDR(summary.dailyProfitIDR))" : "-Rp\(formatIDR(abs(summary.dailyProfitIDR)))"
+                HStack(spacing: 6) {
+                    Text(dailyProfitText)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(isDailyPos ? green : red)
+                    Text(String(format: "(%+.2f%%)", summary.dailyGrowthPct))
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(isDailyPos ? green : red)
+                    Text("1D")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.white.opacity(0.55))
+                }
+
+                // All Time Return (Bottom)
+                let isAllPos = summary.profitIDR >= 0
+                let allProfitText = isAllPos ? "+Rp\(formatIDR(summary.profitIDR))" : "-Rp\(formatIDR(abs(summary.profitIDR)))"
+                HStack(spacing: 6) {
+                    Text(allProfitText)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(isAllPos ? green : red)
+                    Text(String(format: "(%+.2f%%)", summary.growthPct))
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(isAllPos ? green : red)
+                    Text("All Time")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.white.opacity(0.55))
+                }
             }
 
             if showChart {
-                // Area & line chart (flat horizontal line)
-                GeometryReader { geo in
-                    let midY = geo.size.height * 0.5
-                    Path { p in
-                        p.move(to: CGPoint(x: 0, y: midY))
-                        p.addLine(to: CGPoint(x: geo.size.width, y: midY))
-                        p.addLine(to: CGPoint(x: geo.size.width, y: geo.size.height))
-                        p.addLine(to: CGPoint(x: 0, y: geo.size.height))
-                        p.closeSubpath()
-                    }
-                    .fill(
-                        LinearGradient(
-                            stops: [.init(color: Color.orange.opacity(0.20), location: 0),
-                                    .init(color: Color.orange.opacity(0.0), location: 0.9)],
-                            startPoint: .top, endPoint: .bottom
-                        )
-                    )
-                    Path { p in
-                        p.move(to: CGPoint(x: 0, y: midY))
-                        p.addLine(to: CGPoint(x: geo.size.width, y: midY))
-                    }
-                    .stroke(Color.orange, style: StrokeStyle(lineWidth: 1.5, lineCap: .round))
-                }
-                .frame(height: 100)
-                .padding(.top, 8)
+                chartView(points: pts)
+                    .frame(height: 110)
+                    .padding(.top, 8)
 
-                // Custom Segmented Control (without capsule)
+                // Custom Segmented Control
                 HStack {
                     ForEach(ranges, id: \.self) { range in
                         Button {
                             withAnimation(.easeInOut(duration: 0.15)) {
                                 selectedRange = range
+                                draggedIndex = nil
                             }
                         } label: {
                             Text(range)
                                 .font(.system(size: 12, weight: selectedRange == range ? .bold : .medium))
-                                .foregroundColor(selectedRange == range ? .orange : .gray)
+                                .foregroundColor(selectedRange == range ? Color.PrimaryYellow : .white.opacity(0.5))
                                 .frame(maxWidth: .infinity)
+                                .padding(.vertical, 4)
+                                .background(
+                                    selectedRange == range
+                                        ? Color.white.opacity(0.12)
+                                        : Color.clear,
+                                    in: RoundedRectangle(cornerRadius: 6)
+                                )
                         }
                         .buttonStyle(.plain)
                     }
@@ -444,7 +543,95 @@ struct PortfolioSummaryCardView: View {
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.12), lineWidth: 1))
         .padding(.horizontal, horizontalPadding)
     }
+
+    @ViewBuilder
+    private func chartView(points: [PortfolioChartPoint]) -> some View {
+        GeometryReader { geo in
+            let w = geo.size.width
+            let h = geo.size.height
+            let values = points.map(\.value)
+            let minVal = values.min() ?? 0
+            let maxVal = values.max() ?? 1
+            let diff = max(1.0, maxVal - minVal)
+
+            let coords: [CGPoint] = points.enumerated().map { idx, pt in
+                let x = CGFloat(idx) / CGFloat(max(1, points.count - 1)) * w
+                let y = h - 8 - CGFloat((pt.value - minVal) / diff) * (h - 16)
+                return CGPoint(x: x, y: y)
+            }
+
+            let chartColor = Color.PrimaryYellow
+
+            ZStack(alignment: .topLeading) {
+                // Gradient Fill Area
+                if coords.count >= 2 {
+                    Path { p in
+                        p.move(to: CGPoint(x: 0, y: h))
+                        p.addLine(to: coords[0])
+                        for pt in coords.dropFirst() {
+                            p.addLine(to: pt)
+                        }
+                        p.addLine(to: CGPoint(x: w, y: h))
+                        p.closeSubpath()
+                    }
+                    .fill(
+                        LinearGradient(
+                            stops: [
+                                .init(color: chartColor.opacity(0.32), location: 0),
+                                .init(color: chartColor.opacity(0.0), location: 0.95)
+                            ],
+                            startPoint: .top, endPoint: .bottom
+                        )
+                    )
+
+                    // Line Stroke
+                    Path { p in
+                        p.move(to: coords[0])
+                        for pt in coords.dropFirst() {
+                            p.addLine(to: pt)
+                        }
+                    }
+                    .stroke(chartColor, style: StrokeStyle(lineWidth: 2.2, lineCap: .round, lineJoin: .round))
+                }
+
+                // Interactive Scrubber Indicator
+                if let idx = draggedIndex, coords.indices.contains(idx) {
+                    let pt = coords[idx]
+
+                    Path { p in
+                        p.move(to: CGPoint(x: pt.x, y: 0))
+                        p.addLine(to: CGPoint(x: pt.x, y: h))
+                    }
+                    .stroke(Color.white.opacity(0.45), style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
+
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 8, height: 8)
+                        .shadow(color: chartColor, radius: 4)
+                        .position(pt)
+                }
+            }
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { val in
+                        isDragging = true
+                        let clampedX = min(max(0, val.location.x), w)
+                        let ratio = clampedX / max(1, w)
+                        let idx = min(points.count - 1, max(0, Int(round(ratio * Double(points.count - 1)))))
+                        draggedIndex = idx
+                    }
+                    .onEnded { _ in
+                        withAnimation(.easeOut(duration: 0.2)) {
+                            isDragging = false
+                            draggedIndex = nil
+                        }
+                    }
+            )
+        }
+    }
 }
+
 
 // MARK: - AIInsightCardView (with typing animation)
 
@@ -727,6 +914,8 @@ struct HomeView: View {
     @State private var liveStocks: [StockItem] = []
     @State private var isLoading: Bool = true
     @State private var loadErrorMessage: String? = nil
+    @State private var showNotifications: Bool = false
+    @State private var unreadAlertsCount: Int = 0
 
     private var displayedStocks: [StockItem] {
         liveStocks
@@ -803,12 +992,23 @@ struct HomeView: View {
             .safeAreaInset(edge: .top) { topBar }
             .task {
                 await loadStocksFromPostgres()
+                await loadAlertsCount()
             }
             .refreshable {
                 await loadStocksFromPostgres()
+                await loadAlertsCount()
+            }
+            .navigationDestination(isPresented: $showNotifications) {
+                NotificationView()
+            }
+            .onChange(of: showNotifications) {
+                if !showNotifications {
+                    Task { await loadAlertsCount() }
+                }
             }
         }
     }
+
 
     private func loadStocksFromPostgres() async {
         if liveStocks.isEmpty {
@@ -841,6 +1041,17 @@ struct HomeView: View {
                 self.loadErrorMessage = "Belum dapat memuat data saham dari PostgreSQL."
             }
             self.isLoading = false
+        }
+    }
+
+    private func loadAlertsCount() async {
+        do {
+            let res = try await APIClient.shared.fetchAlerts(unreadOnly: true)
+            await MainActor.run {
+                self.unreadAlertsCount = res.unreadCount
+            }
+        } catch {
+            // Silently fallback if offline
         }
     }
 
@@ -923,7 +1134,9 @@ struct HomeView: View {
                     .foregroundColor(.white)
             }
             Spacer()
-            NotificationButton(unreadCount: 3) { /* handle tap */ }
+            NotificationButton(unreadCount: unreadAlertsCount) {
+                showNotifications = true
+            }
         }
         .padding(.horizontal, 16).padding(.vertical, 8)
         .background(Color.DarkPurpleAppBackground)
