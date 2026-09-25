@@ -727,6 +727,8 @@ struct HomeView: View {
     @State private var liveStocks: [StockItem] = []
     @State private var isLoading: Bool = true
     @State private var loadErrorMessage: String? = nil
+    @State private var showNotifications: Bool = false
+    @StateObject private var alertViewModel = AlertViewModel()
 
     private var displayedStocks: [StockItem] {
         liveStocks
@@ -803,9 +805,19 @@ struct HomeView: View {
             .safeAreaInset(edge: .top) { topBar }
             .task {
                 await loadStocksFromPostgres()
+                await alertViewModel.loadAlerts()
             }
             .refreshable {
                 await loadStocksFromPostgres()
+                await alertViewModel.loadAlerts()
+            }
+            .fullScreenCover(isPresented: $showNotifications) {
+                NotificationView()
+            }
+            .onChange(of: showNotifications) {
+                if !showNotifications {
+                    Task { await alertViewModel.loadAlerts() }
+                }
             }
         }
     }
@@ -923,7 +935,9 @@ struct HomeView: View {
                     .foregroundColor(.white)
             }
             Spacer()
-            NotificationButton(unreadCount: 3) { /* handle tap */ }
+            NotificationButton(unreadCount: alertViewModel.unreadCount) {
+                showNotifications = true
+            }
         }
         .padding(.horizontal, 16).padding(.vertical, 8)
         .background(Color.DarkPurpleAppBackground)

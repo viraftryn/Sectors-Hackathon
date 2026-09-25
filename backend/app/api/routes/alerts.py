@@ -30,9 +30,12 @@ def to_alert(row: Any) -> Alert:
 
 
 @router.post("/alerts/scan")
-async def scan_alerts(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
+async def scan_alerts(
+    x_device_id: str | None = Header(default=None),
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, Any]:
     """Trigger the Alert Agent to scan for market anomalies."""
-    agent = AlertAgent(db)
+    agent = AlertAgent(db, device_id=x_device_id)
     try:
         result = await agent.run()
     except Exception as exc:
