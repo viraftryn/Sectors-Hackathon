@@ -22,6 +22,17 @@ if [ ! -f ".env" ]; then
     fi
 fi
 
+# Ensure PostgreSQL service is running if configured for localhost
+if grep -q "localhost:5432" .env 2>/dev/null; then
+    if command -v pg_isready &>/dev/null; then
+        if ! pg_isready -q; then
+            echo "🐘 PostgreSQL is not running. Starting via brew services..."
+            brew services start postgresql@18 2>/dev/null || brew services start postgresql 2>/dev/null
+            sleep 1
+        fi
+    fi
+fi
+
 echo "🚀 Starting Invelio FastAPI Backend..."
 echo "📍 Local Address: http://127.0.0.1:8000"
 echo "📚 API Docs:      http://127.0.0.1:8000/docs"
