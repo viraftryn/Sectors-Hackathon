@@ -999,9 +999,9 @@ struct HomeView: View {
                             .padding(.bottom, 6)
 
                         StockListView(items: topRecommendedStocks)
-
+                        
                         if !otherStocks.isEmpty {
-                            sectionHeader("Other Stocks")
+                            subSectionHeader("Other Stocks")
                                 .padding(.top, 20)
                                 .padding(.bottom, 6)
 
@@ -1269,7 +1269,15 @@ struct HomeView: View {
 
     private func sectionHeader(_ title: String) -> some View {
         HStack {
-            Text(title).font(.title2).fontWeight(.bold).foregroundColor(.white)
+            Text(title).font(.title2).fontWeight(.bold).foregroundColor(.PrimaryYellow)
+            Spacer()
+        }
+        .padding(.horizontal).padding(.bottom, 6)
+    }
+    
+    private func subSectionHeader(_ title: String) -> some View {
+        HStack {
+            Text(title).font(.title3).fontWeight(.bold).foregroundColor(.white)
             Spacer()
         }
         .padding(.horizontal).padding(.bottom, 6)
