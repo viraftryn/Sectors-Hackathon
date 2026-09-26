@@ -924,6 +924,16 @@ struct HomeView: View {
         liveStocks
     }
 
+    private var topRecommendedStocks: [StockItem] {
+        let sorted = liveStocks.sorted { $0.percentChange > $1.percentChange }
+        return Array(sorted.prefix(3))
+    }
+
+    private var otherStocks: [StockItem] {
+        let topIDs = Set(topRecommendedStocks.map(\.id))
+        return liveStocks.filter { !topIDs.contains($0.id) }
+    }
+
     private var dynamicSummary: PortfolioSummaryData {
         guard !holdingLots.isEmpty else {
             return dummySummary
@@ -978,18 +988,25 @@ struct HomeView: View {
                             .padding(.vertical, 4)
                     }
 
-                    // 3) Watchlist Header
-                    sectionHeader("Recommended Stocks")
-                        .padding(.top, 16)
-                        .padding(.bottom, 6)
-
-                    // 4) Stock List from PostgreSQL
+                    // 3) Stock Sections
                     if isLoading && liveStocks.isEmpty {
                         stocksLoadingPlaceholderView
                     } else if liveStocks.isEmpty {
                         emptyOrRetryView
                     } else {
-                        StockListView(items: displayedStocks)
+                        sectionHeader("Top 3 Stocks")
+                            .padding(.top, 16)
+                            .padding(.bottom, 6)
+
+                        StockListView(items: topRecommendedStocks)
+                        
+                        if !otherStocks.isEmpty {
+                            subSectionHeader("Other Stocks")
+                                .padding(.top, 20)
+                                .padding(.bottom, 6)
+
+                            StockListView(items: otherStocks)
+                        }
                     }
                 }
                 .padding(.bottom, 24)
@@ -1252,7 +1269,15 @@ struct HomeView: View {
 
     private func sectionHeader(_ title: String) -> some View {
         HStack {
-            Text(title).font(.title2).fontWeight(.bold).foregroundColor(.white)
+            Text(title).font(.title2).fontWeight(.bold).foregroundColor(.PrimaryYellow)
+            Spacer()
+        }
+        .padding(.horizontal).padding(.bottom, 6)
+    }
+    
+    private func subSectionHeader(_ title: String) -> some View {
+        HStack {
+            Text(title).font(.title3).fontWeight(.bold).foregroundColor(.white)
             Spacer()
         }
         .padding(.horizontal).padding(.bottom, 6)
