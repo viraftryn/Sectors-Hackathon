@@ -994,7 +994,7 @@ struct HomeView: View {
                     } else if liveStocks.isEmpty {
                         emptyOrRetryView
                     } else {
-                        sectionHeader("Recommended Stocks")
+                        sectionHeader("Top 3 Stocks")
                             .padding(.top, 16)
                             .padding(.bottom, 6)
 
