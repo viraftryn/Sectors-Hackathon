@@ -36,6 +36,19 @@ CREATE TABLE IF NOT EXISTS sectors_cache (
 )
 """
 
+SQLITE_INSIGHTS_DDL = """
+CREATE TABLE IF NOT EXISTS stock_ai_insights (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ticker VARCHAR(10) NOT NULL,
+    analysis_type VARCHAR(50) NOT NULL,
+    label VARCHAR(100) NOT NULL,
+    content TEXT NOT NULL,
+    generated_date DATE NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    UNIQUE (ticker, analysis_type, generated_date)
+)
+"""
+
 
 def make_sqlite_engine():
     """Fresh in-memory SQLite engine that survives across connections (StaticPool)."""

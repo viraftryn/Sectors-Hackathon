@@ -23,7 +23,7 @@ extension Color {
     // Primary accent
     static let PrimaryYellow = Color(red: 234/255, green: 179/255, blue: 8/255)
     // Profit / Loss
-    static let ProfitGreen   = Color(red: 34/255, green: 197/255, blue: 94/255)
+    static let ProfitGreen   = Color(red: 0.0, green: 0.78, blue: 0.58)
     static let LossRed       = Color(red: 239/255, green: 68/255, blue: 68/255)
     static let PortfolioLossRed = Color(red: 255/255, green: 88/255, blue: 88/255)
     // Surface / card
@@ -333,15 +333,26 @@ struct StockListView: View {
     }
 }
 
-// MARK: - PortfolioSummaryCardView (simplified — no interactive chart)
+// MARK: - PortfolioSummaryCardView (with dynamic line chart reflecting lot buy dates)
+
+struct PortfolioChartPoint: Identifiable {
+    let id = UUID()
+    let date: Date
+    let value: Double
+}
 
 struct PortfolioSummaryCardView: View {
     let summary: PortfolioSummaryData
+    var holdingLots: [HoldingLot] = []
+    var stockItems: [StockItem] = []
     var title: String = "Your Portfolio"
     var horizontalPadding: CGFloat = 16
     var showChart: Bool = false
 
     @State private var selectedRange: String = "1W"
+    @State private var draggedIndex: Int? = nil
+    @State private var isDragging: Bool = false
+
     private let ranges: [String] = ["1W", "1M", "3M"]
 
     private let green = Color.ProfitGreen
@@ -352,84 +363,172 @@ struct PortfolioSummaryCardView: View {
         startPoint: .top, endPoint: .bottom
     )
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            Text(title)
-                .font(.caption).foregroundColor(.white.opacity(0.75))
-            Text("Rp\(formatIDR(summary.totalValue))")
-                .font(.system(size: 30, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-                .padding(.bottom, 2)
+    private func formatChartDate(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.dateFormat = "d MMM yyyy"
+        return f.string(from: date)
+    }
 
-            // 1D Return (Top)
-            let isDailyPos = summary.dailyProfitIDR >= 0
-            let dailyProfitText = isDailyPos ? "+Rp\(formatIDR(summary.dailyProfitIDR))" : "-Rp\(formatIDR(abs(summary.dailyProfitIDR)))"
-            HStack(spacing: 6) {
-                Text(dailyProfitText)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(isDailyPos ? green : red)
-                Text(String(format: "(%+.2f%%)", summary.dailyGrowthPct))
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(isDailyPos ? green : red)
-                Text("1D")
-                    .font(.system(size: 12, weight: .regular))
-                    .foregroundColor(.white.opacity(0.55))
+    private var chartPoints: [PortfolioChartPoint] {
+        let calendar = Calendar.current
+        let now = Date()
+        let days: Int
+        switch selectedRange {
+        case "1W": days = 7
+        case "1M": days = 30
+        case "3M": days = 90
+        default: days = 7
+        }
+
+        let stepCount = max(days, 24)
+        let earliestDate = calendar.date(byAdding: .day, value: -days, to: now) ?? now
+        let totalDuration = now.timeIntervalSince(earliestDate)
+
+        var points: [PortfolioChartPoint] = []
+
+        if holdingLots.isEmpty {
+            for i in 0..<stepCount {
+                let ratio = Double(i) / Double(stepCount - 1)
+                let pointTime = earliestDate.addingTimeInterval(totalDuration * ratio)
+                let baseline = summary.totalValue
+                let wave = baseline > 0 ? sin(Double(i) * 0.45) * (baseline * 0.015) : 0
+                points.append(PortfolioChartPoint(date: pointTime, value: max(0, baseline + wave)))
+            }
+            return points
+        }
+
+        for i in 0..<stepCount {
+            let ratio = Double(i) / Double(stepCount - 1)
+            let pointTime = earliestDate.addingTimeInterval(totalDuration * ratio)
+
+            var pointTotalValue: Double = 0.0
+
+            for lot in holdingLots {
+                // If the lot was purchased on or before this point in time
+                if lot.buyDate <= pointTime {
+                    let matched = stockItems.first {
+                        $0.symbol.uppercased() == lot.symbol.uppercased() ||
+                        lot.ticker.uppercased().hasPrefix($0.symbol.uppercased())
+                    }
+                    let currentPrice = matched?.price ?? lot.pricePerShare
+                    let currentValue = lot.shares * currentPrice
+                    let initialCost = lot.totalInvested
+
+                    let elapsed = pointTime.timeIntervalSince(lot.buyDate)
+                    let totalSpan = max(1.0, now.timeIntervalSince(lot.buyDate))
+                    let alpha = min(1.0, max(0.0, elapsed / totalSpan))
+
+                    let base = initialCost + alpha * (currentValue - initialCost)
+                    // Gentle realistic market variation between buy date and today
+                    let wave = sin(Double(i) * 0.7 + Double(abs(lot.ticker.hashValue % 5))) * (initialCost * 0.012) * sin(alpha * .pi)
+                    pointTotalValue += max(0, base + wave)
+                }
             }
 
-            // All Time Return (Bottom)
-            let isAllPos = summary.profitIDR >= 0
-            let allProfitText = isAllPos ? "+Rp\(formatIDR(summary.profitIDR))" : "-Rp\(formatIDR(abs(summary.profitIDR)))"
-            HStack(spacing: 6) {
-                Text(allProfitText)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(isAllPos ? green : red)
-                Text(String(format: "(%+.2f%%)", summary.growthPct))
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(isAllPos ? green : red)
-                Text("All Time")
-                    .font(.system(size: 12, weight: .regular))
-                    .foregroundColor(.white.opacity(0.55))
+            // Snap the final point to exactly summary.totalValue
+            if i == stepCount - 1 && summary.totalValue > 0 {
+                pointTotalValue = summary.totalValue
+            }
+
+            points.append(PortfolioChartPoint(date: pointTime, value: pointTotalValue))
+        }
+
+        return points
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            let pts = chartPoints
+            let currentScrubbed = (draggedIndex != nil && pts.indices.contains(draggedIndex!)) ? pts[draggedIndex!] : nil
+
+            if let scrubbed = currentScrubbed {
+                Text(formatChartDate(scrubbed.date))
+                    .font(.caption).foregroundColor(.white.opacity(0.85))
+                Text("Rp\(formatIDR(scrubbed.value))")
+                    .font(.system(size: 30, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .padding(.bottom, 2)
+            } else {
+                Text(title)
+                    .font(.caption).foregroundColor(.white.opacity(0.75))
+                Text("Rp\(formatIDR(summary.totalValue))")
+                    .font(.system(size: 30, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .padding(.bottom, 2)
+            }
+
+            if let scrubbed = currentScrubbed {
+                HStack(spacing: 6) {
+                    let diff = scrubbed.value - summary.totalCost
+                    let pct = summary.totalCost > 0 ? (diff / summary.totalCost) * 100 : 0
+                    let isPos = diff >= 0
+                    Text(isPos ? "+Rp\(formatIDR(diff))" : "-Rp\(formatIDR(abs(diff)))")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(isPos ? green : red)
+                    Text(String(format: "(%+.2f%%)", pct))
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(isPos ? green : red)
+                    Text("at date")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.white.opacity(0.55))
+                }
+            } else {
+                // 1D Return (Top)
+                let isDailyPos = summary.dailyProfitIDR >= 0
+                let dailyProfitText = isDailyPos ? "+Rp\(formatIDR(summary.dailyProfitIDR))" : "-Rp\(formatIDR(abs(summary.dailyProfitIDR)))"
+                HStack(spacing: 6) {
+                    Text(dailyProfitText)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(isDailyPos ? green : red)
+                    Text(String(format: "(%+.2f%%)", summary.dailyGrowthPct))
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(isDailyPos ? green : red)
+                    Text("1D")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.white.opacity(0.55))
+                }
+
+                // All Time Return (Bottom)
+                let isAllPos = summary.profitIDR >= 0
+                let allProfitText = isAllPos ? "+Rp\(formatIDR(summary.profitIDR))" : "-Rp\(formatIDR(abs(summary.profitIDR)))"
+                HStack(spacing: 6) {
+                    Text(allProfitText)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(isAllPos ? green : red)
+                    Text(String(format: "(%+.2f%%)", summary.growthPct))
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(isAllPos ? green : red)
+                    Text("All Time")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.white.opacity(0.55))
+                }
             }
 
             if showChart {
-                // Area & line chart (flat horizontal line)
-                GeometryReader { geo in
-                    let midY = geo.size.height * 0.5
-                    Path { p in
-                        p.move(to: CGPoint(x: 0, y: midY))
-                        p.addLine(to: CGPoint(x: geo.size.width, y: midY))
-                        p.addLine(to: CGPoint(x: geo.size.width, y: geo.size.height))
-                        p.addLine(to: CGPoint(x: 0, y: geo.size.height))
-                        p.closeSubpath()
-                    }
-                    .fill(
-                        LinearGradient(
-                            stops: [.init(color: Color.orange.opacity(0.20), location: 0),
-                                    .init(color: Color.orange.opacity(0.0), location: 0.9)],
-                            startPoint: .top, endPoint: .bottom
-                        )
-                    )
-                    Path { p in
-                        p.move(to: CGPoint(x: 0, y: midY))
-                        p.addLine(to: CGPoint(x: geo.size.width, y: midY))
-                    }
-                    .stroke(Color.orange, style: StrokeStyle(lineWidth: 1.5, lineCap: .round))
-                }
-                .frame(height: 100)
-                .padding(.top, 8)
+                chartView(points: pts)
+                    .frame(height: 110)
+                    .padding(.top, 8)
 
-                // Custom Segmented Control (without capsule)
+                // Custom Segmented Control
                 HStack {
                     ForEach(ranges, id: \.self) { range in
                         Button {
                             withAnimation(.easeInOut(duration: 0.15)) {
                                 selectedRange = range
+                                draggedIndex = nil
                             }
                         } label: {
                             Text(range)
                                 .font(.system(size: 12, weight: selectedRange == range ? .bold : .medium))
-                                .foregroundColor(selectedRange == range ? .orange : .gray)
+                                .foregroundColor(selectedRange == range ? Color.PrimaryYellow : .white.opacity(0.5))
                                 .frame(maxWidth: .infinity)
+                                .padding(.vertical, 4)
+                                .background(
+                                    selectedRange == range
+                                        ? Color.white.opacity(0.12)
+                                        : Color.clear,
+                                    in: RoundedRectangle(cornerRadius: 6)
+                                )
                         }
                         .buttonStyle(.plain)
                     }
@@ -444,7 +543,112 @@ struct PortfolioSummaryCardView: View {
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.12), lineWidth: 1))
         .padding(.horizontal, horizontalPadding)
     }
+
+    @ViewBuilder
+    private func chartView(points: [PortfolioChartPoint]) -> some View {
+        GeometryReader { geo in
+            let w = geo.size.width
+            let h = geo.size.height
+            let values = points.map(\.value)
+            let minVal = values.min() ?? 0
+            let maxVal = values.max() ?? 1
+            let diff = max(1.0, maxVal - minVal)
+
+            let coords: [CGPoint] = points.enumerated().map { idx, pt in
+                let x = CGFloat(idx) / CGFloat(max(1, points.count - 1)) * w
+                let y = h - 8 - CGFloat((pt.value - minVal) / diff) * (h - 16)
+                return CGPoint(x: x, y: y)
+            }
+
+            let chartColor = Color.PrimaryYellow
+
+            ZStack(alignment: .topLeading) {
+                // Gradient Fill Area
+                if coords.count >= 2 {
+                    Path { p in
+                        p.move(to: CGPoint(x: 0, y: h))
+                        p.addLine(to: coords[0])
+                        for pt in coords.dropFirst() {
+                            p.addLine(to: pt)
+                        }
+                        p.addLine(to: CGPoint(x: w, y: h))
+                        p.closeSubpath()
+                    }
+                    .fill(
+                        LinearGradient(
+                            stops: [
+                                .init(color: chartColor.opacity(0.32), location: 0),
+                                .init(color: chartColor.opacity(0.0), location: 0.95)
+                            ],
+                            startPoint: .top, endPoint: .bottom
+                        )
+                    )
+
+                    // Line Stroke
+                    Path { p in
+                        p.move(to: coords[0])
+                        for pt in coords.dropFirst() {
+                            p.addLine(to: pt)
+                        }
+                    }
+                    .stroke(chartColor, style: StrokeStyle(lineWidth: 2.2, lineCap: .round, lineJoin: .round))
+                }
+
+                // Interactive Scrubber Indicator
+                if let idx = draggedIndex, coords.indices.contains(idx) {
+                    let pt = coords[idx]
+
+                    Path { p in
+                        p.move(to: CGPoint(x: pt.x, y: 0))
+                        p.addLine(to: CGPoint(x: pt.x, y: h))
+                    }
+                    .stroke(Color.white.opacity(0.45), style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
+
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 8, height: 8)
+                        .shadow(color: chartColor, radius: 4)
+                        .position(pt)
+                }
+            }
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { val in
+                        isDragging = true
+                        let clampedX = min(max(0, val.location.x), w)
+                        let ratio = clampedX / max(1, w)
+                        let idx = min(points.count - 1, max(0, Int(round(ratio * Double(points.count - 1)))))
+                        draggedIndex = idx
+                    }
+                    .onEnded { _ in
+                        withAnimation(.easeOut(duration: 0.2)) {
+                            isDragging = false
+                            draggedIndex = nil
+                        }
+                    }
+            )
+        }
+    }
 }
+
+
+// MARK: - AIInsightCardTracker
+
+@MainActor
+final class AIInsightCardTracker {
+    static let shared = AIInsightCardTracker()
+    private var animatedKeys = Set<String>()
+
+    func hasAnimated(for key: String) -> Bool {
+        animatedKeys.contains(key)
+    }
+
+    func markAnimated(for key: String) {
+        animatedKeys.insert(key)
+    }
+}
+
 
 // MARK: - AIInsightCardView (with typing animation)
 
@@ -452,6 +656,7 @@ struct AIInsightCardView: View {
     let chips: [InsightChip]
     var title: String = "Market Intelligence"
     var horizontalPadding: CGFloat = 16
+    var cardKey: String? = nil
 
     private let accent = Color.PrimaryYellow
     @State private var selectedIndex: Int      = 0
@@ -460,8 +665,39 @@ struct AIInsightCardView: View {
     @State private var targetWords:   [String] = []
     @State private var timer:         Timer?   = nil
     @State private var isExpanded:    Bool     = false
-    @State private var showReadMore:  Bool     = false
-    @State private var hasStarted:    Bool     = false
+    @State private var showReadMore:     Bool     = false
+    @State private var hasStarted:       Bool     = false
+    @State private var isFinishedTyping: Bool     = false
+
+    private var resolvedCardKey: String {
+        if let cardKey = cardKey, !cardKey.isEmpty {
+            return cardKey
+        }
+        return title
+    }
+
+    init(
+        chips: [InsightChip],
+        title: String = "Market Intelligence",
+        horizontalPadding: CGFloat = 16,
+        cardKey: String? = nil
+    ) {
+        self.chips = chips
+        self.title = title
+        self.horizontalPadding = horizontalPadding
+        self.cardKey = cardKey
+
+        let key = (cardKey != nil && !cardKey!.isEmpty) ? cardKey! : title
+        let alreadyAnimated = AIInsightCardTracker.shared.hasAnimated(for: key)
+        if alreadyAnimated, let firstChip = chips.first {
+            let words = firstChip.text.components(separatedBy: " ")
+            _targetWords = State(initialValue: words)
+            _wordIndex = State(initialValue: words.count)
+            _showReadMore = State(initialValue: words.count > 45)
+            _isFinishedTyping = State(initialValue: true)
+            _hasStarted = State(initialValue: true)
+        }
+    }
 
     private var selectedChip: InsightChip? { chips.indices.contains(selectedIndex) ? chips[selectedIndex] : nil }
     private var displayedText: String { targetWords.prefix(wordIndex).joined(separator: " ") }
@@ -482,8 +718,9 @@ struct AIInsightCardView: View {
                 .overlay(Capsule().strokeBorder(accent.opacity(0.35), lineWidth: 0.5))
 
                 // Animated text
-                let isLong = targetWords.count > 30
-                let lineLimit: Int? = (isLong && !isExpanded) ? 3 : nil
+                let isLong = targetWords.count > 45
+                let lineLimit: Int? = (isLong && !isExpanded) ? 6 : nil
+                let shouldFadeBottom = isLong && !isExpanded && showReadMore
                 VStack(alignment: .leading, spacing: 8) {
                     buildAttributedText(from: displayedText)
                         .font(.subheadline)
@@ -493,6 +730,18 @@ struct AIInsightCardView: View {
                         .lineLimit(lineLimit)
                         .frame(maxWidth: .infinity, alignment: .topLeading)
                         .transaction { $0.animation = nil }
+                        .mask(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .black, location: 0.0),
+                                    .init(color: .black, location: shouldFadeBottom ? 0.50 : 1.0),
+                                    .init(color: .black.opacity(shouldFadeBottom ? 0.12 : 1.0), location: 1.0)
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            .animation(.easeInOut(duration: 0.35), value: shouldFadeBottom)
+                        )
 
                     if isLong && showReadMore {
                         Button {
@@ -508,11 +757,12 @@ struct AIInsightCardView: View {
                             .frame(maxWidth: .infinity, alignment: .trailing)
                         }
                         .buttonStyle(.plain)
+                        .padding(.top, 2)
                     }
                 }
-                .frame(maxWidth: .infinity, minHeight: 80, alignment: .topLeading)
+                .frame(maxWidth: .infinity, minHeight: 130, alignment: .topLeading)
             }
-            .padding(12)
+            .padding(14)
 
             // Disclaimer Banner (above chips)
             Text("Based on available data and for informational purposes only, not financial advice to buy or sell. Always Do your own research before making investment decisions.")
@@ -536,9 +786,9 @@ struct AIInsightCardView: View {
                 HStack(spacing: 6) {
                     ForEach(Array(chips.enumerated()), id: \.element.id) { index, chip in
                         Button {
+                            guard selectedIndex != index else { return }
                             selectedIndex = index
-                            isExpanded    = false
-                            startTyping(text: chip.text)
+                            displayInstant(text: chip.text)
                         } label: {
                             Text(chip.label)
                                 .font(.caption2)
@@ -557,16 +807,24 @@ struct AIInsightCardView: View {
             }
             .padding(.bottom, 12)
         }
-        .frame(minHeight: 150, alignment: .top)
+        .frame(minHeight: 310, alignment: .top)
         .background(Color.AICardBg)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.white.opacity(0.12), lineWidth: 1))
         .padding(.horizontal, horizontalPadding)
         .onAppear {
             isPulsing = true
-            if !hasStarted, let chip = selectedChip {
-                hasStarted = true
-                startTyping(text: chip.text)
+            let key = resolvedCardKey
+            if AIInsightCardTracker.shared.hasAnimated(for: key) {
+                if let chip = selectedChip {
+                    displayInstant(text: chip.text)
+                }
+            } else {
+                if !hasStarted, let chip = selectedChip {
+                    hasStarted = true
+                    AIInsightCardTracker.shared.markAnimated(for: key)
+                    startTyping(text: chip.text)
+                }
             }
         }
         .onChange(of: chips.first?.text) { newText in
@@ -574,21 +832,35 @@ struct AIInsightCardView: View {
             let currentTarget = targetWords.joined(separator: " ")
             guard newText != currentTarget else { return }
             selectedIndex = 0
-            isExpanded = false
-            startTyping(text: newText)
+            let key = resolvedCardKey
+            if AIInsightCardTracker.shared.hasAnimated(for: key) {
+                displayInstant(text: newText)
+            } else {
+                AIInsightCardTracker.shared.markAnimated(for: key)
+                startTyping(text: newText)
+            }
         }
         .onDisappear { timer?.invalidate(); timer = nil }
+    }
+
+    private func displayInstant(text: String) {
+        timer?.invalidate(); timer = nil
+        targetWords = text.components(separatedBy: " ")
+        wordIndex = targetWords.count
+        showReadMore = targetWords.count > 45
+        isFinishedTyping = true
     }
 
     private func startTyping(text: String) {
         timer?.invalidate(); timer = nil
         showReadMore = false; isExpanded = false
+        isFinishedTyping = false
         targetWords = text.components(separatedBy: " ")
         wordIndex = 0
         timer = Timer.scheduledTimer(withTimeInterval: 0.07, repeats: true) { t in
             if wordIndex < targetWords.count {
                 wordIndex += 1
-                if wordIndex == 30 && !showReadMore {
+                if wordIndex >= 45 && !showReadMore {
                     DispatchQueue.main.async {
                         withAnimation(.easeIn(duration: 0.3)) { showReadMore = true }
                     }
@@ -599,10 +871,74 @@ struct AIInsightCardView: View {
                         withAnimation(.easeIn(duration: 0.3)) { showReadMore = true }
                     }
                 }
+                DispatchQueue.main.async {
+                    withAnimation(.easeInOut(duration: 0.25)) { isFinishedTyping = true }
+                }
                 t.invalidate(); timer = nil
             }
         }
     }
+
+    private static let srcCapsuleBadge: UIImage = {
+        let fontRegular = UIFont.systemFont(ofSize: 9.0, weight: .regular)
+        let fontBold = UIFont.systemFont(ofSize: 9.0, weight: .semibold)
+
+        let srcText = "Src:"
+        let brandText = "Sectors"
+
+        let srcAttrs: [NSAttributedString.Key: Any] = [
+            .font: fontRegular,
+            .foregroundColor: UIColor.white.withAlphaComponent(0.65)
+        ]
+        let brandAttrs: [NSAttributedString.Key: Any] = [
+            .font: fontBold,
+            .foregroundColor: UIColor.white.withAlphaComponent(0.95)
+        ]
+
+        let srcSize = (srcText as NSString).size(withAttributes: srcAttrs)
+        let brandSize = (brandText as NSString).size(withAttributes: brandAttrs)
+        let iconSize: CGFloat = 8.5
+        let padH: CGFloat = 5.5
+        let spacing: CGFloat = 3.0
+        let badgeHeight: CGFloat = 16.0
+
+        let totalWidth = padH + srcSize.width + spacing + iconSize + spacing + brandSize.width + padH
+        let badgeSize = CGSize(width: ceil(totalWidth), height: badgeHeight)
+
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = UIScreen.main.scale
+
+        return UIGraphicsImageRenderer(size: badgeSize, format: format).image { ctx in
+            let rect = CGRect(origin: .zero, size: badgeSize).insetBy(dx: 0.5, dy: 0.5)
+            let path = UIBezierPath(roundedRect: rect, cornerRadius: badgeHeight / 2)
+
+            // Capsule Background
+            UIColor.white.withAlphaComponent(0.09).setFill()
+            path.fill()
+
+            // Capsule Stroke Border
+            UIColor.white.withAlphaComponent(0.18).setStroke()
+            path.lineWidth = 0.6
+            path.stroke()
+
+            // Draw "src:"
+            var currentX = padH
+            let srcY = (badgeHeight - srcSize.height) / 2.0
+            (srcText as NSString).draw(at: CGPoint(x: currentX, y: srcY), withAttributes: srcAttrs)
+            currentX += srcSize.width + spacing
+
+            // Draw Sectors Logo
+            if let logo = UIImage(named: "sectors_logo") {
+                let iconY = (badgeHeight - iconSize) / 2.0
+                logo.draw(in: CGRect(x: currentX, y: iconY, width: iconSize, height: iconSize))
+            }
+            currentX += iconSize + spacing
+
+            // Draw "Sectors"
+            let brandY = (badgeHeight - brandSize.height) / 2.0
+            (brandText as NSString).draw(at: CGPoint(x: currentX, y: brandY), withAttributes: brandAttrs)
+        }
+    }()
 
     private func buildAttributedText(from raw: String) -> Text {
         var result = Text("")
@@ -614,6 +950,14 @@ struct AIInsightCardView: View {
                 result = result + Text(part).font(.system(size: 14)).foregroundColor(.white)
             }
         }
+
+        if isFinishedTyping {
+            result = result
+                + Text(" ")
+                + Text(Image(uiImage: Self.srcCapsuleBadge))
+                    .baselineOffset(-2.0)
+        }
+
         return result
     }
 }
@@ -691,16 +1035,14 @@ struct InvelioLogoView: View {
                 return img
             }
         }
-
-        // 2. Main bundle resources
+        // 2. Direct bundle resource search
         for name in names {
             if let path = Bundle.main.path(forResource: name, ofType: "png"),
                let img = UIImage(contentsOfFile: path) {
                 return img
             }
         }
-
-        // 3. Fallback filesystem search for Xcode Canvas preview
+        // 3. Absolute path fallback
         let candidatePaths = [
             "/Users/surya/Documents/2026/Hackaton/Sectors/Sectors-Hackathon-main/ios/Invelio/Resources/Assets.xcassets/invelio-icon.imageset/Invelio-logo.png",
             "/Users/surya/Documents/2026/Hackaton/Sectors/Sectors-Hackathon-main/ios/Invelio/Sources/Assets.xcassets/invelio-icon.imageset/Invelio-logo.png",
@@ -713,23 +1055,148 @@ struct InvelioLogoView: View {
                 return img
             }
         }
-
         return nil
     }
 }
 
 // ╔══════════════════════════════════════════════════════════════════╗
-// ║  6.  MAIN HOME VIEW                                            ║
+// ║  6.  PREFETCH STORES & MAIN HOME VIEW                          ║
 // ╚══════════════════════════════════════════════════════════════════╝
+
+// MARK: - StockDetailCache (Fast In-Memory Cache for Stock Detail & Chart)
+
+@MainActor
+final class StockDetailCache {
+    static let shared = StockDetailCache()
+    private var cache: [String: (detail: BackendStockDetail, points: [StockHistoryPoint], date: Date)] = [:]
+
+    func get(ticker: String) -> (detail: BackendStockDetail, points: [StockHistoryPoint])? {
+        let clean = ticker.components(separatedBy: ".").first?.uppercased() ?? ticker.uppercased()
+        if let entry = cache[clean], Date().timeIntervalSince(entry.date) < 300 {
+            return (entry.detail, entry.points)
+        }
+        return nil
+    }
+
+    func set(ticker: String, detail: BackendStockDetail) {
+        let clean = ticker.components(separatedBy: ".").first?.uppercased() ?? ticker.uppercased()
+        let pts = detail.toHistoryPoints()
+        cache[clean] = (detail, pts, Date())
+    }
+}
+
+// MARK: - HomeDataStore (Background Prefetch & Shared State)
+
+@MainActor
+final class HomeDataStore: ObservableObject {
+    static let shared = HomeDataStore()
+
+    @Published var liveStocks: [StockItem] = []
+    @Published var isLoadingStocks: Bool = true
+    @Published var stockErrorMessage: String? = nil
+
+    @Published var insightChips: [InsightChip] = []
+    @Published var isLoadingInsights: Bool = true
+    @Published var insightLoadFailed: Bool = false
+
+    private var isPrefetchingTop3: Bool = false
+
+    var topRecommendedStocks: [StockItem] {
+        let sorted = liveStocks.sorted { $0.percentChange > $1.percentChange }
+        return Array(sorted.prefix(3))
+    }
+
+    var otherStocks: [StockItem] {
+        let topIDs = Set(topRecommendedStocks.map(\.id))
+        return liveStocks.filter { !topIDs.contains($0.id) }
+    }
+
+    func preloadAll(forceRefresh: Bool = false) async {
+        async let stocksTask: Void = loadStocks(forceRefresh: forceRefresh)
+        async let insightsTask: Void = loadMarketIntelligence(forceRefresh: forceRefresh)
+        _ = await (stocksTask, insightsTask)
+
+        await prefetchTop3StockDetails()
+    }
+
+    func loadStocks(forceRefresh: Bool = false) async {
+        if liveStocks.isEmpty {
+            self.isLoadingStocks = true
+            self.stockErrorMessage = nil
+        }
+        do {
+            let backendStocks = try await APIClient.shared.fetchStocks(forceRefresh: forceRefresh)
+            if !backendStocks.isEmpty {
+                self.liveStocks = backendStocks.map { $0.toStockItem() }
+                self.isLoadingStocks = false
+                return
+            }
+        } catch {
+            // Fallback to local seeds if backend unavailable
+        }
+
+        let localSeeds = SectorsStocksLoader.loadStockItems()
+        if !localSeeds.isEmpty {
+            self.liveStocks = localSeeds
+        } else {
+            self.stockErrorMessage = "Belum dapat memuat data saham dari PostgreSQL."
+        }
+        self.isLoadingStocks = false
+    }
+
+    func loadMarketIntelligence(forceRefresh: Bool = false) async {
+        if insightChips.isEmpty {
+            self.isLoadingInsights = true
+            self.insightLoadFailed = false
+        }
+        do {
+            let response = try await APIClient.shared.fetchMarketIntelligence(forceRefresh: forceRefresh)
+            let chips = response.insights.map { InsightChip(label: $0.label, text: $0.text) }
+            if !chips.isEmpty {
+                self.insightChips = chips
+            }
+            self.isLoadingInsights = false
+        } catch {
+            self.isLoadingInsights = false
+            if self.insightChips.isEmpty {
+                self.insightLoadFailed = true
+            }
+        }
+    }
+
+    func prefetchTop3StockDetails() async {
+        guard !isPrefetchingTop3 else { return }
+        isPrefetchingTop3 = true
+        defer { isPrefetchingTop3 = false }
+
+        let targets = topRecommendedStocks
+        for stock in targets {
+            do {
+                let detail = try await APIClient.shared.fetchStockDetail(ticker: stock.symbol)
+                StockDetailCache.shared.set(ticker: stock.symbol, detail: detail)
+            } catch {
+                // Ignore prefetch error
+            }
+        }
+    }
+}
 
 struct HomeView: View {
     @Query private var holdingLots: [HoldingLot]
-    @State private var liveStocks: [StockItem] = []
-    @State private var isLoading: Bool = true
-    @State private var loadErrorMessage: String? = nil
+    @ObservedObject private var store = HomeDataStore.shared
+    @State private var showNotifications: Bool = false
+    @StateObject private var alertViewModel = AlertViewModel()
 
     private var displayedStocks: [StockItem] {
-        liveStocks
+        store.liveStocks
+    }
+
+    private var topRecommendedStocks: [StockItem] {
+        store.topRecommendedStocks
+    }
+
+    private var otherStocks: [StockItem] {
+        store.otherStocks
     }
 
     private var dynamicSummary: PortfolioSummaryData {
@@ -775,26 +1242,43 @@ struct HomeView: View {
                         .padding(.top, 0).padding(.bottom, 4)
 
                     // 2) Market Intelligence Card
-                    AIInsightCardView(chips: dummyInsightChips)
+                    if store.isLoadingInsights && store.insightChips.isEmpty {
+                        insightLoadingPlaceholder
+                            .padding(.vertical, 4)
+                    } else if !store.insightChips.isEmpty {
+                        AIInsightCardView(
+                            chips: store.insightChips,
+                            cardKey: "home_market_analysis"
+                        )
                         .padding(.vertical, 4)
-
-                    // 3) Watchlist Header
-                    sectionHeader("Recommended Stocks")
-                        .padding(.top, 16)
-                        .padding(.bottom, 6)
-
-                    // 4) Stock List from PostgreSQL
-                    if isLoading && liveStocks.isEmpty {
-                        stocksLoadingPlaceholderView
-                    } else if liveStocks.isEmpty {
-                        emptyOrRetryView
-                    } else {
-                        StockListView(items: displayedStocks)
+                    } else if store.insightLoadFailed {
+                        insightErrorCard
+                            .padding(.vertical, 4)
                     }
 
-                    // 5) Search Hint
-                    searchHint
-                        .padding(.top, 8).padding(.bottom, 20)
+                    // 3) Stock Sections
+                    if store.isLoadingStocks && store.liveStocks.isEmpty {
+                        stocksLoadingPlaceholderView
+                    } else if store.liveStocks.isEmpty {
+                        emptyOrRetryView
+                    } else {
+                        sectionHeader("Top 3 Stocks")
+                            .padding(.top, 16)
+                            .padding(.bottom, 6)
+
+                        StockListView(items: topRecommendedStocks)
+                        
+                        if !otherStocks.isEmpty {
+                            subSectionHeader("Other Stocks")
+                                .padding(.top, 20)
+                                .padding(.bottom, 6)
+
+                            StockListView(items: otherStocks)
+                        }
+                    }
+
+                    // 5) Coverage Disclaimer Card
+                    coverageDisclaimerCard
                 }
             }
             .background(Color.DarkPurpleAppBackground.ignoresSafeArea())
@@ -802,46 +1286,142 @@ struct HomeView: View {
             .toolbar(.hidden, for: .navigationBar)
             .safeAreaInset(edge: .top) { topBar }
             .task {
-                await loadStocksFromPostgres()
+                await alertViewModel.loadAlerts()
+                if store.liveStocks.isEmpty || store.insightChips.isEmpty {
+                    await store.preloadAll()
+                } else {
+                    await store.prefetchTop3StockDetails()
+                }
             }
             .refreshable {
-                await loadStocksFromPostgres()
+                async let alertsTask: Void = alertViewModel.loadAlerts()
+                async let storeTask: Void = store.preloadAll(forceRefresh: true)
+                _ = await (alertsTask, storeTask)
+            }
+            .fullScreenCover(isPresented: $showNotifications) {
+                NotificationView()
+            }
+            .onChange(of: showNotifications) {
+                if !showNotifications {
+                    Task { await alertViewModel.loadAlerts() }
+                }
             }
         }
     }
 
-    private func loadStocksFromPostgres() async {
-        if liveStocks.isEmpty {
-            await MainActor.run {
-                self.isLoading = true
-                self.loadErrorMessage = nil
-            }
-        }
+    private var insightLoadingPlaceholder: some View {
+        VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 12) {
+                // Badge skeleton
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.PrimaryYellow.opacity(0.12))
+                    .frame(width: 130, height: 22)
 
-        // 1. Fetch from FastAPI Backend
-        do {
-            let backendStocks = try await APIClient.shared.fetchStocks()
-            if !backendStocks.isEmpty {
-                await MainActor.run {
-                    self.liveStocks = backendStocks.map { $0.toStockItem() }
-                    self.isLoading = false
+                // Text line skeletons
+                VStack(alignment: .leading, spacing: 8) {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.white.opacity(0.12))
+                        .frame(height: 14)
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.white.opacity(0.10))
+                        .frame(height: 14)
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.white.opacity(0.09))
+                        .frame(height: 14)
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.white.opacity(0.08))
+                        .frame(height: 14)
+                    HStack(spacing: 6) {
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color.white.opacity(0.07))
+                            .frame(width: 140, height: 14)
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.white.opacity(0.08))
+                            .frame(width: 72, height: 16)
+                    }
                 }
-                return
+                .frame(maxWidth: .infinity, minHeight: 130, alignment: .topLeading)
             }
-        } catch {
-            // Fallback to local seeds if backend unavailable
-        }
+            .padding(14)
 
-        // 2. Offline / local fallback from seeded sectors_stocks.json
-        let localSeeds = SectorsStocksLoader.loadStockItems()
-        await MainActor.run {
-            if !localSeeds.isEmpty {
-                self.liveStocks = localSeeds
-            } else {
-                self.loadErrorMessage = "Belum dapat memuat data saham dari PostgreSQL."
+            // Disclaimer Banner skeleton (matching real card)
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.PrimaryYellow.opacity(0.06))
+                .frame(maxWidth: .infinity)
+                .frame(height: 48)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .strokeBorder(Color.PrimaryYellow.opacity(0.18), lineWidth: 0.8)
+                )
+                .padding(.horizontal, 12)
+                .padding(.bottom, 10)
+
+            // Chip skeletons
+            HStack(spacing: 6) {
+                ForEach(0..<3, id: \.self) { _ in
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.white.opacity(0.08))
+                        .frame(width: 95, height: 24)
+                }
+                Spacer(minLength: 0)
             }
-            self.isLoading = false
+            .padding(.horizontal, 12)
+            .padding(.bottom, 12)
         }
+        .frame(minHeight: 310, alignment: .top)
+        .background(Color.AICardBg)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.white.opacity(0.12), lineWidth: 1))
+        .padding(.horizontal, 16)
+    }
+
+    private var insightErrorCard: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 6) {
+                Circle().fill(Color.PrimaryYellow).frame(width: 7, height: 7)
+                Text("Market Intelligence")
+                    .font(.caption2).foregroundColor(.PrimaryYellow).kerning(0.8)
+            }
+            .padding(.horizontal, 10).padding(.vertical, 5)
+            .background(Color.PrimaryYellow.opacity(0.12)).clipShape(Capsule())
+            .overlay(Capsule().strokeBorder(Color.PrimaryYellow.opacity(0.35), lineWidth: 0.5))
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            VStack(spacing: 8) {
+                Image(systemName: "exclamationmark.triangle")
+                    .font(.title3).foregroundColor(.white.opacity(0.5))
+                Text("Unable to load market analysis. Pull down to refresh or try again later.")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.6))
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(2)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+
+            Button {
+                Task { await store.loadMarketIntelligence(forceRefresh: true) }
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 11, weight: .semibold))
+                    Text("Retry")
+                        .font(.system(size: 12, weight: .semibold))
+                }
+                .foregroundColor(.PrimaryYellow)
+                .padding(.horizontal, 14).padding(.vertical, 6)
+                .background(Color.PrimaryYellow.opacity(0.12))
+                .clipShape(Capsule())
+                .overlay(Capsule().strokeBorder(Color.PrimaryYellow.opacity(0.35), lineWidth: 0.5))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, minHeight: 200)
+        .background(Color.AICardBg)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.white.opacity(0.12), lineWidth: 1))
+        .padding(.horizontal, 16)
     }
 
     // MARK: - Skeleton Shimmer Loading Placeholder
@@ -886,13 +1466,13 @@ struct HomeView: View {
             Image(systemName: "server.rack")
                 .font(.system(size: 32))
                 .foregroundColor(.PrimaryYellow)
-            Text(loadErrorMessage ?? "Belum ada data saham dari PostgreSQL.")
+            Text(store.stockErrorMessage ?? "Belum ada data saham dari PostgreSQL.")
                 .font(.subheadline)
                 .foregroundColor(.white.opacity(0.8))
                 .multilineTextAlignment(.center)
             Button(action: {
                 Task {
-                    await loadStocksFromPostgres()
+                    await store.loadStocks(forceRefresh: true)
                 }
             }) {
                 HStack(spacing: 6) {
@@ -923,34 +1503,60 @@ struct HomeView: View {
                     .foregroundColor(.white)
             }
             Spacer()
-            NotificationButton(unreadCount: 3) { /* handle tap */ }
+            NotificationButton(unreadCount: alertViewModel.unreadCount) {
+                showNotifications = true
+            }
         }
         .padding(.horizontal, 16).padding(.vertical, 8)
         .background(Color.DarkPurpleAppBackground)
     }
 
-    // MARK: - Search Hint
+    // MARK: - Coverage Disclaimer Card
 
-    private var searchHint: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "magnifyingglass").foregroundColor(.PrimaryYellow)
-            Text("Search IDX stocks and more")
-                .font(.caption).foregroundColor(.white.opacity(0.7))
-            Spacer()
-            Image(systemName: "chevron.right")
-                .font(.caption2).foregroundColor(.white.opacity(0.7))
+    private var coverageDisclaimerCard: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "info.circle.fill")
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.PrimaryYellow)
+                .padding(.top, 1)
+
+            (Text("Coverage Disclaimer: ")
+                .font(.system(size: 12, weight: .bold))
+                .foregroundColor(.PrimaryYellow)
+            + Text("This app currently covers only the Top 10 Indonesian stocks (IDX) to optimize API credit usage and maintain efficient data access.")
+                .font(.system(size: 12, weight: .regular))
+                .foregroundColor(.white.opacity(0.85)))
+            .lineSpacing(3)
+            .fixedSize(horizontal: false, vertical: true)
+
+            Spacer(minLength: 0)
         }
-        .padding(.horizontal, 16).padding(.vertical, 12)
-        .background(Color(.systemGray6).opacity(0.18))
-        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(Color.PrimaryYellow.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.PrimaryYellow.opacity(0.25), lineWidth: 1)
+        )
         .padding(.horizontal, 16)
+        .padding(.top, 12)
+        .padding(.bottom, 24)
     }
 
     // MARK: - Section Header
 
     private func sectionHeader(_ title: String) -> some View {
         HStack {
-            Text(title).font(.title2).fontWeight(.bold).foregroundColor(.white)
+            Text(title).font(.title2).fontWeight(.bold).foregroundColor(.PrimaryYellow)
+            Spacer()
+        }
+        .padding(.horizontal).padding(.bottom, 6)
+    }
+    
+    private func subSectionHeader(_ title: String) -> some View {
+        HStack {
+            Text(title).font(.title3).fontWeight(.bold).foregroundColor(.white)
             Spacer()
         }
         .padding(.horizontal).padding(.bottom, 6)

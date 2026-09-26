@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import uuid
 from datetime import UTC, datetime
 
@@ -48,11 +50,17 @@ class PricePoint(BaseModel):
     volume: int | None
 
 
+class InsightChip(BaseModel):
+    label: str
+    text: str
+
+
 class StockDetail(StockSummary):
     fundamentals: Fundamentals
     week52_high: float | None
     week52_low: float | None
     prices: list[PricePoint]
+    insights: list[InsightChip] | None = None
 
 
 class IndexPoint(BaseModel):
@@ -200,3 +208,17 @@ class PortfolioSummary(BaseModel):
     pnl: float
     pnl_pct: float
     positions: list[Position]
+
+
+# -- Market Intelligence & Stock Insights ------------------------------------
+
+
+class MarketIntelligenceResponse(BaseModel):
+    generated_date: str
+    insights: list[InsightChip]
+
+
+class StockInsightsResponse(BaseModel):
+    ticker: str
+    generated_date: str
+    insights: list[InsightChip]

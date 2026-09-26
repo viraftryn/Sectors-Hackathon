@@ -5,7 +5,11 @@ actor APIClient {
     static let shared = APIClient()
 
     #if DEBUG
-    private let baseURL = URL(string: "http://10.67.50.36:8000/api")!
+    #if targetEnvironment(simulator)
+    private let baseURL = URL(string: "http://192.168.0.133:8000/api")!
+    #else
+    private let baseURL = URL(string: "http://0.0.0.0:8000/api")!
+    #endif
     #else
     private let baseURL = URL(string: "https://your-production-url.com/api")!
     #endif
@@ -29,8 +33,23 @@ actor APIClient {
 
     // MARK: - Generic HTTP Methods
 
+    private func buildURL(for path: String) -> URL {
+        if path.contains("?") {
+            let parts = path.split(separator: "?", maxSplits: 1, omittingEmptySubsequences: false)
+            let basePath = String(parts[0])
+            let queryString = String(parts[1])
+            if var components = URLComponents(url: baseURL.appendingPathComponent(basePath), resolvingAgainstBaseURL: true) {
+                components.query = queryString
+                if let url = components.url {
+                    return url
+                }
+            }
+        }
+        return baseURL.appendingPathComponent(path)
+    }
+
     func get<T: Decodable>(_ path: String) async throws -> T {
-        let url = baseURL.appendingPathComponent(path)
+        let url = buildURL(for: path)
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue(deviceId, forHTTPHeaderField: "X-Device-Id")
@@ -39,7 +58,10 @@ actor APIClient {
 
         guard let httpResponse = response as? HTTPURLResponse,
               (200...299).contains(httpResponse.statusCode) else {
-            throw APIError.requestFailed
+            let errorBody = String(data: data, encoding: .utf8) ?? ""
+            let code = (response as? HTTPURLResponse)?.statusCode ?? 0
+            print("❌ [APIClient] GET \(path) failed (HTTP \(code)): \(errorBody)")
+            throw APIError.serverError(statusCode: code, detail: errorBody)
         }
 
         return try JSONDecoder().decode(T.self, from: data)
@@ -57,7 +79,10 @@ actor APIClient {
 
         guard let httpResponse = response as? HTTPURLResponse,
               (200...299).contains(httpResponse.statusCode) else {
-            throw APIError.requestFailed
+            let errorBody = String(data: data, encoding: .utf8) ?? ""
+            let code = (response as? HTTPURLResponse)?.statusCode ?? 0
+            print("❌ [APIClient] POST \(path) failed (HTTP \(code)): \(errorBody)")
+            throw APIError.serverError(statusCode: code, detail: errorBody)
         }
 
         return try JSONDecoder().decode(T.self, from: data)
@@ -69,24 +94,47 @@ actor APIClient {
         request.httpMethod = "PATCH"
         request.setValue(deviceId, forHTTPHeaderField: "X-Device-Id")
 
-        let (_, response) = try await session.data(for: request)
+        let (data, response) = try await session.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse,
               (200...299).contains(httpResponse.statusCode) else {
-            throw APIError.requestFailed
+            let errorBody = String(data: data, encoding: .utf8) ?? ""
+            let code = (response as? HTTPURLResponse)?.statusCode ?? 0
+            print("❌ [APIClient] PATCH \(path) failed (HTTP \(code)): \(errorBody)")
+            throw APIError.serverError(statusCode: code, detail: errorBody)
         }
     }
 
+    // MARK: - In-Memory Cache
+    private var stockDetailCache: [String: (data: BackendStockDetail, timestamp: Date)] = [:]
+    private var stocksCache: (data: [BackendStockSummary], timestamp: Date)? = nil
+    private var marketIntelligenceCache: (data: BackendMarketIntelligence, timestamp: Date)? = nil
+    private let defaultCacheTTL: TimeInterval = 300 // 5 minutes
+
     // MARK: - Market & Stocks
 
-    func fetchStocks() async throws -> [BackendStockSummary] {
+    func fetchStocks(forceRefresh: Bool = false) async throws -> [BackendStockSummary] {
+        if !forceRefresh, let cached = stocksCache, Date().timeIntervalSince(cached.timestamp) < defaultCacheTTL {
+            return cached.data
+        }
         let response: BackendStockListResponse = try await get("stocks")
+        stocksCache = (response.stocks, Date())
         return response.stocks
     }
 
-    func fetchStockDetail(ticker: String) async throws -> BackendStockDetail {
+    func fetchStockDetail(ticker: String, forceRefresh: Bool = false) async throws -> BackendStockDetail {
+        let clean = ticker.components(separatedBy: ".").first?.uppercased() ?? ticker.uppercased()
+        if !forceRefresh, let cached = stockDetailCache[clean], Date().timeIntervalSince(cached.timestamp) < defaultCacheTTL {
+            return cached.data
+        }
+        let detail: BackendStockDetail = try await get("stock/\(clean)")
+        stockDetailCache[clean] = (detail, Date())
+        return detail
+    }
+
+    func fetchStockInsights(ticker: String) async throws -> BackendStockInsights {
         let clean = ticker.components(separatedBy: ".").first ?? ticker
-        return try await get("stock/\(clean)")
+        return try await get("stock/\(clean)/insights")
     }
 
     func fetchMarketOverview() async throws -> BackendMarketOverview {
@@ -95,6 +143,17 @@ actor APIClient {
 
     func fetchRecommendations() async throws -> BackendRecommendationList {
         return try await get("recommendations")
+    }
+
+    // MARK: - Market Intelligence
+
+    func fetchMarketIntelligence(forceRefresh: Bool = false) async throws -> BackendMarketIntelligence {
+        if !forceRefresh, let cached = marketIntelligenceCache, Date().timeIntervalSince(cached.timestamp) < defaultCacheTTL {
+            return cached.data
+        }
+        let result: BackendMarketIntelligence = try await get("market-intelligence")
+        marketIntelligenceCache = (result, Date())
+        return result
     }
 
     // MARK: - Portfolio & Holdings
@@ -109,6 +168,7 @@ actor APIClient {
     }
 
     func buyStock(
+        id: UUID? = nil,
         ticker: String,
         pricePerShare: Double,
         shares: Double? = nil,
@@ -124,6 +184,7 @@ actor APIClient {
         }
 
         let payload = BackendHoldingLotIn(
+            id: id?.uuidString.lowercased(),
             ticker: ticker.components(separatedBy: ".").first?.uppercased() ?? ticker.uppercased(),
             pricePerShare: pricePerShare,
             shares: shares,
@@ -152,10 +213,13 @@ actor APIClient {
         request.httpMethod = "DELETE"
         request.setValue(deviceId, forHTTPHeaderField: "X-Device-Id")
 
-        let (_, response) = try await session.data(for: request)
+        let (data, response) = try await session.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse,
               (200...299).contains(httpResponse.statusCode) else {
-            throw APIError.requestFailed
+            let errorBody = String(data: data, encoding: .utf8) ?? ""
+            let code = (response as? HTTPURLResponse)?.statusCode ?? 0
+            print("❌ [APIClient] DELETE portfolio/lots failed (HTTP \(code)): \(errorBody)")
+            throw APIError.serverError(statusCode: code, detail: errorBody)
         }
     }
 
@@ -168,6 +232,30 @@ actor APIClient {
 
     func markAlertRead(alertId: Int) async throws {
         try await patchEmpty("alerts/\(alertId)/read")
+    }
+
+    func markAllAlertsRead() async throws {
+        let url = baseURL.appendingPathComponent("alerts/read-all")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue(deviceId, forHTTPHeaderField: "X-Device-Id")
+        let (_, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.requestFailed
+        }
+    }
+
+    func triggerAlertScan() async throws {
+        let url = baseURL.appendingPathComponent("alerts/scan")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue(deviceId, forHTTPHeaderField: "X-Device-Id")
+        let (_, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.requestFailed
+        }
     }
 
     // MARK: - SSE stream (POST /chat/stream)
@@ -314,6 +402,7 @@ struct BackendHoldingLotList: Codable, Sendable {
 }
 
 struct BackendHoldingLotIn: Codable, Sendable {
+    let id: String?
     let ticker: String
     let pricePerShare: Double
     let shares: Double?
@@ -321,7 +410,7 @@ struct BackendHoldingLotIn: Codable, Sendable {
     let buyDate: String?
 
     enum CodingKeys: String, CodingKey {
-        case ticker
+        case id, ticker
         case pricePerShare = "price_per_share"
         case shares
         case totalInvested = "total_invested"
@@ -422,16 +511,47 @@ struct BackendAlertList: Codable, Sendable {
     }
 }
 
+// MARK: - Market Intelligence DTOs
+
+struct BackendInsightChip: Codable, Sendable {
+    let label: String
+    let text: String
+}
+
+struct BackendMarketIntelligence: Codable, Sendable {
+    let generatedDate: String
+    let insights: [BackendInsightChip]
+
+    enum CodingKeys: String, CodingKey {
+        case generatedDate = "generated_date"
+        case insights
+    }
+}
+
+struct BackendStockInsights: Codable, Sendable {
+    let ticker: String
+    let generatedDate: String
+    let insights: [BackendInsightChip]
+
+    enum CodingKeys: String, CodingKey {
+        case ticker
+        case generatedDate = "generated_date"
+        case insights
+    }
+}
+
 // MARK: - Errors
 
 enum APIError: Error, LocalizedError {
     case requestFailed
     case decodingFailed
+    case serverError(statusCode: Int, detail: String)
 
     var errorDescription: String? {
         switch self {
         case .requestFailed: "Request failed"
         case .decodingFailed: "Failed to decode response"
+        case .serverError(let code, let detail): "Server error (\(code)): \(detail)"
         }
     }
 }

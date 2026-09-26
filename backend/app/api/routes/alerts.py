@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.agents.alert import AlertAgent
 from app.cache import _coerce_dt
 from app.db.database import get_db
-from app.models.schemas import Alert, AlertList, utc_iso
+from app.models.schemas import Alert, AlertList
 
 logger = logging.getLogger(__name__)
 
@@ -30,9 +30,12 @@ def to_alert(row: Any) -> Alert:
 
 
 @router.post("/alerts/scan")
-async def scan_alerts(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
+async def scan_alerts(
+    x_device_id: str | None = Header(default=None),
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, Any]:
     """Trigger the Alert Agent to scan for market anomalies."""
-    agent = AlertAgent(db)
+    agent = AlertAgent(db, device_id=x_device_id)
     try:
         result = await agent.run()
     except Exception as exc:
@@ -62,6 +65,20 @@ async def list_alerts(
         params,
     )
     return AlertList(unread_count=unread.scalar_one(), alerts=[to_alert(r) for r in rows])
+
+
+@router.post("/alerts/read-all")
+async def mark_all_alerts_read(
+    x_device_id: str | None = Header(default=None),
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, int]:
+    params = {"device": x_device_id}
+    res = await db.execute(
+        text(f"UPDATE alerts SET is_read = TRUE WHERE {VISIBLE_TO_DEVICE} AND is_read = FALSE"),
+        params,
+    )
+    await db.commit()
+    return {"updated": res.rowcount or 0}
 
 
 @router.post("/alerts/{alert_id}/read", response_model=Alert)

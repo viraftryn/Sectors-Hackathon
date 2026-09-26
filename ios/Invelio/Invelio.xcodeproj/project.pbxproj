@@ -12,6 +12,7 @@
 		3B9C4D5E6F7A8B9C0D1E2F3A /* HoldingLot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A8B3C4D5E6F7A8B9C0D1E2F /* HoldingLot.swift */; };
 		5B2E3D4C5A6B7C8D9E0F1A2B /* StockDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A1F2C3D4E5F6A7B8C9D0E1F /* StockDetailView.swift */; };
 		664F1086C8C365A239A4019F /* InvelioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E27E39B194A5B05D70D6F96 /* InvelioTests.swift */; };
+		6C7D8E9F0A1B2C3D4E5F6A7B /* AlertViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B3C4D5E6F7A8B9C0D1E2F3A /* AlertViewModel.swift */; };
 		76BC79C9C796F4A3EED1E951 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E80E1F46D10E577C3BB855B /* ContentView.swift */; };
 		790AFB0FC9DBC71AF69E0BF5 /* Stock.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1161490963A206CA3A1F812 /* Stock.swift */; };
 		80733EC71CF633E11F48E069 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5226C47D501454DEBC61AAD6 /* HomeView.swift */; };
@@ -19,6 +20,7 @@
 		921A35C0CA5ED9024F0B771E /* NotificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8110454BA26FE036A072B5A8 /* NotificationView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E1F2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D86F7185305E5558005FD590 /* Assets.xcassets */; };
 		C52AC931BF45F914967A9F99 /* InvelioApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C65A82A9BB7B48C0C464624 /* InvelioApp.swift */; };
+		D80A8D283067E4BC00BE5A7A /* SplashScreenView 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = D80A8D273067E4BC00BE5A7A /* SplashScreenView 2.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,9 +44,11 @@
 		473107F0D1D5A1D04D4C305E /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		4A1F2C3D4E5F6A7B8C9D0E1F /* StockDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockDetailView.swift; sourceTree = "<group>"; };
 		5226C47D501454DEBC61AAD6 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		5B3C4D5E6F7A8B9C0D1E2F3A /* AlertViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertViewModel.swift; sourceTree = "<group>"; };
 		5C65A82A9BB7B48C0C464624 /* InvelioApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvelioApp.swift; sourceTree = "<group>"; };
 		8110454BA26FE036A072B5A8 /* NotificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationView.swift; sourceTree = "<group>"; };
 		B1161490963A206CA3A1F812 /* Stock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stock.swift; sourceTree = "<group>"; };
+		D80A8D273067E4BC00BE5A7A /* SplashScreenView 2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SplashScreenView 2.swift"; sourceTree = "<group>"; };
 		D86F7185305E5558005FD590 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F30EF2A838D1272702A46C6E /* Invelio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Invelio.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -62,6 +66,7 @@
 		2CFA5756EE532529A580802B /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				D80A8D273067E4BC00BE5A7A /* SplashScreenView 2.swift */,
 				0D4DAFBEBB482239402E8E37 /* ChatbotView.swift */,
 				5226C47D501454DEBC61AAD6 /* HomeView.swift */,
 				8110454BA26FE036A072B5A8 /* NotificationView.swift */,
@@ -88,6 +93,14 @@
 				5C65A82A9BB7B48C0C464624 /* InvelioApp.swift */,
 			);
 			path = App;
+			sourceTree = "<group>";
+		};
+		7A8B9C0D1E2F3A4B5C6D7E8F /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				5B3C4D5E6F7A8B9C0D1E2F3A /* AlertViewModel.swift */,
+			);
+			path = ViewModels;
 			sourceTree = "<group>";
 		};
 		99E8A4742E54F346E758E1BB /* Tests */ = {
@@ -122,6 +135,7 @@
 				F30CA96F92DC904E588DAEF3 /* Components */,
 				C6D08E4563B4BF8BFE4984EE /* Models */,
 				E406FC1248F2EF18B354698D /* Services */,
+				7A8B9C0D1E2F3A4B5C6D7E8F /* ViewModels */,
 				2CFA5756EE532529A580802B /* Views */,
 			);
 			path = Sources;
@@ -219,6 +233,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6C7D8E9F0A1B2C3D4E5F6A7B /* AlertViewModel.swift in Sources */,
 				1BC12EFB7A675618F165C9E0 /* APIClient.swift in Sources */,
 				8E916646E6DD046618D989E9 /* ChatbotView.swift in Sources */,
 				76BC79C9C796F4A3EED1E951 /* ContentView.swift in Sources */,
@@ -229,6 +244,7 @@
 				790AFB0FC9DBC71AF69E0BF5 /* Stock.swift in Sources */,
 				5B2E3D4C5A6B7C8D9E0F1A2B /* StockDetailView.swift in Sources */,
 				3B9C4D5E6F7A8B9C0D1E2F3A /* HoldingLot.swift in Sources */,
+				D80A8D283067E4BC00BE5A7A /* SplashScreenView 2.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -322,6 +322,7 @@ struct BackendStockDetail: Codable, Identifiable, Sendable {
     let week52High: Double?
     let week52Low: Double?
     let prices: [BackendPricePoint]
+    let insights: [BackendInsightChip]?
 
     enum CodingKeys: String, CodingKey {
         case ticker
@@ -335,6 +336,7 @@ struct BackendStockDetail: Codable, Identifiable, Sendable {
         case week52High = "week52_high"
         case week52Low = "week52_low"
         case prices
+        case insights
     }
 
     func toStockQuote() -> StockQuote {
@@ -369,9 +371,19 @@ struct BackendStockDetail: Codable, Identifiable, Sendable {
     func toHistoryPoints() -> [StockHistoryPoint] {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
+        dateFormatter.timeZone = TimeZone(identifier: "Asia/Jakarta") ?? .current
+
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Asia/Jakarta") ?? .current
 
         return prices.compactMap { p in
-            let d = dateFormatter.date(from: p.date) ?? Date()
+            guard let rawDate = dateFormatter.date(from: p.date) else { return nil }
+            var comps = calendar.dateComponents([.year, .month, .day], from: rawDate)
+            comps.hour = 16
+            comps.minute = 0
+            comps.second = 0
+            let d = calendar.date(from: comps) ?? rawDate
+            guard !calendar.isDateInWeekend(d) else { return nil }
             return StockHistoryPoint(
                 date: d,
                 price: p.close,

@@ -31,7 +31,9 @@ from langgraph.graph import END, StateGraph
 from pydantic import SecretStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.cache import cache_get, cache_set
 from app.clients.cached_sectors import CachedSectorsClient
+from app.clients.sectors import bare_symbol
 from app.config import settings
 
 logger = logging.getLogger(__name__)
@@ -352,9 +354,89 @@ def _wrap_mcp_tool(original: Any) -> Any:
     return original
 
 
+def _mcp_cache_key(tool_name: str, args: dict[str, Any]) -> tuple[str, int] | None:
+    """Map an MCP tool call to (cache_key, ttl). Returns None if not cacheable."""
+
+    def _ticker(args: dict[str, Any]) -> str:
+        for p in TICKER_PARAM_NAMES:
+            raw = args.get(p, "")
+            if raw:
+                t = raw.split(",")[0].strip() if isinstance(raw, str) else raw[0]
+                return bare_symbol(t)
+        return ""
+
+    mapping: dict[str, tuple[str, int]] = {
+        "fetch-company-report": (
+            f"company_report:{_ticker(args)}",
+            settings.cache_ttl_fundamentals,
+        ),
+        "fetch-daily-transaction": (
+            f"daily_prices:{_ticker(args)}",
+            settings.cache_ttl_prices,
+        ),
+        "fetch-companies-by-subsector": (
+            "companies_list",
+            settings.cache_ttl_prices,
+        ),
+        "fetch-most-traded-stocks": (
+            "most_traded",
+            settings.cache_ttl_prices,
+        ),
+        "fetch-companies-top-changes": (
+            "top_companies",
+            settings.cache_ttl_prices,
+        ),
+        "fetch-index-daily": (
+            "ihsg",
+            settings.cache_ttl_market_index,
+        ),
+        "fetch-subsector-report": (
+            f"sector_report:{args.get('sub_sector', args.get('subsector', ''))}",
+            settings.cache_ttl_sector_reports,
+        ),
+        "fetch-news": (
+            f"news:{_ticker(args)}" if _ticker(args) else "news:all",
+            settings.cache_ttl_news,
+        ),
+        "fetch-filings": (
+            f"news_filings:{_ticker(args)}" if _ticker(args) else "news_filings:all",
+            settings.cache_ttl_sector_reports,
+        ),
+        "get-subsectors": (
+            "subsectors",
+            settings.cache_ttl_sector_reports,
+        ),
+    }
+    return mapping.get(tool_name)
+
+
+def _wrap_mcp_tool_cached(original: Any, db: AsyncSession | None) -> Any:
+    """Wrap an MCP tool with L1/L2 cache — same keys and TTLs as CachedSectorsClient."""
+    guarded = _wrap_mcp_tool(original)
+    real_ainvoke = guarded.ainvoke
+
+    async def cached_ainvoke(input: Any, config: Any = None, **kwargs: Any) -> Any:  # noqa: A002
+        args = input if isinstance(input, dict) else {"input": input}
+        cache_info = _mcp_cache_key(original.name, args)
+        if cache_info is not None:
+            cache_key, ttl = cache_info
+            mcp_key = f"mcp:{cache_key}"
+            hit = await cache_get(mcp_key, db)
+            if hit is not None:
+                logger.debug("MCP cache hit: %s", mcp_key)
+                return hit.get("result", hit)
+            result = await real_ainvoke(input, config, **kwargs)
+            await cache_set(mcp_key, {"result": result}, ttl, db)
+            return result
+        return await real_ainvoke(input, config, **kwargs)
+
+    guarded.ainvoke = cached_ainvoke
+    return guarded
+
+
 @asynccontextmanager
-async def _mcp_tools() -> Any:
-    """Connect to Sectors MCP server and yield guarded LangChain tools."""
+async def _mcp_tools(db: AsyncSession | None = None) -> Any:
+    """Connect to Sectors MCP server and yield cache-wrapped LangChain tools."""
     from langchain_mcp_adapters.tools import load_mcp_tools
     from mcp import ClientSession
     from mcp.client.streamable_http import streamablehttp_client
@@ -365,8 +447,12 @@ async def _mcp_tools() -> Any:
         async with ClientSession(read, write) as session:
             await session.initialize()
             all_tools = await load_mcp_tools(session)
-            tools = [_wrap_mcp_tool(t) for t in all_tools if t.name in MCP_TOOL_WHITELIST]
-            logger.info("Loaded %d/%d MCP tools from Sectors", len(tools), len(all_tools))
+            tools = [
+                _wrap_mcp_tool_cached(t, db) for t in all_tools if t.name in MCP_TOOL_WHITELIST
+            ]
+            logger.info(
+                "Loaded %d/%d MCP tools from Sectors (cache-enabled)", len(tools), len(all_tools)
+            )
             yield tools
 
 
@@ -379,8 +465,8 @@ async def _mcp_tools() -> Any:
 async def _get_tools(db: AsyncSession | None = None) -> Any:
     """Yield tools from MCP (demo) or REST+cache (development)."""
     if settings.use_mcp:
-        logger.info("Chatbot mode: MCP (live Sectors data)")
-        async with _mcp_tools() as tools:
+        logger.info("Chatbot mode: MCP (live Sectors data, cache-enabled)")
+        async with _mcp_tools(db) as tools:
             yield tools
     else:
         logger.info("Chatbot mode: REST + cache")

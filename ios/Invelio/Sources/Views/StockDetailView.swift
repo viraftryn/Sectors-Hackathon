@@ -123,6 +123,7 @@ public enum StockTimeRange: String, CaseIterable, Sendable {
     case oneWeek    = "1W"
     case oneMonth   = "1M"
     case threeMonth = "3M"
+    case oneYear    = "1Y"
 
     public var isIntraday: Bool {
         false
@@ -143,13 +144,11 @@ public struct PurchaseFormEntry: Identifiable, Equatable {
     }
 
     public var price: Double {
-        let clean = priceInput.replacingOccurrences(of: ",", with: ".").trimmingCharacters(in: .whitespaces)
-        return Double(clean) ?? 0.0
+        StockFormatters.parseCurrencyInput(priceInput)
     }
 
     public var total: Double {
-        let clean = totalInput.replacingOccurrences(of: ",", with: ".").trimmingCharacters(in: .whitespaces)
-        return Double(clean) ?? 0.0
+        StockFormatters.parseCurrencyInput(totalInput)
     }
 
     public var shares: Double {
@@ -174,6 +173,61 @@ public struct PurchaseFormEntry: Identifiable, Equatable {
 // MARK: - ==========================================
 
 public enum StockFormatters {
+    public static func parseCurrencyInput(_ input: String) -> Double {
+        var s = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        s = s.replacingOccurrences(of: "Rp", with: "", options: .caseInsensitive)
+        s = s.replacingOccurrences(of: "IDR", with: "", options: .caseInsensitive)
+        s = s.replacingOccurrences(of: " ", with: "")
+        guard !s.isEmpty else { return 0.0 }
+
+        if s.contains(".") && s.contains(",") {
+            if let dotIdx = s.lastIndex(of: "."), let commaIdx = s.lastIndex(of: ",") {
+                if dotIdx > commaIdx {
+                    s = s.replacingOccurrences(of: ",", with: "")
+                } else {
+                    s = s.replacingOccurrences(of: ".", with: "")
+                    s = s.replacingOccurrences(of: ",", with: ".")
+                }
+            }
+            return Double(s) ?? 0.0
+        }
+
+        if s.contains(".") {
+            let components = s.split(separator: ".")
+            if components.count > 2 {
+                s = s.replacingOccurrences(of: ".", with: "")
+                return Double(s) ?? 0.0
+            } else if components.count == 2 {
+                let last = components[1]
+                if last.count == 3 {
+                    s = s.replacingOccurrences(of: ".", with: "")
+                    return Double(s) ?? 0.0
+                } else {
+                    return Double(s) ?? 0.0
+                }
+            }
+        }
+
+        if s.contains(",") {
+            let components = s.split(separator: ",")
+            if components.count > 2 {
+                s = s.replacingOccurrences(of: ",", with: "")
+                return Double(s) ?? 0.0
+            } else if components.count == 2 {
+                let last = components[1]
+                if last.count == 3 {
+                    s = s.replacingOccurrences(of: ",", with: "")
+                    return Double(s) ?? 0.0
+                } else {
+                    s = s.replacingOccurrences(of: ",", with: ".")
+                    return Double(s) ?? 0.0
+                }
+            }
+        }
+
+        return Double(s) ?? 0.0
+    }
+
     public static func currencyPrefix(for currency: String = "IDR") -> String {
         return "Rp "
     }
@@ -207,16 +261,67 @@ public enum StockFormatters {
 
     public static func formatScrubDate(_ date: Date) -> String {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US")
-        let calendar = Calendar.current
-        let hour = calendar.component(.hour, from: date)
-        let min = calendar.component(.minute, from: date)
-        if hour == 0 && min == 0 {
-            f.dateFormat = "d MMM yyyy"
-        } else {
-            f.dateFormat = "d MMM yyyy, HH:mm"
-        }
+        f.locale = Locale(identifier: "id_ID")
+        f.timeZone = IDXCalendar.timeZone
+        f.dateFormat = "E, d MMM yyyy"
         return f.string(from: date)
+    }
+}
+
+// MARK: - IDX Bursa Efek Indonesia Trading Calendar Helper
+public enum IDXCalendar {
+    public static var timeZone: TimeZone {
+        TimeZone(identifier: "Asia/Jakarta") ?? .current
+    }
+
+    public static var calendar: Calendar {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = timeZone
+        return cal
+    }
+
+    /// Cek apakah suatu tanggal adalah hari bursa aktif (Senin-Jumat, bukan hari libur bursa nasional)
+    public static func isTradingDay(_ date: Date) -> Bool {
+        let cal = calendar
+        let weekday = cal.component(.weekday, from: date)
+        // 1 = Minggu, 7 = Sabtu
+        if weekday == 1 || weekday == 7 { return false }
+
+        // Hari libur nasional tetap bursa Indonesia (BEI)
+        let month = cal.component(.month, from: date)
+        let day = cal.component(.day, from: date)
+        if month == 1 && day == 1 { return false }   // Tahun Baru
+        if month == 5 && day == 1 { return false }   // Hari Buruh
+        if month == 6 && day == 1 { return false }   // Hari Lahir Pancasila
+        if month == 8 && day == 17 { return false }  // HUT RI
+        if month == 12 && day == 25 { return false } // Hari Raya Natal
+
+        return true
+    }
+
+    /// Menghasilkan N hari perdagangan terakhir bursa (hanya hari Senin - Jumat / non-libur)
+    public static func previousTradingDays(count: Int, from referenceDate: Date = Date()) -> [Date] {
+        let cal = calendar
+        var comps = cal.dateComponents([.year, .month, .day], from: referenceDate)
+        comps.hour = 16
+        comps.minute = 0
+        comps.second = 0
+        var cursor = cal.date(from: comps) ?? referenceDate
+
+        // Jika hari referensi adalah libur/weekend, mundur ke hari bursa aktif sebelumnya
+        while !isTradingDay(cursor) {
+            cursor = cal.date(byAdding: .day, value: -1, to: cursor) ?? cursor
+        }
+
+        var result: [Date] = []
+        var d = cursor
+        while result.count < count {
+            if isTradingDay(d) {
+                result.append(d)
+            }
+            d = cal.date(byAdding: .day, value: -1, to: d) ?? d
+        }
+        return result.reversed()
     }
 }
 
@@ -230,6 +335,8 @@ fileprivate extension Color {
         let b = Double(rgbValue & 0x0000FF) / 255.0
         self.init(red: r, green: g, blue: b)
     }
+
+    static let capsuleProfitGreen = Color(red: 0.0, green: 0.78, blue: 0.58)
 }
 
 
@@ -250,6 +357,14 @@ public final class StockDetailViewModel: ObservableObject {
     public init(quote: StockQuote, fetcher: ((String, StockTimeRange) async throws -> [StockHistoryPoint])? = nil) {
         self.quote = quote
         self.customHistoryFetcher = fetcher
+
+        // Check if preloaded in StockDetailCache
+        if let cached = StockDetailCache.shared.get(ticker: quote.ticker), !cached.points.isEmpty {
+            self.allHistoricalPoints = cached.points
+            let tradingPoints = cached.points.filter { IDXCalendar.isTradingDay($0.date) }
+            self.dataPoints = Array(tradingPoints.suffix(5))
+            self.isLoading = false
+        }
     }
 
     public var minPrice: Double { dataPoints.map(\.price).min() ?? quote.price }
@@ -259,18 +374,22 @@ public final class StockDetailViewModel: ObservableObject {
     public var isPositive: Bool { latestPrice >= startPrice }
 
     public func fetchChartData() async {
-        isLoading = true
-
         // 1. Fetch from FastAPI Backend
         if allHistoricalPoints.isEmpty {
-            do {
-                let detail = try await APIClient.shared.fetchStockDetail(ticker: quote.ticker)
-                let pts = detail.toHistoryPoints()
-                if !pts.isEmpty {
-                    self.allHistoricalPoints = pts
+            if let cached = StockDetailCache.shared.get(ticker: quote.ticker), !cached.points.isEmpty {
+                self.allHistoricalPoints = cached.points
+            } else {
+                isLoading = true
+                do {
+                    let detail = try await APIClient.shared.fetchStockDetail(ticker: quote.ticker)
+                    StockDetailCache.shared.set(ticker: quote.ticker, detail: detail)
+                    let pts = detail.toHistoryPoints()
+                    if !pts.isEmpty {
+                        self.allHistoricalPoints = pts
+                    }
+                } catch {
+                    // Fallback to customHistoryFetcher or synthetic
                 }
-            } catch {
-                // Fallback to customHistoryFetcher or synthetic
             }
         }
 
@@ -299,36 +418,39 @@ public final class StockDetailViewModel: ObservableObject {
     }
 
     private func filterPoints(_ points: [StockHistoryPoint], for range: StockTimeRange) -> [StockHistoryPoint] {
+        let tradingPoints = points.filter { IDXCalendar.isTradingDay($0.date) }
         switch range {
         case .oneWeek:
-            return Array(points.suffix(5))
+            return Array(tradingPoints.suffix(5))
         case .oneMonth:
-            return Array(points.suffix(22))
+            return Array(tradingPoints.suffix(22))
         case .threeMonth:
-            return points
+            return Array(tradingPoints.suffix(66))
+        case .oneYear:
+            return Array(tradingPoints.suffix(250))
         }
     }
 
     private func generateMockPoints(for range: StockTimeRange) -> [StockHistoryPoint] {
-        let (count, interval): (Int, TimeInterval) = {
+        let count: Int = {
             switch range {
-            case .oneWeek:    return (5, 24 * 3600)
-            case .oneMonth:   return (22, 24 * 3600)
-            case .threeMonth: return (66, 24 * 3600)
+            case .oneWeek:    return 5
+            case .oneMonth:   return 22
+            case .threeMonth: return 66
+            case .oneYear:    return 250
             }
         }()
 
-        let now = Date()
+        let dates = IDXCalendar.previousTradingDays(count: count)
         var points: [StockHistoryPoint] = []
         var current = quote.previousClose > 0 ? quote.previousClose : quote.price * 0.98
         let step = max(quote.price * 0.006, 0.05)
 
-        for i in 0..<count {
-            let d = now.addingTimeInterval(-Double(count - 1 - i) * interval)
+        for (i, d) in dates.enumerated() {
             let delta = Double([-2, -1, 0, 1, 2].randomElement() ?? 0) * step
             current = max(quote.price * 0.5, current + delta)
 
-            if i == count - 1 {
+            if i == dates.count - 1 {
                 current = quote.price
             }
 
@@ -485,9 +607,9 @@ public struct StockInteractiveChartView: View {
                         // Green Area (Above start point baseline)
                         MorphingXYAreaShape(data: animatedData, closingY: animatedBaselineY)
                             .fill(LinearGradient(stops: [
-                                .init(color: Color.ProfitGreen.opacity(0.35), location: 0.0),
-                                .init(color: Color.ProfitGreen.opacity(0.15), location: 0.6),
-                                .init(color: Color.ProfitGreen.opacity(0.0),  location: 1.0)
+                                .init(color: Color.capsuleProfitGreen.opacity(0.35), location: 0.0),
+                                .init(color: Color.capsuleProfitGreen.opacity(0.15), location: 0.6),
+                                .init(color: Color.capsuleProfitGreen.opacity(0.0),  location: 1.0)
                             ], startPoint: .top, endPoint: .bottom))
                             .clipShape(AnimatableClipAbove(cutY: animatedBaselineY))
 
@@ -502,7 +624,7 @@ public struct StockInteractiveChartView: View {
 
                         // Green Line (Above start point baseline)
                         MorphingXYLineShape(data: animatedData)
-                            .stroke(Color.ProfitGreen, style: StrokeStyle(lineWidth: 2.2, lineCap: .round, lineJoin: .round))
+                            .stroke(Color.capsuleProfitGreen, style: StrokeStyle(lineWidth: 2.2, lineCap: .round, lineJoin: .round))
                             .clipShape(AnimatableClipAbove(cutY: animatedBaselineY))
 
                         // Red Line (Below start point baseline)
@@ -512,7 +634,7 @@ public struct StockInteractiveChartView: View {
 
                         // End point indicator dot (Latest Price)
                         if !isDragging, let lastPt = animatedData.points.last {
-                            let dotColor = viewModel.latestPrice >= viewModel.startPrice ? Color.ProfitGreen : Color.PortfolioLossRed
+                            let dotColor = viewModel.latestPrice >= viewModel.startPrice ? Color.capsuleProfitGreen : Color.PortfolioLossRed
                             Circle()
                                 .fill(dotColor)
                                 .frame(width: 8, height: 8)
@@ -704,7 +826,7 @@ public struct StockInteractiveChartView: View {
         let y = yPos(for: pt.price, in: size)
 
         let isPositive = pt.price >= viewModel.startPrice
-        let ptColor = isPositive ? Color.ProfitGreen : Color.PortfolioLossRed
+        let ptColor = isPositive ? Color.capsuleProfitGreen : Color.PortfolioLossRed
 
         let labelText = StockFormatters.formatScrubDate(pt.date)
         let labelX = min(max(55, xPos), size.width - 55)
@@ -805,6 +927,8 @@ public struct StockDetailView: View {
     // Purchase / Lots management state
     @State private var purchaseEntries: [PurchaseFormEntry] = []
     @State private var cachedAnalysisChips: [InsightChip] = []
+    @State private var activeDatePickerEntryID: UUID? = nil
+    @State private var tempSelectedDate: Date = Date()
 
     public init(
         quote: StockQuote,
@@ -816,6 +940,15 @@ public struct StockDetailView: View {
         self.initialFundamentals = fundamentals
         self.onBuy = onBuy
         _viewModel = StateObject(wrappedValue: StockDetailViewModel(quote: quote, fetcher: customHistoryFetcher))
+
+        if let cached = StockDetailCache.shared.get(ticker: quote.ticker) {
+            _liveFundamentals = State(initialValue: cached.detail.toStockFundamentals())
+            if let serverInsights = cached.detail.insights, !serverInsights.isEmpty {
+                _cachedAnalysisChips = State(initialValue: serverInsights.map {
+                    InsightChip(label: $0.label, text: $0.text)
+                })
+            }
+        }
     }
 
     private var stockLots: [HoldingLot] {
@@ -863,7 +996,7 @@ public struct StockDetailView: View {
 
     private var isGain: Bool { currentChange >= 0 }
     private var themeColor: Color {
-        isGain ? Color(red: 0.0, green: 0.78, blue: 0.58) : Color(red: 0.94, green: 0.27, blue: 0.27)
+        isGain ? Color.capsuleProfitGreen : Color(red: 0.94, green: 0.27, blue: 0.27)
     }
 
     public var body: some View {
@@ -908,27 +1041,112 @@ public struct StockDetailView: View {
         .task {
             loadExistingHoldings()
             await fetchLiveStockDetail()
+            await fetchLiveStockInsights()
             await viewModel.fetchChartData()
             if cachedAnalysisChips.isEmpty {
                 self.cachedAnalysisChips = stockAnalysisChips
             }
         }
-        .onChange(of: purchaseEntries) { _ in
+        .onChange(of: purchaseEntries) {
             syncHoldingsToSwiftData()
+        }
+        .sheet(isPresented: Binding(
+            get: { activeDatePickerEntryID != nil },
+            set: { if !$0 { activeDatePickerEntryID = nil } }
+        )) {
+            datePickerSheet
         }
     }
 
+    private var datePickerSheet: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                DatePicker(
+                    "Purchase Date",
+                    selection: $tempSelectedDate,
+                    in: ...Date(),
+                    displayedComponents: .date
+                )
+                .datePickerStyle(.graphical)
+                .tint(Color.PrimaryYellow)
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+
+                Spacer()
+            }
+            .navigationTitle("Purchase Date")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        activeDatePickerEntryID = nil
+                    }
+                    .foregroundColor(.white.opacity(0.7))
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        if let id = activeDatePickerEntryID,
+                           let idx = purchaseEntries.firstIndex(where: { $0.id == id }) {
+                            purchaseEntries[idx].date = tempSelectedDate
+                            syncHoldingsToSwiftData()
+                        }
+                        activeDatePickerEntryID = nil
+                    }
+                    .fontWeight(.bold)
+                    .foregroundColor(Color.PrimaryYellow)
+                }
+            }
+            .background(Color.DarkPurpleAppBackground.ignoresSafeArea())
+            .preferredColorScheme(.dark)
+        }
+        .presentationDetents([.height(450)])
+        .presentationDragIndicator(.visible)
+    }
+
     private func fetchLiveStockDetail() async {
+        if let cached = StockDetailCache.shared.get(ticker: quote.ticker) {
+            await MainActor.run {
+                self.liveFundamentals = cached.detail.toStockFundamentals()
+                if let serverInsights = cached.detail.insights, !serverInsights.isEmpty {
+                    self.cachedAnalysisChips = serverInsights.map {
+                        InsightChip(label: $0.label, text: $0.text)
+                    }
+                }
+            }
+            return
+        }
         do {
             let detail = try await APIClient.shared.fetchStockDetail(ticker: quote.ticker)
+            StockDetailCache.shared.set(ticker: quote.ticker, detail: detail)
             await MainActor.run {
                 self.liveFundamentals = detail.toStockFundamentals()
-                if self.cachedAnalysisChips.isEmpty {
-                    self.cachedAnalysisChips = self.stockAnalysisChips
+                if let serverInsights = detail.insights, !serverInsights.isEmpty {
+                    self.cachedAnalysisChips = serverInsights.map {
+                        InsightChip(label: $0.label, text: $0.text)
+                    }
                 }
             }
         } catch {
             // Retain initial/fallback fundamentals gracefully
+        }
+    }
+
+    private func fetchLiveStockInsights() async {
+        if !cachedAnalysisChips.isEmpty { return }
+        do {
+            let response = try await APIClient.shared.fetchStockInsights(ticker: quote.ticker)
+            let chips = response.insights.map { InsightChip(label: $0.label, text: $0.text) }
+            if !chips.isEmpty {
+                await MainActor.run {
+                    self.cachedAnalysisChips = chips
+                }
+            }
+        } catch {
+            await MainActor.run {
+                if self.cachedAnalysisChips.isEmpty {
+                    self.cachedAnalysisChips = self.stockAnalysisChips
+                }
+            }
         }
     }
 
@@ -964,7 +1182,12 @@ public struct StockDetailView: View {
                 let deletedId = lot.id
                 modelContext.delete(lot)
                 Task {
-                    try? await APIClient.shared.deleteLot(id: deletedId)
+                    do {
+                        try await APIClient.shared.deleteLot(id: deletedId)
+                        print("🗑️ Lot \(deletedId) successfully deleted from PostgreSQL/Supabase")
+                    } catch {
+                        print("⚠️ Note: Lot deleted locally. Server delete error: \(error.localizedDescription)")
+                    }
                 }
             }
         }
@@ -997,19 +1220,26 @@ public struct StockDetailView: View {
             let price = entry.price
             let total = entry.total
             let date = entry.date
-
+            let lotId = entry.id
             Task {
-                _ = try? await APIClient.shared.buyStock(
-                    ticker: ticker,
-                    pricePerShare: price,
-                    shares: shares,
-                    totalInvested: total,
-                    buyDate: date
-                )
+                do {
+                    let res = try await APIClient.shared.buyStock(
+                        id: lotId,
+                        ticker: ticker,
+                        pricePerShare: price,
+                        shares: shares,
+                        totalInvested: total,
+                        buyDate: date
+                    )
+                    print("✅ Holding synced to PostgreSQL/Supabase: \(res.id) - \(res.ticker)")
+                } catch {
+                    print("⚠️ Note: Holding saved locally to SwiftData. Server sync: \(error.localizedDescription)")
+                }
             }
         }
         try? modelContext.save()
     }
+
 
     // MARK: - Header
     private var headerSection: some View {
@@ -1091,7 +1321,8 @@ public struct StockDetailView: View {
         AIInsightCardView(
             chips: currentAnalysisChips,
             title: "AI Analysis",
-            horizontalPadding: 0
+            horizontalPadding: 0,
+            cardKey: "stock_detail_ai_\(quote.ticker)"
         )
     }
 
@@ -1191,10 +1422,10 @@ public struct StockDetailView: View {
                         Text("Saved")
                             .font(.system(size: 11, weight: .semibold))
                     }
-                    .foregroundStyle(Color.ProfitGreen)
+                    .foregroundStyle(Color.capsuleProfitGreen)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(Color.ProfitGreen.opacity(0.12), in: Capsule())
+                    .background(Color.capsuleProfitGreen.opacity(0.12), in: Capsule())
                 }
             }
 
@@ -1211,7 +1442,7 @@ public struct StockDetailView: View {
 
                     let isProfit = currentPnL >= 0
                     let sign = isProfit ? "+" : "-"
-                    let pColor = isProfit ? Color.ProfitGreen : Color.PortfolioLossRed
+                    let pColor = isProfit ? Color.capsuleProfitGreen : Color.PortfolioLossRed
 
                     summaryTile(
                         title: "Total G&L",
@@ -1229,22 +1460,29 @@ public struct StockDetailView: View {
                 ForEach($purchaseEntries) { $entry in
                     VStack(spacing: 10) {
                         HStack {
-                            HStack(spacing: 4) {
-                                Image(systemName: "calendar")
-                                    .font(.system(size: 10, weight: .bold))
-                                Text(formatEntryDate(entry.date))
-                                    .font(.system(size: 10, weight: .semibold))
+                            Button {
+                                if let entryObj = purchaseEntries.first(where: { $0.id == entry.id }) {
+                                    tempSelectedDate = entryObj.date
+                                } else {
+                                    tempSelectedDate = entry.date
+                                }
+                                activeDatePickerEntryID = entry.id
+                            } label: {
+                                HStack(spacing: 5) {
+                                    Image(systemName: "calendar")
+                                        .font(.system(size: 11, weight: .bold))
+                                    Text(formatEntryDate(entry.date))
+                                        .font(.system(size: 11, weight: .semibold))
+                                    Image(systemName: "chevron.down")
+                                        .font(.system(size: 8, weight: .bold))
+                                        .opacity(0.75)
+                                }
+                                .foregroundStyle(Color(hex: "38BDF8"))
+                                .padding(.horizontal, 9)
+                                .padding(.vertical, 5)
+                                .background(Color(hex: "38BDF8").opacity(0.16), in: Capsule())
                             }
-                            .foregroundStyle(Color(hex: "38BDF8"))
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4.5)
-                            .background(Color(hex: "38BDF8").opacity(0.16), in: Capsule())
-                            .overlay {
-                                DatePicker("", selection: $entry.date, displayedComponents: .date)
-                                    .labelsHidden()
-                                    .blendMode(.destinationOver)
-                                    .opacity(0.015)
-                            }
+                            .buttonStyle(.plain)
 
                             Spacer()
 
@@ -1257,7 +1495,12 @@ public struct StockDetailView: View {
                                             modelContext.delete(existing)
                                             try? modelContext.save()
                                             Task {
-                                                try? await APIClient.shared.deleteLot(id: idToDelete)
+                                                do {
+                                                    try await APIClient.shared.deleteLot(id: idToDelete)
+                                                    print("🗑️ Lot \(idToDelete) successfully deleted from PostgreSQL/Supabase")
+                                                } catch {
+                                                    print("⚠️ Note: Lot deleted locally. Server delete error: \(error.localizedDescription)")
+                                                }
                                             }
                                         }
                                         if purchaseEntries.isEmpty {
@@ -1366,11 +1609,6 @@ public struct StockDetailView: View {
         return f.string(from: date)
     }
 
-    private func formatScrubDate(_ date: Date) -> String {
-        let f = DateFormatter()
-        f.dateFormat = "d MMM, HH:mm"
-        return f.string(from: date)
-    }
 
     private func formatNumber(_ val: Double) -> String {
         guard val > 0 else { return "" }
