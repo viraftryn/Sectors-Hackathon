@@ -133,6 +133,26 @@ class SectorsClient:
     # --- Price / Trending data ---
 
     async def get_daily_prices(self, ticker: str) -> Any:
+        # Sectors API caps single /daily request at ~90 days.
+        # Query in 4 quarterly windows across 365 days to ensure full 1-year history.
+        today = date.today()
+        windows = []
+        curr = today
+        for _ in range(4):
+            start = curr - timedelta(days=91)
+            windows.append((start.isoformat(), curr.isoformat()))
+            curr = start - timedelta(days=1)
+
+        all_points: dict[str, dict[str, Any]] = {}
+        for s, e in reversed(windows):
+            data = await self._get(f"/daily/{bare_symbol(ticker)}/", {"start": s, "end": e})
+            if isinstance(data, list):
+                for item in data:
+                    if isinstance(item, dict) and "date" in item:
+                        all_points[item["date"]] = item
+
+        if all_points:
+            return [all_points[k] for k in sorted(all_points.keys())]
         return await self._get(f"/daily/{bare_symbol(ticker)}/", {"start": _history_start()})
 
     async def get_most_traded(self) -> Any:

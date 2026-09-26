@@ -633,12 +633,30 @@ struct PortfolioSummaryCardView: View {
 }
 
 
+// MARK: - AIInsightCardTracker
+
+@MainActor
+final class AIInsightCardTracker {
+    static let shared = AIInsightCardTracker()
+    private var animatedKeys = Set<String>()
+
+    func hasAnimated(for key: String) -> Bool {
+        animatedKeys.contains(key)
+    }
+
+    func markAnimated(for key: String) {
+        animatedKeys.insert(key)
+    }
+}
+
+
 // MARK: - AIInsightCardView (with typing animation)
 
 struct AIInsightCardView: View {
     let chips: [InsightChip]
     var title: String = "Market Intelligence"
     var horizontalPadding: CGFloat = 16
+    var cardKey: String? = nil
 
     private let accent = Color.PrimaryYellow
     @State private var selectedIndex: Int      = 0
@@ -650,6 +668,36 @@ struct AIInsightCardView: View {
     @State private var showReadMore:     Bool     = false
     @State private var hasStarted:       Bool     = false
     @State private var isFinishedTyping: Bool     = false
+
+    private var resolvedCardKey: String {
+        if let cardKey = cardKey, !cardKey.isEmpty {
+            return cardKey
+        }
+        return title
+    }
+
+    init(
+        chips: [InsightChip],
+        title: String = "Market Intelligence",
+        horizontalPadding: CGFloat = 16,
+        cardKey: String? = nil
+    ) {
+        self.chips = chips
+        self.title = title
+        self.horizontalPadding = horizontalPadding
+        self.cardKey = cardKey
+
+        let key = (cardKey != nil && !cardKey!.isEmpty) ? cardKey! : title
+        let alreadyAnimated = AIInsightCardTracker.shared.hasAnimated(for: key)
+        if alreadyAnimated, let firstChip = chips.first {
+            let words = firstChip.text.components(separatedBy: " ")
+            _targetWords = State(initialValue: words)
+            _wordIndex = State(initialValue: words.count)
+            _showReadMore = State(initialValue: words.count > 45)
+            _isFinishedTyping = State(initialValue: true)
+            _hasStarted = State(initialValue: true)
+        }
+    }
 
     private var selectedChip: InsightChip? { chips.indices.contains(selectedIndex) ? chips[selectedIndex] : nil }
     private var displayedText: String { targetWords.prefix(wordIndex).joined(separator: " ") }
@@ -738,9 +786,9 @@ struct AIInsightCardView: View {
                 HStack(spacing: 6) {
                     ForEach(Array(chips.enumerated()), id: \.element.id) { index, chip in
                         Button {
+                            guard selectedIndex != index else { return }
                             selectedIndex = index
-                            isExpanded    = false
-                            startTyping(text: chip.text)
+                            displayInstant(text: chip.text)
                         } label: {
                             Text(chip.label)
                                 .font(.caption2)
@@ -766,9 +814,17 @@ struct AIInsightCardView: View {
         .padding(.horizontal, horizontalPadding)
         .onAppear {
             isPulsing = true
-            if !hasStarted, let chip = selectedChip {
-                hasStarted = true
-                startTyping(text: chip.text)
+            let key = resolvedCardKey
+            if AIInsightCardTracker.shared.hasAnimated(for: key) {
+                if let chip = selectedChip {
+                    displayInstant(text: chip.text)
+                }
+            } else {
+                if !hasStarted, let chip = selectedChip {
+                    hasStarted = true
+                    AIInsightCardTracker.shared.markAnimated(for: key)
+                    startTyping(text: chip.text)
+                }
             }
         }
         .onChange(of: chips.first?.text) { newText in
@@ -776,10 +832,24 @@ struct AIInsightCardView: View {
             let currentTarget = targetWords.joined(separator: " ")
             guard newText != currentTarget else { return }
             selectedIndex = 0
-            isExpanded = false
-            startTyping(text: newText)
+            let key = resolvedCardKey
+            if AIInsightCardTracker.shared.hasAnimated(for: key) {
+                displayInstant(text: newText)
+            } else {
+                AIInsightCardTracker.shared.markAnimated(for: key)
+                startTyping(text: newText)
+            }
         }
         .onDisappear { timer?.invalidate(); timer = nil }
+    }
+
+    private func displayInstant(text: String) {
+        timer?.invalidate(); timer = nil
+        targetWords = text.components(separatedBy: " ")
+        wordIndex = targetWords.count
+        isExpanded = false
+        showReadMore = targetWords.count > 45
+        isFinishedTyping = true
     }
 
     private func startTyping(text: String) {
@@ -814,7 +884,7 @@ struct AIInsightCardView: View {
         let fontRegular = UIFont.systemFont(ofSize: 9.0, weight: .regular)
         let fontBold = UIFont.systemFont(ofSize: 9.0, weight: .semibold)
 
-        let srcText = "src:"
+        let srcText = "Src:"
         let brandText = "Sectors"
 
         let srcAttrs: [NSAttributedString.Key: Any] = [
@@ -1069,8 +1139,11 @@ struct HomeView: View {
                         insightLoadingPlaceholder
                             .padding(.vertical, 4)
                     } else if !insightChips.isEmpty {
-                        AIInsightCardView(chips: insightChips)
-                            .padding(.vertical, 4)
+                        AIInsightCardView(
+                            chips: insightChips,
+                            cardKey: "home_market_analysis"
+                        )
+                        .padding(.vertical, 4)
                     } else if insightLoadFailed {
                         insightErrorCard
                             .padding(.vertical, 4)

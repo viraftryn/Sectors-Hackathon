@@ -100,7 +100,9 @@ async def add_lot(
     if not name:
         name = ticker
         await db.execute(
-            text("INSERT INTO stocks (ticker, name) VALUES (:t, :n) ON CONFLICT (ticker) DO NOTHING"),
+            text(
+                "INSERT INTO stocks (ticker, name) VALUES (:t, :n) ON CONFLICT (ticker) DO NOTHING"
+            ),
             {"t": ticker, "n": name},
         )
 

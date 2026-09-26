@@ -19,7 +19,9 @@ sys.path.insert(0, str(backend_dir))
 
 from app.db.database import get_engine
 from app.clients.sectors import bare_symbol
-logging.basicConfig(level=logging.INFO)
+from app.config import settings
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
 env_key = os.getenv("SECTORS_API_KEY", "")
@@ -42,7 +44,7 @@ ON CONFLICT (ticker, date) DO UPDATE SET
 
 def generate_365d_windows() -> list[tuple[str, str]]:
     """Generate 4 consecutive quarterly windows covering 365 days."""
-    today = date(2026, 9, 25)
+    today = date(2026, 9, 26)
     windows = []
     
     current_end = today
@@ -65,18 +67,28 @@ async def sync_ticker_365d(ticker: str) -> int:
     async with httpx.AsyncClient() as client:
         for s, e in windows:
             url = f"https://api.sectors.app/v2/daily/{ticker}/?start={s}&end={e}"
-            try:
-                res = await client.get(url, headers=headers, timeout=20.0)
-                if res.status_code == 200:
-                    items = res.json()
-                    if isinstance(items, list):
-                        for it in items:
-                            all_points[it["date"]] = it
-                else:
-                    logger.warning("Failed window %s -> %s for %s (HTTP %d)", s, e, ticker, res.status_code)
-            except Exception as exc:
-                logger.error("Error fetching window %s -> %s for %s: %s", s, e, ticker, exc)
-            await asyncio.sleep(0.3)
+            for attempt in range(4):
+                try:
+                    res = await client.get(url, headers=headers, timeout=25.0)
+                    if res.status_code == 200:
+                        items = res.json()
+                        if isinstance(items, list):
+                            for it in items:
+                                if isinstance(it, dict) and "date" in it and "close" in it:
+                                    all_points[it["date"]] = it
+                        break
+                    elif res.status_code == 429:
+                        wait_sec = 3.0 * (attempt + 1)
+                        logger.warning("Rate limit (429) for %s. Backing off %.1fs (attempt %d)...", ticker, wait_sec, attempt + 1)
+                        await asyncio.sleep(wait_sec)
+                        continue
+                    else:
+                        logger.warning("Failed window %s -> %s for %s (HTTP %d): %s", s, e, ticker, res.status_code, res.text[:100])
+                        break
+                except Exception as exc:
+                    logger.error("Error fetching window %s -> %s for %s: %s", s, e, ticker, exc)
+                    await asyncio.sleep(2.0)
+            await asyncio.sleep(1.0)
 
     if not all_points:
         logger.warning("No data points fetched for %s", ticker)
@@ -85,48 +97,59 @@ async def sync_ticker_365d(ticker: str) -> int:
     sorted_dates = sorted(all_points.keys())
     logger.info("Fetched %d unique trading days for %s (%s -> %s)", len(all_points), ticker, sorted_dates[0], sorted_dates[-1])
 
-    engine = get_engine()
-    async with engine.begin() as conn:
-        for d in sorted_dates:
-            p = all_points[d]
-            dt_obj = date.fromisoformat(p["date"])
-            await conn.execute(
-                text(UPSERT_PRICE_SQL),
-                {
-                    "ticker": ticker,
-                    "date": dt_obj,
-                    "open": p.get("open"),
-                    "high": p.get("high"),
-                    "low": p.get("low"),
-                    "close": p["close"],
-                    "volume": p.get("volume"),
-                },
-            )
+    records = [
+        {
+            "ticker": ticker,
+            "date": date.fromisoformat(all_points[d]["date"]),
+            "open": all_points[d].get("open"),
+            "high": all_points[d].get("high"),
+            "low": all_points[d].get("low"),
+            "close": all_points[d]["close"],
+            "volume": all_points[d].get("volume"),
+        }
+        for d in sorted_dates
+    ]
 
-    logger.info("Successfully stored %d days into stock_daily_prices for %s", len(sorted_dates), ticker)
-    return len(sorted_dates)
+    engine = get_engine()
+    logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
+    async with engine.begin() as conn:
+        await conn.execute(text(UPSERT_PRICE_SQL), records)
+
+    logger.info("Successfully stored %d days into stock_daily_prices for %s", len(records), ticker)
+    return len(records)
 
 
 async def main():
-    target = sys.argv[1] if len(sys.argv) > 1 else "BBCA"
+    target = sys.argv[1] if len(sys.argv) > 1 else "ALL"
+    
+    if target.upper() == "ALL":
+        tickers_to_sync = settings.tracked_tickers
+    else:
+        tickers_to_sync = [bare_symbol(t.strip()) for t in target.split(",") if t.strip()]
+
     print(f"\n========================================================")
-    print(f" SINKRONISASI 365 HARI (1 TAHUN) HARGA HISTORIS: {target}")
+    print(f" SINKRONISASI 365 HARI (1 TAHUN) HARGA HISTORIS: {tickers_to_sync}")
+    print(f" Key: {SECTORS_API_KEY[:8]}...{SECTORS_API_KEY[-6:]}")
     print(f"========================================================\n")
     
-    count = await sync_ticker_365d(target)
+    total_synced = {}
+    for ticker in tickers_to_sync:
+        count = await sync_ticker_365d(ticker)
+        total_synced[ticker] = count
+        await asyncio.sleep(0.3)
     
     # Query check
     engine = get_engine()
     async with engine.connect() as conn:
-        res = await conn.execute(
-            text("SELECT MIN(date), MAX(date), COUNT(*) FROM stock_daily_prices WHERE ticker = :t"),
-            {"t": bare_symbol(target)}
-        )
-        row = res.fetchone()
         print(f"\n=== HASIL VERIFIKASI SUPABASE (stock_daily_prices) ===")
-        print(f"Ticker:         {target}")
-        print(f"Total Baris:    {row[2]} hari bursa")
-        print(f"Rentang Waktu:  {row[0]} s/d {row[1]}")
+        for ticker in tickers_to_sync:
+            res = await conn.execute(
+                text("SELECT MIN(date), MAX(date), COUNT(*) FROM stock_daily_prices WHERE ticker = :t"),
+                {"t": bare_symbol(ticker)}
+            )
+            row = res.fetchone()
+            if row:
+                print(f"Ticker: {ticker:6} | Baris: {row[2]:3} hari bursa | Rentang: {row[0]} s/d {row[1]}")
 
 
 if __name__ == "__main__":

@@ -105,4 +105,3 @@ async def mark_alert_read(
     if row is None:
         raise HTTPException(status_code=404, detail="Alert not found")
     return to_alert(row)
-

@@ -46,9 +46,6 @@ async def latest_insights(db: AsyncSession) -> list[dict[str, Any]]:
 
 async def insights_generated_today(db: AsyncSession) -> bool:
     result = await db.execute(
-        text(
-            "SELECT COUNT(*) FROM market_intelligence "
-            "WHERE generated_date = CURRENT_DATE"
-        )
+        text("SELECT COUNT(*) FROM market_intelligence WHERE generated_date = CURRENT_DATE")
     )
     return (result.scalar() or 0) >= 3

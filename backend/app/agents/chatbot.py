@@ -356,6 +356,7 @@ def _wrap_mcp_tool(original: Any) -> Any:
 
 def _mcp_cache_key(tool_name: str, args: dict[str, Any]) -> tuple[str, int] | None:
     """Map an MCP tool call to (cache_key, ttl). Returns None if not cacheable."""
+
     def _ticker(args: dict[str, Any]) -> str:
         for p in TICKER_PARAM_NAMES:
             raw = args.get(p, "")
@@ -447,11 +448,11 @@ async def _mcp_tools(db: AsyncSession | None = None) -> Any:
             await session.initialize()
             all_tools = await load_mcp_tools(session)
             tools = [
-                _wrap_mcp_tool_cached(t, db)
-                for t in all_tools
-                if t.name in MCP_TOOL_WHITELIST
+                _wrap_mcp_tool_cached(t, db) for t in all_tools if t.name in MCP_TOOL_WHITELIST
             ]
-            logger.info("Loaded %d/%d MCP tools from Sectors (cache-enabled)", len(tools), len(all_tools))
+            logger.info(
+                "Loaded %d/%d MCP tools from Sectors (cache-enabled)", len(tools), len(all_tools)
+            )
             yield tools
 
 

@@ -117,6 +117,11 @@ actor APIClient {
         return try await get("stock/\(clean)")
     }
 
+    func fetchStockInsights(ticker: String) async throws -> BackendStockInsights {
+        let clean = ticker.components(separatedBy: ".").first ?? ticker
+        return try await get("stock/\(clean)/insights")
+    }
+
     func fetchMarketOverview() async throws -> BackendMarketOverview {
         return try await get("market-overview")
     }
@@ -498,6 +503,18 @@ struct BackendMarketIntelligence: Codable, Sendable {
     let insights: [BackendInsightChip]
 
     enum CodingKeys: String, CodingKey {
+        case generatedDate = "generated_date"
+        case insights
+    }
+}
+
+struct BackendStockInsights: Codable, Sendable {
+    let ticker: String
+    let generatedDate: String
+    let insights: [BackendInsightChip]
+
+    enum CodingKeys: String, CodingKey {
+        case ticker
         case generatedDate = "generated_date"
         case insights
     }

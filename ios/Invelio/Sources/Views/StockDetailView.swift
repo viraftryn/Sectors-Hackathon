@@ -1018,6 +1018,7 @@ public struct StockDetailView: View {
         .task {
             loadExistingHoldings()
             await fetchLiveStockDetail()
+            await fetchLiveStockInsights()
             await viewModel.fetchChartData()
             if cachedAnalysisChips.isEmpty {
                 self.cachedAnalysisChips = stockAnalysisChips
@@ -1084,12 +1085,33 @@ public struct StockDetailView: View {
             let detail = try await APIClient.shared.fetchStockDetail(ticker: quote.ticker)
             await MainActor.run {
                 self.liveFundamentals = detail.toStockFundamentals()
-                if self.cachedAnalysisChips.isEmpty {
-                    self.cachedAnalysisChips = self.stockAnalysisChips
+                if let serverInsights = detail.insights, !serverInsights.isEmpty {
+                    self.cachedAnalysisChips = serverInsights.map {
+                        InsightChip(label: $0.label, text: $0.text)
+                    }
                 }
             }
         } catch {
             // Retain initial/fallback fundamentals gracefully
+        }
+    }
+
+    private func fetchLiveStockInsights() async {
+        if !cachedAnalysisChips.isEmpty { return }
+        do {
+            let response = try await APIClient.shared.fetchStockInsights(ticker: quote.ticker)
+            let chips = response.insights.map { InsightChip(label: $0.label, text: $0.text) }
+            if !chips.isEmpty {
+                await MainActor.run {
+                    self.cachedAnalysisChips = chips
+                }
+            }
+        } catch {
+            await MainActor.run {
+                if self.cachedAnalysisChips.isEmpty {
+                    self.cachedAnalysisChips = self.stockAnalysisChips
+                }
+            }
         }
     }
 
@@ -1264,7 +1286,8 @@ public struct StockDetailView: View {
         AIInsightCardView(
             chips: currentAnalysisChips,
             title: "AI Analysis",
-            horizontalPadding: 0
+            horizontalPadding: 0,
+            cardKey: "stock_detail_ai_\(quote.ticker)"
         )
     }
 
