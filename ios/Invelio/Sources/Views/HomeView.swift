@@ -23,7 +23,7 @@ extension Color {
     // Primary accent
     static let PrimaryYellow = Color(red: 234/255, green: 179/255, blue: 8/255)
     // Profit / Loss
-    static let ProfitGreen   = Color(red: 34/255, green: 197/255, blue: 94/255)
+    static let ProfitGreen   = Color(red: 0.0, green: 0.78, blue: 0.58)
     static let LossRed       = Color(red: 239/255, green: 68/255, blue: 68/255)
     static let PortfolioLossRed = Color(red: 255/255, green: 88/255, blue: 88/255)
     // Surface / card
@@ -847,7 +847,6 @@ struct AIInsightCardView: View {
         timer?.invalidate(); timer = nil
         targetWords = text.components(separatedBy: " ")
         wordIndex = targetWords.count
-        isExpanded = false
         showReadMore = targetWords.count > 45
         isFinishedTyping = true
     }

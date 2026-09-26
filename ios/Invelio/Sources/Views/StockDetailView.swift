@@ -335,6 +335,8 @@ fileprivate extension Color {
         let b = Double(rgbValue & 0x0000FF) / 255.0
         self.init(red: r, green: g, blue: b)
     }
+
+    static let capsuleProfitGreen = Color(red: 0.0, green: 0.78, blue: 0.58)
 }
 
 
@@ -593,9 +595,9 @@ public struct StockInteractiveChartView: View {
                         // Green Area (Above start point baseline)
                         MorphingXYAreaShape(data: animatedData, closingY: animatedBaselineY)
                             .fill(LinearGradient(stops: [
-                                .init(color: Color.ProfitGreen.opacity(0.35), location: 0.0),
-                                .init(color: Color.ProfitGreen.opacity(0.15), location: 0.6),
-                                .init(color: Color.ProfitGreen.opacity(0.0),  location: 1.0)
+                                .init(color: Color.capsuleProfitGreen.opacity(0.35), location: 0.0),
+                                .init(color: Color.capsuleProfitGreen.opacity(0.15), location: 0.6),
+                                .init(color: Color.capsuleProfitGreen.opacity(0.0),  location: 1.0)
                             ], startPoint: .top, endPoint: .bottom))
                             .clipShape(AnimatableClipAbove(cutY: animatedBaselineY))
 
@@ -610,7 +612,7 @@ public struct StockInteractiveChartView: View {
 
                         // Green Line (Above start point baseline)
                         MorphingXYLineShape(data: animatedData)
-                            .stroke(Color.ProfitGreen, style: StrokeStyle(lineWidth: 2.2, lineCap: .round, lineJoin: .round))
+                            .stroke(Color.capsuleProfitGreen, style: StrokeStyle(lineWidth: 2.2, lineCap: .round, lineJoin: .round))
                             .clipShape(AnimatableClipAbove(cutY: animatedBaselineY))
 
                         // Red Line (Below start point baseline)
@@ -620,7 +622,7 @@ public struct StockInteractiveChartView: View {
 
                         // End point indicator dot (Latest Price)
                         if !isDragging, let lastPt = animatedData.points.last {
-                            let dotColor = viewModel.latestPrice >= viewModel.startPrice ? Color.ProfitGreen : Color.PortfolioLossRed
+                            let dotColor = viewModel.latestPrice >= viewModel.startPrice ? Color.capsuleProfitGreen : Color.PortfolioLossRed
                             Circle()
                                 .fill(dotColor)
                                 .frame(width: 8, height: 8)
@@ -812,7 +814,7 @@ public struct StockInteractiveChartView: View {
         let y = yPos(for: pt.price, in: size)
 
         let isPositive = pt.price >= viewModel.startPrice
-        let ptColor = isPositive ? Color.ProfitGreen : Color.PortfolioLossRed
+        let ptColor = isPositive ? Color.capsuleProfitGreen : Color.PortfolioLossRed
 
         let labelText = StockFormatters.formatScrubDate(pt.date)
         let labelX = min(max(55, xPos), size.width - 55)
@@ -973,7 +975,7 @@ public struct StockDetailView: View {
 
     private var isGain: Bool { currentChange >= 0 }
     private var themeColor: Color {
-        isGain ? Color(red: 0.0, green: 0.78, blue: 0.58) : Color(red: 0.94, green: 0.27, blue: 0.27)
+        isGain ? Color.capsuleProfitGreen : Color(red: 0.94, green: 0.27, blue: 0.27)
     }
 
     public var body: some View {
@@ -1387,10 +1389,10 @@ public struct StockDetailView: View {
                         Text("Saved")
                             .font(.system(size: 11, weight: .semibold))
                     }
-                    .foregroundStyle(Color.ProfitGreen)
+                    .foregroundStyle(Color.capsuleProfitGreen)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(Color.ProfitGreen.opacity(0.12), in: Capsule())
+                    .background(Color.capsuleProfitGreen.opacity(0.12), in: Capsule())
                 }
             }
 
@@ -1407,7 +1409,7 @@ public struct StockDetailView: View {
 
                     let isProfit = currentPnL >= 0
                     let sign = isProfit ? "+" : "-"
-                    let pColor = isProfit ? Color.ProfitGreen : Color.PortfolioLossRed
+                    let pColor = isProfit ? Color.capsuleProfitGreen : Color.PortfolioLossRed
 
                     summaryTile(
                         title: "Total G&L",
