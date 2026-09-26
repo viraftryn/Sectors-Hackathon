@@ -1035,16 +1035,14 @@ struct InvelioLogoView: View {
                 return img
             }
         }
-
-        // 2. Main bundle resources
+        // 2. Direct bundle resource search
         for name in names {
             if let path = Bundle.main.path(forResource: name, ofType: "png"),
                let img = UIImage(contentsOfFile: path) {
                 return img
             }
         }
-
-        // 3. Fallback filesystem search for Xcode Canvas preview
+        // 3. Absolute path fallback
         let candidatePaths = [
             "/Users/surya/Documents/2026/Hackaton/Sectors/Sectors-Hackathon-main/ios/Invelio/Resources/Assets.xcassets/invelio-icon.imageset/Invelio-logo.png",
             "/Users/surya/Documents/2026/Hackaton/Sectors/Sectors-Hackathon-main/ios/Invelio/Sources/Assets.xcassets/invelio-icon.imageset/Invelio-logo.png",
@@ -1057,38 +1055,148 @@ struct InvelioLogoView: View {
                 return img
             }
         }
-
         return nil
     }
 }
 
 // ╔══════════════════════════════════════════════════════════════════╗
-// ║  6.  MAIN HOME VIEW                                            ║
+// ║  6.  PREFETCH STORES & MAIN HOME VIEW                          ║
 // ╚══════════════════════════════════════════════════════════════════╝
 
-struct HomeView: View {
-    @Query private var holdingLots: [HoldingLot]
-    @State private var liveStocks: [StockItem] = []
-    @State private var isLoading: Bool = true
-    @State private var loadErrorMessage: String? = nil
-    @State private var showNotifications: Bool = false
-    @StateObject private var alertViewModel = AlertViewModel()
-    @State private var insightChips: [InsightChip] = []
-    @State private var isLoadingInsights: Bool = true
-    @State private var insightLoadFailed: Bool = false
+// MARK: - StockDetailCache (Fast In-Memory Cache for Stock Detail & Chart)
 
-    private var displayedStocks: [StockItem] {
-        liveStocks
+@MainActor
+final class StockDetailCache {
+    static let shared = StockDetailCache()
+    private var cache: [String: (detail: BackendStockDetail, points: [StockHistoryPoint], date: Date)] = [:]
+
+    func get(ticker: String) -> (detail: BackendStockDetail, points: [StockHistoryPoint])? {
+        let clean = ticker.components(separatedBy: ".").first?.uppercased() ?? ticker.uppercased()
+        if let entry = cache[clean], Date().timeIntervalSince(entry.date) < 300 {
+            return (entry.detail, entry.points)
+        }
+        return nil
     }
 
-    private var topRecommendedStocks: [StockItem] {
+    func set(ticker: String, detail: BackendStockDetail) {
+        let clean = ticker.components(separatedBy: ".").first?.uppercased() ?? ticker.uppercased()
+        let pts = detail.toHistoryPoints()
+        cache[clean] = (detail, pts, Date())
+    }
+}
+
+// MARK: - HomeDataStore (Background Prefetch & Shared State)
+
+@MainActor
+final class HomeDataStore: ObservableObject {
+    static let shared = HomeDataStore()
+
+    @Published var liveStocks: [StockItem] = []
+    @Published var isLoadingStocks: Bool = true
+    @Published var stockErrorMessage: String? = nil
+
+    @Published var insightChips: [InsightChip] = []
+    @Published var isLoadingInsights: Bool = true
+    @Published var insightLoadFailed: Bool = false
+
+    private var isPrefetchingTop3: Bool = false
+
+    var topRecommendedStocks: [StockItem] {
         let sorted = liveStocks.sorted { $0.percentChange > $1.percentChange }
         return Array(sorted.prefix(3))
     }
 
-    private var otherStocks: [StockItem] {
+    var otherStocks: [StockItem] {
         let topIDs = Set(topRecommendedStocks.map(\.id))
         return liveStocks.filter { !topIDs.contains($0.id) }
+    }
+
+    func preloadAll(forceRefresh: Bool = false) async {
+        async let stocksTask: Void = loadStocks(forceRefresh: forceRefresh)
+        async let insightsTask: Void = loadMarketIntelligence(forceRefresh: forceRefresh)
+        _ = await (stocksTask, insightsTask)
+
+        await prefetchTop3StockDetails()
+    }
+
+    func loadStocks(forceRefresh: Bool = false) async {
+        if liveStocks.isEmpty {
+            self.isLoadingStocks = true
+            self.stockErrorMessage = nil
+        }
+        do {
+            let backendStocks = try await APIClient.shared.fetchStocks(forceRefresh: forceRefresh)
+            if !backendStocks.isEmpty {
+                self.liveStocks = backendStocks.map { $0.toStockItem() }
+                self.isLoadingStocks = false
+                return
+            }
+        } catch {
+            // Fallback to local seeds if backend unavailable
+        }
+
+        let localSeeds = SectorsStocksLoader.loadStockItems()
+        if !localSeeds.isEmpty {
+            self.liveStocks = localSeeds
+        } else {
+            self.stockErrorMessage = "Belum dapat memuat data saham dari PostgreSQL."
+        }
+        self.isLoadingStocks = false
+    }
+
+    func loadMarketIntelligence(forceRefresh: Bool = false) async {
+        if insightChips.isEmpty {
+            self.isLoadingInsights = true
+            self.insightLoadFailed = false
+        }
+        do {
+            let response = try await APIClient.shared.fetchMarketIntelligence(forceRefresh: forceRefresh)
+            let chips = response.insights.map { InsightChip(label: $0.label, text: $0.text) }
+            if !chips.isEmpty {
+                self.insightChips = chips
+            }
+            self.isLoadingInsights = false
+        } catch {
+            self.isLoadingInsights = false
+            if self.insightChips.isEmpty {
+                self.insightLoadFailed = true
+            }
+        }
+    }
+
+    func prefetchTop3StockDetails() async {
+        guard !isPrefetchingTop3 else { return }
+        isPrefetchingTop3 = true
+        defer { isPrefetchingTop3 = false }
+
+        let targets = topRecommendedStocks
+        for stock in targets {
+            do {
+                let detail = try await APIClient.shared.fetchStockDetail(ticker: stock.symbol)
+                StockDetailCache.shared.set(ticker: stock.symbol, detail: detail)
+            } catch {
+                // Ignore prefetch error
+            }
+        }
+    }
+}
+
+struct HomeView: View {
+    @Query private var holdingLots: [HoldingLot]
+    @ObservedObject private var store = HomeDataStore.shared
+    @State private var showNotifications: Bool = false
+    @StateObject private var alertViewModel = AlertViewModel()
+
+    private var displayedStocks: [StockItem] {
+        store.liveStocks
+    }
+
+    private var topRecommendedStocks: [StockItem] {
+        store.topRecommendedStocks
+    }
+
+    private var otherStocks: [StockItem] {
+        store.otherStocks
     }
 
     private var dynamicSummary: PortfolioSummaryData {
@@ -1134,24 +1242,24 @@ struct HomeView: View {
                         .padding(.top, 0).padding(.bottom, 4)
 
                     // 2) Market Intelligence Card
-                    if isLoadingInsights {
+                    if store.isLoadingInsights && store.insightChips.isEmpty {
                         insightLoadingPlaceholder
                             .padding(.vertical, 4)
-                    } else if !insightChips.isEmpty {
+                    } else if !store.insightChips.isEmpty {
                         AIInsightCardView(
-                            chips: insightChips,
+                            chips: store.insightChips,
                             cardKey: "home_market_analysis"
                         )
                         .padding(.vertical, 4)
-                    } else if insightLoadFailed {
+                    } else if store.insightLoadFailed {
                         insightErrorCard
                             .padding(.vertical, 4)
                     }
 
                     // 3) Stock Sections
-                    if isLoading && liveStocks.isEmpty {
+                    if store.isLoadingStocks && store.liveStocks.isEmpty {
                         stocksLoadingPlaceholderView
-                    } else if liveStocks.isEmpty {
+                    } else if store.liveStocks.isEmpty {
                         emptyOrRetryView
                     } else {
                         sectionHeader("Top 3 Stocks")
@@ -1178,14 +1286,17 @@ struct HomeView: View {
             .toolbar(.hidden, for: .navigationBar)
             .safeAreaInset(edge: .top) { topBar }
             .task {
-                await loadStocksFromPostgres()
                 await alertViewModel.loadAlerts()
-                await loadMarketIntelligence()
+                if store.liveStocks.isEmpty || store.insightChips.isEmpty {
+                    await store.preloadAll()
+                } else {
+                    await store.prefetchTop3StockDetails()
+                }
             }
             .refreshable {
-                await loadStocksFromPostgres()
-                await alertViewModel.loadAlerts()
-                await loadMarketIntelligence()
+                async let alertsTask: Void = alertViewModel.loadAlerts()
+                async let storeTask: Void = store.preloadAll(forceRefresh: true)
+                _ = await (alertsTask, storeTask)
             }
             .fullScreenCover(isPresented: $showNotifications) {
                 NotificationView()
@@ -1194,61 +1305,6 @@ struct HomeView: View {
                 if !showNotifications {
                     Task { await alertViewModel.loadAlerts() }
                 }
-            }
-        }
-    }
-
-
-    private func loadStocksFromPostgres() async {
-        if liveStocks.isEmpty {
-            await MainActor.run {
-                self.isLoading = true
-                self.loadErrorMessage = nil
-            }
-        }
-
-        // 1. Fetch from FastAPI Backend
-        do {
-            let backendStocks = try await APIClient.shared.fetchStocks()
-            if !backendStocks.isEmpty {
-                await MainActor.run {
-                    self.liveStocks = backendStocks.map { $0.toStockItem() }
-                    self.isLoading = false
-                }
-                return
-            }
-        } catch {
-            // Fallback to local seeds if backend unavailable
-        }
-
-        // 2. Offline / local fallback from seeded sectors_stocks.json
-        let localSeeds = SectorsStocksLoader.loadStockItems()
-        await MainActor.run {
-            if !localSeeds.isEmpty {
-                self.liveStocks = localSeeds
-            } else {
-                self.loadErrorMessage = "Belum dapat memuat data saham dari PostgreSQL."
-            }
-            self.isLoading = false
-        }
-    }
-
-    private func loadMarketIntelligence() async {
-        await MainActor.run {
-            self.isLoadingInsights = true
-            self.insightLoadFailed = false
-        }
-        do {
-            let response = try await APIClient.shared.fetchMarketIntelligence()
-            let chips = response.insights.map { InsightChip(label: $0.label, text: $0.text) }
-            await MainActor.run {
-                if !chips.isEmpty { self.insightChips = chips }
-                self.isLoadingInsights = false
-            }
-        } catch {
-            await MainActor.run {
-                self.isLoadingInsights = false
-                self.insightLoadFailed = true
             }
         }
     }
@@ -1344,7 +1400,7 @@ struct HomeView: View {
             .padding(.vertical, 8)
 
             Button {
-                Task { await loadMarketIntelligence() }
+                Task { await store.loadMarketIntelligence(forceRefresh: true) }
             } label: {
                 HStack(spacing: 4) {
                     Image(systemName: "arrow.clockwise")
@@ -1410,13 +1466,13 @@ struct HomeView: View {
             Image(systemName: "server.rack")
                 .font(.system(size: 32))
                 .foregroundColor(.PrimaryYellow)
-            Text(loadErrorMessage ?? "Belum ada data saham dari PostgreSQL.")
+            Text(store.stockErrorMessage ?? "Belum ada data saham dari PostgreSQL.")
                 .font(.subheadline)
                 .foregroundColor(.white.opacity(0.8))
                 .multilineTextAlignment(.center)
             Button(action: {
                 Task {
-                    await loadStocksFromPostgres()
+                    await store.loadStocks(forceRefresh: true)
                 }
             }) {
                 HStack(spacing: 6) {

@@ -105,16 +105,31 @@ actor APIClient {
         }
     }
 
+    // MARK: - In-Memory Cache
+    private var stockDetailCache: [String: (data: BackendStockDetail, timestamp: Date)] = [:]
+    private var stocksCache: (data: [BackendStockSummary], timestamp: Date)? = nil
+    private var marketIntelligenceCache: (data: BackendMarketIntelligence, timestamp: Date)? = nil
+    private let defaultCacheTTL: TimeInterval = 300 // 5 minutes
+
     // MARK: - Market & Stocks
 
-    func fetchStocks() async throws -> [BackendStockSummary] {
+    func fetchStocks(forceRefresh: Bool = false) async throws -> [BackendStockSummary] {
+        if !forceRefresh, let cached = stocksCache, Date().timeIntervalSince(cached.timestamp) < defaultCacheTTL {
+            return cached.data
+        }
         let response: BackendStockListResponse = try await get("stocks")
+        stocksCache = (response.stocks, Date())
         return response.stocks
     }
 
-    func fetchStockDetail(ticker: String) async throws -> BackendStockDetail {
-        let clean = ticker.components(separatedBy: ".").first ?? ticker
-        return try await get("stock/\(clean)")
+    func fetchStockDetail(ticker: String, forceRefresh: Bool = false) async throws -> BackendStockDetail {
+        let clean = ticker.components(separatedBy: ".").first?.uppercased() ?? ticker.uppercased()
+        if !forceRefresh, let cached = stockDetailCache[clean], Date().timeIntervalSince(cached.timestamp) < defaultCacheTTL {
+            return cached.data
+        }
+        let detail: BackendStockDetail = try await get("stock/\(clean)")
+        stockDetailCache[clean] = (detail, Date())
+        return detail
     }
 
     func fetchStockInsights(ticker: String) async throws -> BackendStockInsights {
@@ -132,8 +147,13 @@ actor APIClient {
 
     // MARK: - Market Intelligence
 
-    func fetchMarketIntelligence() async throws -> BackendMarketIntelligence {
-        return try await get("market-intelligence")
+    func fetchMarketIntelligence(forceRefresh: Bool = false) async throws -> BackendMarketIntelligence {
+        if !forceRefresh, let cached = marketIntelligenceCache, Date().timeIntervalSince(cached.timestamp) < defaultCacheTTL {
+            return cached.data
+        }
+        let result: BackendMarketIntelligence = try await get("market-intelligence")
+        marketIntelligenceCache = (result, Date())
+        return result
     }
 
     // MARK: - Portfolio & Holdings
