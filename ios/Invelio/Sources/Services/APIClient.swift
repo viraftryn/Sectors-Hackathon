@@ -6,9 +6,9 @@ actor APIClient {
 
     #if DEBUG
     #if targetEnvironment(simulator)
-    private let baseURL = URL(string: "http://10.67.50.36:8000/api")!
+    private let baseURL = URL(string: "http://192.168.0.133:8000/api")!
     #else
-    private let baseURL = URL(string: "http://10.67.50.36:8000/api")!
+    private let baseURL = URL(string: "http://0.0.0.0:8000/api")!
     #endif
     #else
     private let baseURL = URL(string: "https://your-production-url.com/api")!
@@ -105,16 +105,36 @@ actor APIClient {
         }
     }
 
+    // MARK: - In-Memory Cache
+    private var stockDetailCache: [String: (data: BackendStockDetail, timestamp: Date)] = [:]
+    private var stocksCache: (data: [BackendStockSummary], timestamp: Date)? = nil
+    private var marketIntelligenceCache: (data: BackendMarketIntelligence, timestamp: Date)? = nil
+    private let defaultCacheTTL: TimeInterval = 300 // 5 minutes
+
     // MARK: - Market & Stocks
 
-    func fetchStocks() async throws -> [BackendStockSummary] {
+    func fetchStocks(forceRefresh: Bool = false) async throws -> [BackendStockSummary] {
+        if !forceRefresh, let cached = stocksCache, Date().timeIntervalSince(cached.timestamp) < defaultCacheTTL {
+            return cached.data
+        }
         let response: BackendStockListResponse = try await get("stocks")
+        stocksCache = (response.stocks, Date())
         return response.stocks
     }
 
-    func fetchStockDetail(ticker: String) async throws -> BackendStockDetail {
+    func fetchStockDetail(ticker: String, forceRefresh: Bool = false) async throws -> BackendStockDetail {
+        let clean = ticker.components(separatedBy: ".").first?.uppercased() ?? ticker.uppercased()
+        if !forceRefresh, let cached = stockDetailCache[clean], Date().timeIntervalSince(cached.timestamp) < defaultCacheTTL {
+            return cached.data
+        }
+        let detail: BackendStockDetail = try await get("stock/\(clean)")
+        stockDetailCache[clean] = (detail, Date())
+        return detail
+    }
+
+    func fetchStockInsights(ticker: String) async throws -> BackendStockInsights {
         let clean = ticker.components(separatedBy: ".").first ?? ticker
-        return try await get("stock/\(clean)")
+        return try await get("stock/\(clean)/insights")
     }
 
     func fetchMarketOverview() async throws -> BackendMarketOverview {
@@ -127,8 +147,13 @@ actor APIClient {
 
     // MARK: - Market Intelligence
 
-    func fetchMarketIntelligence() async throws -> BackendMarketIntelligence {
-        return try await get("market-intelligence")
+    func fetchMarketIntelligence(forceRefresh: Bool = false) async throws -> BackendMarketIntelligence {
+        if !forceRefresh, let cached = marketIntelligenceCache, Date().timeIntervalSince(cached.timestamp) < defaultCacheTTL {
+            return cached.data
+        }
+        let result: BackendMarketIntelligence = try await get("market-intelligence")
+        marketIntelligenceCache = (result, Date())
+        return result
     }
 
     // MARK: - Portfolio & Holdings
@@ -498,6 +523,18 @@ struct BackendMarketIntelligence: Codable, Sendable {
     let insights: [BackendInsightChip]
 
     enum CodingKeys: String, CodingKey {
+        case generatedDate = "generated_date"
+        case insights
+    }
+}
+
+struct BackendStockInsights: Codable, Sendable {
+    let ticker: String
+    let generatedDate: String
+    let insights: [BackendInsightChip]
+
+    enum CodingKeys: String, CodingKey {
+        case ticker
         case generatedDate = "generated_date"
         case insights
     }

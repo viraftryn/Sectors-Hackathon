@@ -157,10 +157,12 @@ def _build_prompt(db_data: dict[str, Any], today: str) -> str:
                 latest = prices[-1]
                 prev = prices[-2]
                 vol_avg = sum(p.get("volume", 0) or 0 for p in prices[-5:]) / min(5, len(prices))
+                min_p = min(p["close"] for p in prices)
+                max_p = max(p["close"] for p in prices)
                 lines.append(
                     f"{ticker}: latest close={latest['close']}, "
                     f"prev close={prev['close']}, "
-                    f"30d range={min(p['close'] for p in prices)}-{max(p['close'] for p in prices)}, "
+                    f"30d range={min_p}-{max_p}, "
                     f"5d avg vol={vol_avg:.0f}"
                 )
 
@@ -174,9 +176,7 @@ def _build_prompt(db_data: dict[str, Any], today: str) -> str:
         )
         if overview.get("foreign_inflow") is not None:
             direction = "inflow" if overview["foreign_inflow"] >= 0 else "outflow"
-            lines.append(
-                f"Foreign net {direction}: Rp {abs(overview['foreign_inflow']):,.0f}"
-            )
+            lines.append(f"Foreign net {direction}: Rp {abs(overview['foreign_inflow']):,.0f}")
 
     return "\n".join(lines)
 
@@ -237,11 +237,13 @@ def build_intelligence_graph(db: AsyncSession) -> Any:
             insights = []
             for item in raw:
                 atype = item["analysis_type"]
-                insights.append({
-                    "analysis_type": atype,
-                    "label": label_map.get(atype, atype.title()),
-                    "content": item["content"],
-                })
+                insights.append(
+                    {
+                        "analysis_type": atype,
+                        "label": label_map.get(atype, atype.title()),
+                        "content": item["content"],
+                    }
+                )
             if len(insights) == 3:
                 return {"insights": insights}
             logger.warning("LLM returned %d insights instead of 3, using fallback", len(insights))

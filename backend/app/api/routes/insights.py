@@ -30,9 +30,7 @@ async def get_market_intelligence(
             rows = await latest_insights(db)
             return MarketIntelligenceResponse(
                 generated_date=str(rows[0]["generated_date"]),
-                insights=[
-                    InsightChip(label=r["label"], text=r["content"]) for r in rows
-                ],
+                insights=[InsightChip(label=r["label"], text=r["content"]) for r in rows],
             )
 
         results = await run_market_intelligence(db)

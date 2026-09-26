@@ -20,6 +20,7 @@
 		921A35C0CA5ED9024F0B771E /* NotificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8110454BA26FE036A072B5A8 /* NotificationView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E1F2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D86F7185305E5558005FD590 /* Assets.xcassets */; };
 		C52AC931BF45F914967A9F99 /* InvelioApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C65A82A9BB7B48C0C464624 /* InvelioApp.swift */; };
+		D80A8D283067E4BC00BE5A7A /* SplashScreenView 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = D80A8D273067E4BC00BE5A7A /* SplashScreenView 2.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,6 +48,7 @@
 		5C65A82A9BB7B48C0C464624 /* InvelioApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvelioApp.swift; sourceTree = "<group>"; };
 		8110454BA26FE036A072B5A8 /* NotificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationView.swift; sourceTree = "<group>"; };
 		B1161490963A206CA3A1F812 /* Stock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stock.swift; sourceTree = "<group>"; };
+		D80A8D273067E4BC00BE5A7A /* SplashScreenView 2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SplashScreenView 2.swift"; sourceTree = "<group>"; };
 		D86F7185305E5558005FD590 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F30EF2A838D1272702A46C6E /* Invelio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Invelio.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -64,6 +66,7 @@
 		2CFA5756EE532529A580802B /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				D80A8D273067E4BC00BE5A7A /* SplashScreenView 2.swift */,
 				0D4DAFBEBB482239402E8E37 /* ChatbotView.swift */,
 				5226C47D501454DEBC61AAD6 /* HomeView.swift */,
 				8110454BA26FE036A072B5A8 /* NotificationView.swift */,
@@ -241,6 +244,7 @@
 				790AFB0FC9DBC71AF69E0BF5 /* Stock.swift in Sources */,
 				5B2E3D4C5A6B7C8D9E0F1A2B /* StockDetailView.swift in Sources */,
 				3B9C4D5E6F7A8B9C0D1E2F3A /* HoldingLot.swift in Sources */,
+				D80A8D283067E4BC00BE5A7A /* SplashScreenView 2.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

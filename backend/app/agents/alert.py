@@ -206,9 +206,7 @@ class AlertAgent:
         created = 0
         now = datetime.now(UTC)
 
-        device_filter = (
-            "AND device_id = :device_id" if self._device_id else "AND device_id IS NULL"
-        )
+        device_filter = "AND device_id = :device_id" if self._device_id else "AND device_id IS NULL"
 
         for anomaly in state["anomalies"]:
             existing = await self._db.execute(
@@ -232,7 +230,8 @@ class AlertAgent:
 
             await self._db.execute(
                 text(
-                    "INSERT INTO alerts (device_id, ticker, alert_type, severity, message, created_at) "
+                    "INSERT INTO alerts "
+                    "(device_id, ticker, alert_type, severity, message, created_at) "
                     "VALUES (:device_id, :ticker, :alert_type, :severity, :message, :created_at)"
                 ),
                 {

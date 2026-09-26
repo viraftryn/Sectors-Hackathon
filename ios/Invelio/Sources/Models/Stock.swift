@@ -322,6 +322,7 @@ struct BackendStockDetail: Codable, Identifiable, Sendable {
     let week52High: Double?
     let week52Low: Double?
     let prices: [BackendPricePoint]
+    let insights: [BackendInsightChip]?
 
     enum CodingKeys: String, CodingKey {
         case ticker
@@ -335,6 +336,7 @@ struct BackendStockDetail: Codable, Identifiable, Sendable {
         case week52High = "week52_high"
         case week52Low = "week52_low"
         case prices
+        case insights
     }
 
     func toStockQuote() -> StockQuote {

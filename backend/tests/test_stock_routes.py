@@ -10,7 +10,7 @@ from app.clients.sectors import SectorsError
 from app.config import settings
 from app.db.database import get_db
 from app.main import app
-from tests.conftest import SQLITE_CACHE_DDL, make_sqlite_engine
+from tests.conftest import SQLITE_CACHE_DDL, SQLITE_INSIGHTS_DDL, make_sqlite_engine
 
 
 @pytest.fixture
@@ -25,6 +25,7 @@ def client(monkeypatch: pytest.MonkeyPatch) -> Iterator[TestClient]:
         async with factory() as session:
             if not ready:
                 await session.execute(text(SQLITE_CACHE_DDL))
+                await session.execute(text(SQLITE_INSIGHTS_DDL))
                 ready = True
             yield session
 
@@ -97,3 +98,18 @@ def test_status_reports_mock_mode(client: TestClient) -> None:
     body = client.get("/api/status").json()
     assert body["mock_data"] is True
     assert isinstance(body["sectors_api_calls"], int)
+
+
+def test_stock_insights(client: TestClient) -> None:
+    response = client.get("/api/stock/BBCA/insights")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["ticker"] == "BBCA"
+    assert "generated_date" in data
+    assert len(data["insights"]) == 4
+
+    labels = [item["label"] for item in data["insights"]]
+    assert "Technical Analysis" in labels
+    assert "Fundamentals" in labels
+    assert "Market Sentiment" in labels
+    assert "Outlook & Risks" in labels

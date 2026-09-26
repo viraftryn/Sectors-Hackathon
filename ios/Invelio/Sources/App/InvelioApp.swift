@@ -22,6 +22,9 @@ struct InvelioApp: App {
                         }
                 }
             }
+            .task {
+                await HomeDataStore.shared.preloadAll()
+            }
         }
         .modelContainer(for: HoldingLot.self)
     }
