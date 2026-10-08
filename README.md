@@ -359,6 +359,17 @@ The system focuses on Indonesia's most liquid, blue-chip market leaders:
 
 ---
 
+# 📊 Invelio Agentic AI vs. IHSG Benchmark
+
+Berikut adalah perbandingan performa antara **INVELIO AI Recommendation (Top 5 Balanced)** dengan **IHSG Benchmark (^JKSE)** berdasarkan indikator keuangan utama:
+
+| Indikator | INVELIO AI Recommendation (Top 5 Balanced) | IHSG Benchmark (^JKSE) | Keunggulan INVELIO ($\alpha$) |
+| :--- | :---: | :---: | :---: |
+| **Total Pertumbuhan (5 Tahun)** | +24.78% | -8.90% | **+33.68%** (Net Alpha) |
+| **CAGR (Pertumbuhan Tahunan)** | +5.13% | -1.96% | **+7.09%** / tahun |
+| **Maximum Drawdown (MDD)** | -31.37% | -41.52% | **10.15%** lebih tahan banting |
+| **Sharpe Ratio (Risk-Adjusted)** | +0.11 | -0.32 | Jauh lebih stabil |
+
 ## 📄 License & Attribution
 
 Developed for the **Sectors Hackathon 2026**.  
