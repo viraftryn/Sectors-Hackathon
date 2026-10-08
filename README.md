@@ -361,7 +361,7 @@ The system focuses on Indonesia's most liquid, blue-chip market leaders:
 
 ## 📊 Invelio Agentic AI vs. IHSG Benchmark
 
-![Invelio Backtesting](./Invelio_backtesting_chart.jpeg)
+![Invelio Backtesting](./Invelio_backtesting_chart_new.jpeg)
 
 Berikut adalah perbandingan performa antara **INVELIO AI Recommendation (Top 5 Balanced)** dengan **IHSG Benchmark (^JKSE)** berdasarkan indikator keuangan utama:
 
